@@ -64,7 +64,7 @@ const UpdateRegHead = (props) => {
     const dataregtail = Object.values(regtail || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
     const dataCompany = Object.values(company || {});
     const dataDrivers = Object.values(drivers || {});
-    const registrationTail = dataregtail.filter(row => row.Status === "ยังไม่เชื่อมต่อทะเบียนหัว");
+    const registrationTail = dataregtail.filter(row => row.Status === "ยังไม่ได้เชื่อมต่อทะเบียนหัว");
     const employees = dataDrivers.filter(row => row.Registration && row.Registration === "0:ไม่มี" && (row.TruckType === "รถใหญ่" || row.TruckType === "รถใหญ่/รถเล็ก"));
 
     const [companies, setCompanies] = React.useState(truck.Company);
@@ -162,50 +162,79 @@ const UpdateRegHead = (props) => {
                 Path: vehicleRegistration ? img : "ไม่แนบไฟล์"
             })
             .then(() => {
-                const regK = regTail?.split?.(":")[0] || "0";
-                const regT = truck?.RegTail?.split?.(":")[0] || "0";
+                const newDriverId = Number(driver?.split?.(":")[0] || 0);
+                const oldDriverId = Number(truck?.Driver?.split?.(":")[0] || 0);
 
-                const regIdPart = regT === "0"
-                    ? regK
-                    : (regK === "0" ? regT : regT);
-                const RegistrationId = Number(regIdPart);
+                const updates = [];
 
-                database
-                    .ref("/truck/registrationTail/")
-                    .child(RegistrationId - 1)
-                    .update({
-                        Status: regK !== "0" ? "เชื่อมทะเบียนหัวแล้ว" : "ยังไม่ได้เชื่อมต่อทะเบียนหัว",
-                    })
-                    .then(() => {
-                        console.log("Data pushed successfully");
-                    })
-                    .catch((error) => {
-                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        console.error("Error pushing data:", error);
-                    });
+                // ✅ 1. ล้างของเก่า (ถ้ามี)
+                if (oldDriverId !== 0) {
+                    updates.push(
+                        database
+                            .ref("/employee/drivers/")
+                            .child(oldDriverId - 1)
+                            .update({
+                                Registration: "0:ไม่มี",
+                            })
+                    );
+                }
 
-                const regId = driver?.split?.(":")[0] || "0";
-                const drvId = truck?.Driver?.split?.(":")[0] || "0";
+                // ✅ 2. ถ้าเลือกใหม่ไม่ใช่ 0 → ใส่ค่าใหม่
+                if (newDriverId !== 0) {
+                    updates.push(
+                        database
+                            .ref("/employee/drivers/")
+                            .child(newDriverId - 1)
+                            .update({
+                                Registration: `${truck.id}:${regHead}`,
+                            })
+                    );
+                }
 
-                const driverIdPart = drvId === "0"
-                    ? regId
-                    : (regId === "0" ? drvId : drvId);
-                const driverId = Number(driverIdPart);
-                database
-                    .ref("/employee/drivers/")
-                    .child(driverId - 1)
-                    .update({
-                        Registration: driver !== "0:ไม่มี" ? `${truck.id}:${regHead}` : driver,
-                    })
+                Promise.all(updates)
                     .then(() => {
                         ShowSuccess("แก้ไขข้อมูลสำเร็จ");
-                        console.log("Data pushed successfully");
-                        setUpdate(true)
+                        setUpdate(true);
                     })
-                    .catch((error) => {
+                    .catch((err) => {
                         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                        console.error("Error pushing data:", error);
+                        console.error(err);
                     });
+
+
+                const newRegId = Number(regTail?.split?.(":")[0] || 0);
+                const oldRegId = Number(truck?.RegTail?.split?.(":")[0] || 0);
+
+                const regUpdates = [];
+
+                // ล้างของเก่า
+                if (oldRegId !== 0) {
+                    regUpdates.push(
+                        database
+                            .ref("/truck/registrationTail/")
+                            .child(oldRegId - 1)
+                            .update({
+                                Status: "ยังไม่ได้เชื่อมต่อทะเบียนหัว",
+                            })
+                    );
+                }
+
+                // ใส่ของใหม่
+                if (newRegId !== 0) {
+                    regUpdates.push(
+                        database
+                            .ref("/truck/registrationTail/")
+                            .child(newRegId - 1)
+                            .update({
+                                Status: "เชื่อมทะเบียนหัวแล้ว",
+                            })
+                    );
+                }
+
+                Promise.all(regUpdates)
+                    .then(() => console.log("Registration updated"))
+                    .catch((err) => console.error(err));
+
             })
             .catch((error) => {
                 ShowError("เพิ่มข้อมูลไม่สำเร็จ");

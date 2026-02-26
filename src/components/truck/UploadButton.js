@@ -2,25 +2,50 @@ import React, { useState } from 'react';
 import { Button, Box, Typography, Grid } from '@mui/material';
 
 const FilePreview = ({ file }) => {
-  if (!file || file === "ไม่แนบไฟล์") return null;
+if (!file || file === "ไม่แนบไฟล์") return null;
 
-  const isFileObject = file instanceof File;
+  // ✅ เช็คว่าเป็น File จริงไหม
+  const isRealFile = file instanceof File;
 
-  // ตรวจชนิดไฟล์
+  // ✅ ถ้าเป็น object ที่เราสร้างเอง
+  const isCustomObject = typeof file === "object" && file.url;
+
+  // ✅ ถ้าเป็น string path
+  const isStringPath = typeof file === "string";
+
+  const fileName =
+    isRealFile
+      ? file.name
+      : isCustomObject
+        ? file.name
+        : isStringPath
+          ? file.split("/").pop()
+          : "";
+
+  const fileType =
+    isRealFile
+      ? file.type
+      : isCustomObject
+        ? file.type
+        : "";
+
   const isImage =
-    (isFileObject && file.type.startsWith("image/")) ||
-    (!isFileObject && /\.(jpg|jpeg|png|webp)$/i.test(file));
+    fileType?.startsWith("image/") ||
+    /\.(jpg|jpeg|png|webp)$/i.test(fileName);
 
   const isPdf =
-    (isFileObject && file.type === "application/pdf") ||
-    (!isFileObject && /\.pdf$/i.test(file));
+    fileType === "application/pdf" ||
+    /\.pdf$/i.test(fileName);
 
-  // แหล่งที่มาของรูป
-  const src = isFileObject
+  const src = isRealFile
     ? URL.createObjectURL(file)
-    : file.startsWith("http")
-      ? file
-      : `https://${file}`;
+    : isCustomObject
+      ? file.url
+      : isStringPath
+        ? file.startsWith("http")
+          ? file
+          : `https://${file}`
+        : null;
 
   return (
     <Box
@@ -36,7 +61,7 @@ const FilePreview = ({ file }) => {
         backgroundColor: "#fafafa"
       }}
     >
-      {isImage && (
+      {isImage && src && (
         <img
           src={src}
           alt="preview"

@@ -1462,9 +1462,11 @@ const CloseFS = ({ openNavbar }) => {
                 // const regis = Number(dg.Registration.split(":")[0]);
                 // const total = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
                 const regis = normalizeReg(dg.Registration);
+                const regisTail = normalizeReg(dg.RegistrationTail);
                 const total = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+                const totalTail = driverReportTotals[regisTail] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
 
-                return total.TotalPrice;
+                return total.TotalPrice + totalTail.TotalPrice;
             }),
         ];
         const gTotalReportRow = worksheet.addRow(grandTotalReportRow);
@@ -1488,10 +1490,12 @@ const CloseFS = ({ openNavbar }) => {
                 // const regis = Number(dg.Registration.split(":")[0]);
                 // const total1 = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
                 const regis = normalizeReg(dg.Registration);
-                const total1 = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+                const regisTail = normalizeReg(dg.RegistrationTail);
+                const total = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+                const totalTail = driverReportTotals[regisTail] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
 
                 const total2 = driverTotals[driverName] || { Volume: 0, Amount: 0 };
-                return (check ? total2.Amount : total2.Volume) - total1.TotalPrice;
+                return (check ? total2.Amount : total2.Volume) - (total.TotalPrice + totalTail.TotalPrice);
             }),
         ];
         const gTotalnetIncomeRow = worksheet.addRow(netIncomeReportRow);
@@ -2259,7 +2263,10 @@ const CloseFS = ({ openNavbar }) => {
                                 </TableCell>
                                 {driverGroups.map((row, index) => {
                                     const regis = normalizeReg(row.Registration);
+                                    const regisTail = normalizeReg(row.RegistrationTail);
+
                                     const total = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+                                    const totalTail = driverReportTotals[regisTail] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
 
                                     return (
                                         <TableCell
@@ -2276,7 +2283,7 @@ const CloseFS = ({ openNavbar }) => {
                                                 {new Intl.NumberFormat("en-US", {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
-                                                }).format(total.TotalPrice)}
+                                                }).format(total.TotalPrice + totalTail.TotalPrice)}
                                             </Typography>
                                         </TableCell>
                                     );
@@ -2338,7 +2345,9 @@ const CloseFS = ({ openNavbar }) => {
                                     // const regis = Number(row.Registration.split(":")[0]);
                                     // const total1 = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
                                     const regis = normalizeReg(row.Registration);
-                                    const total1 = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+                                    const regisTail = normalizeReg(row.RegistrationTail);
+                                    const total = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+                                    const totalTail = driverReportTotals[regisTail] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
 
                                     const total2 = driverTotals[driverName] || { Volume: 0, Amount: 0 };
 
@@ -2354,7 +2363,7 @@ const CloseFS = ({ openNavbar }) => {
                                             }}
                                         >
                                             <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format((check ? total2.Amount : total2.Volume) - (total1.TotalPrice))}
+                                                {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format((check ? total2.Amount : total2.Volume) - (total.TotalPrice + totalTail.TotalPrice))}
                                             </Typography>
                                         </TableCell>
                                     );

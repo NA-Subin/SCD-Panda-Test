@@ -165,27 +165,58 @@ const UpdateDriver = (props) => {
                 DrivingLicensePicture: file
             });
 
-            const regId = registration?.split?.(":")[0] || "0";
-            const drvId = driver?.Registration?.split?.(":")[0] || "0";
+            const newTruckId = Number(registration?.split?.(":")[0] || 0);   // ค่าที่เลือกใหม่
+            const oldTruckId = Number(driver?.Registration?.split?.(":")[0] || 0); // ค่าเดิม
 
-            const driverIdPart = drvId === "0"
-                ? regId
-                : (regId === "0" ? drvId : drvId);
-            const driverId = Number(driverIdPart);
-            //const truckIndex = driverId - 1;
+            const updates = [];
 
-            if (!isNaN(driverId) && driverId >= 0) {
-                const truckPath = registration.split(":")[2] === "รถใหญ่"
+            // หา path รถก่อน (ใช้ค่าใหม่ถ้ามี ไม่งั้นใช้ค่าเดิม)
+            const truckTypeSource = registration !== "0:ไม่มี"
+                ? registration
+                : driver?.Registration || "";
+
+            const truckPath =
+                truckTypeSource.split(":")[2] === "รถใหญ่"
                     ? "/truck/registration/"
                     : "/truck/small/";
 
-                await database.ref(truckPath).child(driverId - 1).update({
-                    Driver: registration.split(":")[1] !== "ไม่มี" ? `${driver.id}:${name}` : `${registration.split(":")[0]}:${registration.split(":")[1]}`,
-                });
-            } else {
-                ShowError("Truck ID ไม่ถูกต้อง");
-                return;
+
+            // ✅ 1. ล้างของเก่า (ถ้ามี)
+            if (oldTruckId !== 0) {
+                updates.push(
+                    database
+                        .ref(truckPath)
+                        .child(oldTruckId - 1)
+                        .update({
+                            Driver: "0:ไม่มี",
+                        })
+                );
             }
+
+            // ✅ 2. ใส่ค่าใหม่ (ถ้ามี)
+            if (newTruckId !== 0) {
+                updates.push(
+                    database
+                        .ref(truckPath)
+                        .child(newTruckId - 1)
+                        .update({
+                            Driver: `${driver.id}:${name}`,
+                        })
+                );
+            }
+
+            // 🚀 รอทุกอย่างเสร็จ
+            if (updates.length > 0) {
+                Promise.all(updates)
+                    .then(() => {
+                        console.log("Truck updated successfully");
+                    })
+                    .catch((err) => {
+                        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                        console.error(err);
+                    });
+            }
+
 
             ShowSuccess("แก้ไขข้อมูลสำเร็จ");
             setUpdate(true);

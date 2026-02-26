@@ -171,10 +171,10 @@ const InsertEmployee = (props) => {
     const handlePost = async () => {
         try {
 
-            if (phone.trim() === "" || name.trim() === "" || lastname.trim() === "" || idCard.trim() === "" || user.trim() === "" || bankID.trim() === "" || bank.trim() === "" || salary.trim() === "" || tripCost.trim() === "" || pointCost.trim() === "" || security.trim() === "" || deposit.trim() === "" || loan.trim() === "" || drivingLicense.trim() === "") {
-                setError(true);
-                return; // ❌ ไม่ให้บันทึก
-            }
+            // if (phone.trim() === "" || name.trim() === "" || lastname.trim() === "" || idCard.trim() === "" || user.trim() === "" || bankID.trim() === "" || bank.trim() === "" || salary.trim() === "" || tripCost.trim() === "" || pointCost.trim() === "" || security.trim() === "" || deposit.trim() === "" || loan.trim() === "" || drivingLicense.trim() === "") {
+            //     setError(true);
+            //     return; // ❌ ไม่ให้บันทึก
+            // }
             let email = "";
 
             // =======================

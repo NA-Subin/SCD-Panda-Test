@@ -42,6 +42,7 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import FolderOffIcon from '@mui/icons-material/FolderOff';
 import ImageIcon from "@mui/icons-material/Image";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import ImageNotSupportedIcon from '@mui/icons-material/ImageNotSupported';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import { database } from "../../server/firebase";
 import theme from "../../theme/theme";
@@ -57,8 +58,9 @@ import { useTripData } from "../../server/provider/TripProvider";
 import { Details, Group } from "@mui/icons-material";
 import { formatThaiFull, formatThaiShort, formatThaiSlash } from "../../theme/DateTH";
 import FileUploadCard from "../../theme/FileUploadCard";
+import FilePreview from "../truck/UploadButton";
 
-const InsertFinancial = () => {
+const UpdateFinancial = (props) => {
     // const { reghead, regtail, small, report, reportType } = useData();
     const { reghead, regtail, small, companypayment, expenseitems } = useBasicData();
     const { report, reportType } = useTripData();
@@ -68,22 +70,45 @@ const InsertFinancial = () => {
     const reportDetail = Object.values(report);
     const companypaymentDetail = Object.values(companypayment);
     const expenseitem = Object.values(expenseitems);
-    const [open, setOpen] = React.useState(false);
-    const [registrationTruck, setRegistrationTruck] = React.useState("");
-    const [invoiceID, setInvoiceID] = React.useState("");
-    const [note, setNote] = React.useState("");
-    const [details, setDetails] = React.useState("");
-    const [company, setCompany] = React.useState("");
-    const [bank, setBank] = React.useState("");
-    const [price, setPrice] = useState("0.00");
-    const [vat, setVat] = useState("0.00");
-    const [total, setTotal] = useState("0.00");
-    const [resultPrice, setResultPrice] = useState("0.00");
-    const [resultVat, setResultVat] = useState("0.00");
-    const [resultTotal, setResultTotal] = useState("0.00");
+    const { row, open, FinancialID, onClose } = props;
+
+    const [registrationTruck, setRegistrationTruck] = React.useState(row.Registration || null);
+    const [invoiceID, setInvoiceID] = React.useState(row.InvoiceID || "");
+    const [note, setNote] = React.useState(row.Note || "");
+    const [details, setDetails] = React.useState(row.Details || "");
+    const [company, setCompany] = React.useState(companypaymentDetail.find((item) => item.id === Number(row.Company?.split(":")[0])) || null);
+    const [bank, setBank] = React.useState(expenseitem.find((item) => item.id === Number(row.Bank?.split(":")[0])) || null);
+    const [price, setPrice] = useState(row.Price);
+    const [vat, setVat] = useState(row.Vat);
+    const [total, setTotal] = useState(row.Total);
+    const [resultPrice, setResultPrice] = useState(row.Group === "กลุ่ม" ? (row.Price / row.MergedDetails?.length) : row.Price);
+    const [resultVat, setResultVat] = useState(row.Group === "กลุ่ม" ? (row.Vat / row.MergedDetails?.length) : row.Vat);
+    const [resultTotal, setResultTotal] = useState(row.Group === "กลุ่ม" ? (row.Total / row.MergedDetails?.length).toFixed(2) : row.Total);
     const [manualTotal, setManualTotal] = useState(false); // เช็คว่าผู้ใช้แก้ total โดยตรง
-    const [file, setFile] = useState("ไม่แนบไฟล์");
-    const [fileType, setFileType] = useState(1);
+
+    let initialFile = "ไม่แนบไฟล์";
+    let initialFileType = 1;
+
+    if (row?.Path) {
+        const lower = row.Path.toLowerCase();
+
+        if (lower.endsWith(".pdf")) {
+            initialFile = row.Path;
+            initialFileType = 2;
+        } else if (/\.(jpg|jpeg|png|webp)$/i.test(lower)) {
+            initialFile = row.Path;
+            initialFileType = 3;
+        }
+    }
+
+    const [file, setFile] = useState(initialFile);
+    const [fileType, setFileType] = useState(initialFileType);
+
+    // const [file, setFile] = useState(files);
+    // const [fileType, setFileType] = useState(fileTypes);
+
+    const [edit, setEdit] = useState(false);
+
     const [errors, setErrors] = useState({
         invoiceID: false,
         selectedDateInvoice: false,
@@ -112,9 +137,6 @@ const InsertFinancial = () => {
     console.log("RV : ", resultVat);
     console.log("RT : ", resultTotal);
 
-    console.log("File : ", file);
-    console.log("File Type : ", fileType);
-
     const parseNumber = (val) => {
         if (typeof val === "string") {
             return parseFloat(val.replace(/,/g, "")) || 0;
@@ -135,12 +157,12 @@ const InsertFinancial = () => {
         }
     }, [price, vat]);
 
-    const [selectedDateInvoice, setSelectedDateInvoice] = useState(dayjs(new Date));
-    const [selectedDateTransfer, setSelectedDateTransfer] = useState(dayjs(new Date));
+    const [selectedDateInvoice, setSelectedDateInvoice] = useState(dayjs(row.SelectedDateInvoice, "DD/MM/YYYY"));
+    const [selectedDateTransfer, setSelectedDateTransfer] = useState(dayjs(row.SelectedDateTransfer, "DD/MM/YYYY"));
     const [result, setResult] = useState(false);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    const [type, setType] = useState("หัวรถ");
-    const [group, setGroup] = useState("เดี่ยว");
+    const [type, setType] = useState(row.TruckType === "หัวรถใหญ่" ? "หัวรถ" : row.TruckType === "หางรถใหญ่" ? "หางรถ" : "รถเล็ก");
+    const [group, setGroup] = useState(row.Group !== "กลุ่ม" ? "เดี่ยว" : "กลุ่ม");
 
     // ใช้ useEffect เพื่อรับฟังการเปลี่ยนแปลงของขนาดหน้าจอ
     useEffect(() => {
@@ -182,7 +204,6 @@ const InsertFinancial = () => {
 
     console.log("Date Invoice : ", dayjs(selectedDateInvoice));
     console.log("Date Transfer : ", dayjs(selectedDateTransfer));
-    console.log("Bank : ", bank);
 
     const handleDateChangeDateInvoice = (newValue) => {
         if (newValue) {
@@ -198,10 +219,42 @@ const InsertFinancial = () => {
         }
     };
 
-    //const [registrationTruck, setRegistrationTruck] = useState(null);
-    const [list, setList] = useState([]);
-    const [selectedValue, setSelectedValue] = useState(null);
+    const sourceData =
+        row.Group === "กลุ่ม"
+            ? row.MergedDetails || []
+            : [row];
 
+    const formattedList = sourceData.map(item => {
+
+        const price = parseNumber(item.Price);
+        const vat = parseNumber(item.Vat);
+
+        return {
+            id: item.id,
+            invoiceID: item.InvoiceID,
+            dateInvoice: item.SelectedDateInvoice,
+            dateTranfer: item.SelectedDateTransfer,
+            registration: item.Registration,
+            company: item.Company,
+            details: item.Details,
+            Group: item.Group,
+            bank: item.Bank,
+            note: item.Note,
+            price: price,
+            vat: vat,
+            total: price + vat,
+            truckType: item.TruckType,
+        };
+    });
+
+    const [list, setList] = useState(formattedList);
+
+    const [selectedValue, setSelectedValue] = useState(row.Group !== "กลุ่ม" ? (
+        getRegistration().find((item) =>
+            item.TruckType === row.TruckType && item.id === Number(row.Registration?.split(":")[0]))) : null
+    );
+
+    console.log("List : ", list);
     console.log("Selected Value : ", selectedValue);
 
     const handleAdd = () => {
@@ -226,16 +279,6 @@ const InsertFinancial = () => {
         setList((prev) => prev.filter((item) => item.id !== id));
     };
 
-    console.log("Registration Truck : ",
-        registrationTruck.TruckType === "หัวรถใหญ่"
-            ? `${registrationTruck.RegHead}(${registrationTruck.TruckType})`
-            : registrationTruck.TruckType === "หางรถใหญ่"
-                ? `${registrationTruck.RegTail}(${registrationTruck.TruckType})`
-                : registrationTruck.TruckType === "รถเล็ก"
-                    ? `${registrationTruck.RegHead}(${registrationTruck.TruckType})`
-                    : ""
-    );
-
     useEffect(() => {
         if (manualTotal) {
             if (list.length > 0) {
@@ -255,20 +298,38 @@ const InsertFinancial = () => {
                     maximumFractionDigits: 2,
                 }))
             } else {
-                setResultPrice("0.00");
-                setResultVat("0.00");
-                setResultTotal("0.00");
+                setResultPrice(row.Group === "กลุ่ม" ? (row.Price / row.MergedDetails?.length || 0).toFixed(2) : "0.00");
+                setResultVat(row.Group === "กลุ่ม" ? (row.Vat / row.MergedDetails?.length || 0).toFixed(2) : "0.00");
+                setResultTotal(row.Group === "กลุ่ม" ? (row.Total / row.MergedDetails?.length || 0).toFixed(2) : "0.00");
             }
         }
     }, [price, vat, list]);  // 👈 เพิ่ม list เข้าไป
 
-    const handleClickOpen = () => {
-        setOpen(true);
+    const handleClose = () => {
+        setEdit(false);
+        setRegistrationTruck(row.Registration || null);
+        setInvoiceID(row.InvoiceID || "");
+        setNote(row.Note || "");
+        setDetails(row.Details || "");
+        setCompany(companypaymentDetail.find((item) => item.id === Number(row.Company?.split(":")[0])) || null);
+        setBank(expenseitem.find((item) => item.id === Number(row.Bank?.split(":")[0])) || null);
+        setPrice(row.Price);
+        setVat(row.Vat);
+        setTotal(row.Total);
+        setFile(initialFile);
+        setFileType(initialFileType);
+        setSelectedDateInvoice(dayjs(row.SelectedDateInvoice, "DD/MM/YYYY"));
+        setSelectedDateTransfer(dayjs(row.SelectedDateTransfer, "DD/MM/YYYY"));
+        setSelectedValue(row.Group !== "กลุ่ม" ? (
+            getRegistration().find((item) =>
+                item.TruckType === row.TruckType && item.id === Number(row.Registration?.split(":")[0]))) : null
+        );
+        setList(formattedList);
+        setGroup(row.Group !== "กลุ่ม" ? "เดี่ยว" : "กลุ่ม");
+        setType(row.TruckType === "หัวรถใหญ่" ? "หัวรถ" : row.TruckType === "หางรถใหญ่" ? "หางรถ" : "รถเล็ก");
     };
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+    console.log("Banks : ", bank);
 
     const validateBeforeSave = () => {
         const newErrors = {
@@ -364,84 +425,84 @@ const InsertFinancial = () => {
         //     return;
         // }
 
-        if (!validateBeforeSave()) return;
+        // if (!validateBeforeSave()) return;
 
-        if (!file) return alert("กรุณาเลือกไฟล์ก่อน");
+        // if (!file) return alert("กรุณาเลือกไฟล์ก่อน");
 
-        let img = "ไม่แนบไฟล์"; // ตั้งค่าเริ่มต้นไว้เลย
+        // let img = "ไม่แนบไฟล์"; // ตั้งค่าเริ่มต้นไว้เลย
 
-        // ✅ ตรวจสอบก่อนว่า file เป็น "ไม่แนบไฟล์" หรือไม่
-        if (file !== "ไม่แนบไฟล์") {
-            const formData = new FormData();
-            formData.append("pic", file);
+        // // ✅ ตรวจสอบก่อนว่า file เป็น "ไม่แนบไฟล์" หรือไม่
+        // if (file !== "ไม่แนบไฟล์") {
+        //     const formData = new FormData();
+        //     formData.append("pic", file);
 
-            try {
-                const response = await fetch("https://upload.happysoftth.com/panda/uploads", {
-                    method: "POST",
-                    body: formData,
-                });
+        //     try {
+        //         const response = await fetch("https://upload.happysoftth.com/panda/uploads", {
+        //             method: "POST",
+        //             body: formData,
+        //         });
 
-                const data = await response.json();
-                img = data.file_path;
-            } catch (err) {
-                console.error("Upload failed:", err);
-            }
-        }
+        //         const data = await response.json();
+        //         img = data.file_path;
+        //     } catch (err) {
+        //         console.error("Upload failed:", err);
+        //     }
+        // }
 
-        console.log("Image after try/catch:", img);
+        // console.log("Image after try/catch:", img);
 
-        const startId = reportDetail.length; // ใช้ต่อจากของเดิม
-        const updates = {};
+        // const startId = reportDetail.length; // ใช้ต่อจากของเดิม
+        // const updates = {};
 
-        list.forEach((item, index) => {
-            const id = startId + index;
+        // list.forEach((item, index) => {
+        //     const id = startId + index;
 
-            updates[id] = {
-                id: id,
-                InvoiceID: invoiceID,
-                SelectedDateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
-                SelectedDateTransfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
-                Registration: item.registration,
-                Company: `${company?.id}:${company?.Name}`,
-                Details: details,
-                Bank: `${bank?.id}:${bank?.Name}`,
-                Group: group,
-                Note: note,
-                Price: list.length <= 1 ? parseNumber(price) : parseNumber(resultPrice),
-                Vat: list.length <= 1 ? parseNumber(vat) : parseNumber(resultVat),
-                Total: list.length <= 1 ? parseNumber(total) : parseNumber(resultTotal),
-                TruckType: item.truckType,
-                Status: "อยู่ในระบบ",
-                Path: img, // ✅ ถ้าไม่แนบไฟล์ก็จะได้ "ไม่แนบไฟล์"
-            };
-        });
+        //     updates[id] = {
+        //         id: id,
+        //         InvoiceID: invoiceID,
+        //         SelectedDateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
+        //         SelectedDateTransfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
+        //         Registration: item.registration,
+        //         Company: `${company?.id}:${company?.Name}`,
+        //         Details: details,
+        //         Bank: `${bank?.id}:${bank?.Name}`,
+        //         Group: group,
+        //         Note: note,
+        //         Price: list.length <= 1 ? parseNumber(price) : parseNumber(resultPrice),
+        //         Vat: list.length <= 1 ? parseNumber(vat) : parseNumber(resultVat),
+        //         Total: list.length <= 1 ? parseNumber(total) : parseNumber(resultTotal),
+        //         TruckType: item.truckType,
+        //         Status: "อยู่ในระบบ",
+        //         Path: img, // ✅ ถ้าไม่แนบไฟล์ก็จะได้ "ไม่แนบไฟล์"
+        //     };
+        // });
 
-        console.log("updates : ", updates);
+        // console.log("updates : ", updates);
 
-        database
-            .ref("report/invoice")
-            .update(updates)
-            .then(() => {
-                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-                console.log("All data pushed successfully");
-                setList([]);
-                setInvoiceID("");
-                setSelectedDateInvoice(dayjs(new Date()).format("DD/MM/YYYY"));
-                setSelectedDateTransfer(dayjs(new Date()).format("DD/MM/YYYY"));
-                setCompany("");
-                setDetails("");
-                setBank("");
-                setNote("");
-                setPrice("");
-                setVat("");
-                setOpen(false);
-                setFile("ไม่แนบไฟล์");
-                setFileType(1);
-            })
-            .catch((error) => {
-                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                console.error("Error pushing data:", error);
-            });
+        // database
+        //     .ref("report/invoice")
+        //     .update(updates)
+        //     .then(() => {
+        //         ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+        //         console.log("All data pushed successfully");
+        //         setList([]);
+        //         setInvoiceID("");
+        //         setSelectedDateInvoice(dayjs(new Date()).format("DD/MM/YYYY"));
+        //         setSelectedDateTransfer(dayjs(new Date()).format("DD/MM/YYYY"));
+        //         setCompany("");
+        //         setDetails("");
+        //         setBank("");
+        //         setNote("");
+        //         setPrice("");
+        //         setVat("");
+        //         onClose();
+        //         setFile("ไม่แนบไฟล์");
+        //         setFileType(1);
+        //     })
+        //     .catch((error) => {
+        //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+        //         console.error("Error pushing data:", error);
+        //     });
     };
 
     console.log("registrationTruck: ", registrationTruck);
@@ -451,25 +512,11 @@ const InsertFinancial = () => {
 
     return (
         <React.Fragment>
-            <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                fullWidth
-                sx={{
-                    fontSize: "14px",
-                    fontWeight: "bold"
-                }}
-                endIcon={<NoteAddIcon />}   // 👈 ใส่ไอคอนด้านหน้า
-                onClick={handleClickOpen}
-            >
-                เพิ่มบิล
-            </Button>
             <Dialog
-                open={open}
+                open={open && FinancialID === row.id}
                 keepMounted
                 fullScreen={windowWidth <= 900 ? true : false}
-                onClose={handleClose}
+                onClose={onClose}
                 maxWidth="sm"
                 sx={
                     (!result && group === "เดี่ยว") ?
@@ -493,7 +540,7 @@ const InsertFinancial = () => {
                             <Typography variant="h6" fontWeight="bold" color="white" sx={{ marginTop: -1 }} >เพิ่มบิล</Typography>
                         </Grid>
                         <Grid item xs={2} textAlign="right">
-                            <IconButtonError onClick={handleClose} sx={{ marginTop: -2 }}>
+                            <IconButtonError onClick={onClose} sx={{ marginTop: -2 }}>
                                 <CancelIcon fontSize="small" />
                             </IconButtonError>
                         </Grid>
@@ -503,15 +550,24 @@ const InsertFinancial = () => {
                     <Grid container spacing={2} marginTop={0.5} marginBottom={-0.5}>
                         <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4.5 }} gutterBottom>เลขที่บิล</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                    sx={{
+                                        whiteSpace: "nowrap",
+                                        marginRight: 1,
+                                        marginLeft: 4.5,
+                                        color: !edit ? "gray" : "black"
+                                    }} gutterBottom>เลขที่บิล</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
-                                    <TextField size="small" fullWidth value={invoiceID} onChange={(e) => setInvoiceID(e.target.value)} />
+                                    <TextField size="small" fullWidth value={invoiceID} onChange={(e) => setInvoiceID(e.target.value)}
+                                        disabled={!edit}
+                                    />
                                 </Paper>
                             </Box>
                         </Grid>
                         <Grid item md={6} xs={6}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 5 }} gutterBottom>วันที่บิล</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                    sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 5, color: !edit ? "gray" : "black" }} gutterBottom>วันที่บิล</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                                         <DatePicker
@@ -531,6 +587,7 @@ const InsertFinancial = () => {
                                                     },
                                                 },
                                             }}
+                                            disabled={!edit}
                                         />
                                     </LocalizationProvider>
                                 </Paper>
@@ -538,7 +595,8 @@ const InsertFinancial = () => {
                         </Grid>
                         <Grid item md={6} xs={6}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 0.5 }} gutterBottom>วันที่โอน</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                    sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 0.5, color: !edit ? "gray" : "black" }} gutterBottom>วันที่โอน</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                                         <DatePicker
@@ -558,6 +616,7 @@ const InsertFinancial = () => {
                                                     },
                                                 },
                                             }}
+                                            disabled={!edit}
                                         />
                                     </LocalizationProvider>
                                 </Paper>
@@ -565,7 +624,8 @@ const InsertFinancial = () => {
                         </Grid>
                         <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ชื่อบริษัท</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                    sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5, color: !edit ? "gray" : "black" }} gutterBottom>ชื่อบริษัท</Typography>
                                 {/* <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField size="small" fullWidth value={company} onChange={(e) => setCompany(e.target.value)} />
                                 </Paper> */}
@@ -609,6 +669,7 @@ const InsertFinancial = () => {
                                                 </Typography>
                                             </li>
                                         )}
+                                        disabled={!edit}
                                     />
 
                                 </Paper>
@@ -620,16 +681,17 @@ const InsertFinancial = () => {
                         <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center" sx={{ marginTop: -1.5, marginBottom: -1.5 }} >
                                 <FormGroup row>
-                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: "nowrap", marginRight: 3, marginLeft: 0.5, marginTop: 1 }} gutterBottom>เลือกประเภทรถ</Typography>
-                                    <FormControlLabel control={<Checkbox checked={type === "หัวรถ" ? true : false} color="info" onChange={() => { setType("หัวรถ"); setSelectedValue(null) }} />} label="หัวรถ" />
-                                    <FormControlLabel control={<Checkbox checked={type === "หางรถ" ? true : false} color="info" onChange={() => { setType("หางรถ"); setSelectedValue(null) }} />} label="หางรถ" />
-                                    <FormControlLabel control={<Checkbox checked={type === "รถเล็ก" ? true : false} color="info" onChange={() => { setType("รถเล็ก"); setSelectedValue(null) }} />} label="รถเล็ก" />
+                                    <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ whiteSpace: "nowrap", marginRight: 3, marginLeft: 0.5, marginTop: 1, color: !edit ? "gray" : "black" }} gutterBottom>เลือกประเภทรถ</Typography>
+                                    <FormControlLabel control={<Checkbox checked={type === "หัวรถ" ? true : false} color="info" onChange={() => { setType("หัวรถ"); setSelectedValue(null) }} disabled={!edit} />} label="หัวรถ" />
+                                    <FormControlLabel control={<Checkbox checked={type === "หางรถ" ? true : false} color="info" onChange={() => { setType("หางรถ"); setSelectedValue(null) }} disabled={!edit} />} label="หางรถ" />
+                                    <FormControlLabel control={<Checkbox checked={type === "รถเล็ก" ? true : false} color="info" onChange={() => { setType("รถเล็ก"); setSelectedValue(null) }} disabled={!edit} />} label="รถเล็ก" />
                                 </FormGroup>
                             </Box>
                         </Grid>
                         <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 1 }} gutterBottom>ป้ายทะเบียน</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                    sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 1, color: !edit ? "gray" : "black" }} gutterBottom>ป้ายทะเบียน</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <Autocomplete
                                         id="autocomplete-tickets"
@@ -713,12 +775,14 @@ const InsertFinancial = () => {
                                                 </Typography>
                                             </li>
                                         )}
+                                        disabled={!edit}
                                     />
                                 </Paper>
                             </Box>
                         </Grid>
                         <Grid item md={12} xs={12}>
-                            <Box display="flex" justifyContent="center" alignItems="center" sx={{ marginTop: -1.5, marginBottom: -1.5 }} >
+                            <Box display="flex" justifyContent="center" alignItems="center"
+                                sx={{ marginTop: -1.5, marginBottom: -1.5, color: !edit ? "gray" : "black" }} >
                                 <FormGroup row>
                                     <Typography
                                         variant="subtitle1"
@@ -742,6 +806,7 @@ const InsertFinancial = () => {
                                                     setPrice("0.00");
                                                     setVat("0.00");
                                                 }}
+                                                disabled={!edit}
                                             />
                                         }
                                         label="เดี่ยว"
@@ -759,6 +824,7 @@ const InsertFinancial = () => {
                                                     setPrice("0.00");
                                                     setVat("0.00");
                                                 }}
+                                                disabled={!edit}
                                             />
                                         }
                                         label="กลุ่ม"
@@ -768,7 +834,8 @@ const InsertFinancial = () => {
                         </Grid>
                         <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 1.5 }} gutterBottom>รายละเอียด</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                    sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 1.5, color: !edit ? "gray" : "black" }} gutterBottom>รายละเอียด</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <TextField
                                         size="small"
@@ -779,13 +846,15 @@ const InsertFinancial = () => {
                                         onChange={(e) => setDetails(e.target.value)}
                                         error={errors.details}
                                         helperText={errors.details ? "กรุณากรอกรายละเอียด" : ""}
+                                        disabled={!edit}
                                     />
                                 </Paper>
                             </Box>
                         </Grid>
                         <Grid item md={12} xs={12}>
                             <Box display="flex" justifyContent="center" alignItems="center">
-                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4.5 }} gutterBottom>ชื่อบัญชี</Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                    sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4.5, color: !edit ? "gray" : "black" }} gutterBottom>ชื่อบัญชี</Typography>
                                 <Paper component="form" sx={{ width: "100%" }}>
                                     <Autocomplete
                                         id="autocomplete-tickets"
@@ -827,6 +896,7 @@ const InsertFinancial = () => {
                                                 </Typography>
                                             </li>
                                         )}
+                                        disabled={!edit}
                                     />
 
                                 </Paper>
@@ -838,7 +908,8 @@ const InsertFinancial = () => {
                             <React.Fragment>
                                 <Grid item md={6} xs={12}>
                                     <Box display="flex" justifyContent="center" alignItems="center">
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 0.5 }} gutterBottom>ยอดก่อน Vat</Typography>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                            sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 0.5, color: !edit ? "gray" : "black" }} gutterBottom>ยอดก่อน Vat</Typography>
                                         <Paper component="form" sx={{ width: "100%" }}>
                                             {/* <TextField
                                                 size="small"
@@ -887,6 +958,7 @@ const InsertFinancial = () => {
                                                 }}
                                                 error={errors.price}
                                                 helperText={errors.price ? "กรุณากรอกยอดก่อน Vat" : ""}
+                                                disabled={!edit}
                                             />
                                         </Paper>
                                     </Box>
@@ -894,7 +966,8 @@ const InsertFinancial = () => {
 
                                 <Grid item md={6} xs={12}>
                                     <Box display="flex" justifyContent="center" alignItems="center">
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ยอด Vat</Typography>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                            sx={{ whiteSpace: "nowrap", marginRight: 1, color: !edit ? "gray" : "black" }} gutterBottom>ยอด Vat</Typography>
                                         <Paper component="form" sx={{ width: "100%" }}>
                                             {/* <TextField
                                                 size="small"
@@ -943,6 +1016,7 @@ const InsertFinancial = () => {
                                                 }}
                                                 error={errors.vat}
                                                 helperText={errors.vat ? "กรุณากรอกยอด Vat" : ""}
+                                                disabled={!edit}
                                             />
                                         </Paper>
                                     </Box>
@@ -950,7 +1024,8 @@ const InsertFinancial = () => {
 
                                 <Grid item md={12} xs={12}>
                                     <Box display="flex" justifyContent="center" alignItems="center">
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4 }} gutterBottom>ยอดรวม</Typography>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                            sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 4, color: !edit ? "gray" : "black" }} gutterBottom>ยอดรวม</Typography>
                                         <Paper component="form" sx={{ width: "100%" }}>
                                             <TextField
                                                 size="small"
@@ -987,6 +1062,7 @@ const InsertFinancial = () => {
                                                 }}
                                                 error={errors.total}
                                                 helperText={errors.total ? "กรุณากรอกยอดรวม" : ""}
+                                                disabled={!edit}
                                             />
                                             {/* <TextField
                                                 size="small"
@@ -1087,9 +1163,13 @@ const InsertFinancial = () => {
                                                             </TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>{item.truckType}</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>
-                                                                <IconButton size="smal" color="error" onClick={() => handleDelete(item.id)} sx={{ marginTop: -0.5, marginBottom: -0.5 }}>
-                                                                    <DeleteForeverIcon fontSize="small" />
-                                                                </IconButton>
+                                                                {
+                                                                    edit &&
+                                                                    <IconButton size="smal" color="error" onClick={() => handleDelete(item.id)} sx={{ marginTop: -0.5, marginBottom: -0.5 }}>
+                                                                        <DeleteForeverIcon fontSize="small" />
+                                                                    </IconButton>
+                                                                }
+
                                                             </TableCell>
                                                         </TableRow>
                                                     ))}
@@ -1104,7 +1184,8 @@ const InsertFinancial = () => {
                                                     <Grid container spacing={2}>
                                                         <Grid item md={12} xs={12}>
                                                             <Box display="flex" justifyContent="center" alignItems="center">
-                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ยอดก่อน Vat</Typography>
+                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                                                    sx={{ whiteSpace: "nowrap", marginRight: 1, color: !edit ? "gray" : "black" }} gutterBottom>ยอดก่อน Vat</Typography>
                                                                 <Paper component="form" sx={{ width: "100%" }}>
                                                                     {/* <TextField size="small" type="number" fullWidth
                                                                         value={price}
@@ -1156,13 +1237,15 @@ const InsertFinancial = () => {
                                                                                 setPrice(price.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
                                                                             }
                                                                         }}
+                                                                        disabled={!edit}
                                                                     />
                                                                 </Paper>
                                                             </Box>
                                                         </Grid>
                                                         <Grid item md={12} xs={12}>
                                                             <Box display="flex" justifyContent="center" alignItems="center">
-                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอด Vat</Typography>
+                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                                                    sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5, color: !edit ? "gray" : "black" }} gutterBottom>ยอด Vat</Typography>
                                                                 <Paper component="form" sx={{ width: "100%" }}>
                                                                     {/* <TextField size="small" type="number" fullWidth
                                                                         value={vat}
@@ -1214,13 +1297,15 @@ const InsertFinancial = () => {
                                                                                 setVat(vat.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
                                                                             }
                                                                         }}
+                                                                        disabled={!edit}
                                                                     />
                                                                 </Paper>
                                                             </Box>
                                                         </Grid>
                                                         <Grid item md={12} xs={12}>
                                                             <Box display="flex" justifyContent="center" alignItems="center">
-                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอดรวม</Typography>
+                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                                                    sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอดรวม</Typography>
                                                                 <Paper component="form" sx={{ width: "100%" }}>
                                                                     {/* <TextField size="small" type="number" fullWidth
                                                                         value={total}
@@ -1272,6 +1357,7 @@ const InsertFinancial = () => {
                                                                                 setTotal(total.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
                                                                             }
                                                                         }}
+                                                                        disabled={!edit}
                                                                     />
                                                                 </Paper>
                                                             </Box>
@@ -1299,7 +1385,8 @@ const InsertFinancial = () => {
                                                     <Grid container spacing={2}>
                                                         <Grid item md={12} xs={12}>
                                                             <Box display="flex" justifyContent="center" alignItems="center">
-                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1 }} gutterBottom>ยอดก่อน Vat</Typography>
+                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                                                    sx={{ whiteSpace: "nowrap", marginRight: 1, color: !edit ? "gray" : "black" }} gutterBottom>ยอดก่อน Vat</Typography>
                                                                 <Paper component="form" sx={{ width: "100%" }}>
                                                                     {/* <TextField
                                                                         size="small"
@@ -1341,13 +1428,15 @@ const InsertFinancial = () => {
                                                                                 setResultPrice(resultPrice.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
                                                                             }
                                                                         }}
+                                                                        disabled={!edit}
                                                                     />
                                                                 </Paper>
                                                             </Box>
                                                         </Grid>
                                                         <Grid item md={12} xs={12}>
                                                             <Box display="flex" justifyContent="center" alignItems="center">
-                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอด Vat</Typography>
+                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                                                    sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5, color: !edit ? "gray" : "black" }} gutterBottom>ยอด Vat</Typography>
                                                                 <Paper component="form" sx={{ width: "100%" }}>
                                                                     {/* <TextField
                                                                         size="small"
@@ -1389,13 +1478,15 @@ const InsertFinancial = () => {
                                                                                 setResultVat(resultVat.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
                                                                             }
                                                                         }}
+                                                                        disabled={!edit}
                                                                     />
                                                                 </Paper>
                                                             </Box>
                                                         </Grid>
                                                         <Grid item md={12} xs={12}>
                                                             <Box display="flex" justifyContent="center" alignItems="center">
-                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอดรวม</Typography>
+                                                                <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
+                                                                    sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5, color: !edit ? "gray" : "black" }} gutterBottom>ยอดรวม</Typography>
                                                                 <Paper component="form" sx={{ width: "100%" }}>
                                                                     {/* <TextField
                                                                         size="small"
@@ -1437,6 +1528,7 @@ const InsertFinancial = () => {
                                                                                 setResultTotal(resultTotal.replace(/,/g, "")); // ลบ comma ออกตอนแก้ไข
                                                                             }
                                                                         }}
+                                                                        disabled={!edit}
                                                                     />
                                                                 </Paper>
                                                             </Box>
@@ -1452,140 +1544,200 @@ const InsertFinancial = () => {
                         }
                         <Grid item md={12} xs={12}>
                             <Divider>
-                                <Chip label="เพิ่มไฟล์เพิ่มเติม" size="small" sx={{ marginTop: -1, marginBottom: 1 }} />
+                                <Chip label="ไฟล์เพิ่มเติม" size="small" sx={{ marginTop: -1, marginBottom: 1 }} />
                             </Divider>
                             {
-                                file === "ไม่แนบไฟล์" ?
-                                    <Box display="flex" alignItems="center" justifyContent="center" sx={{ paddingLeft: 3, paddingRight: 3 }}>
-                                        <Button
-                                            variant="contained"
-                                            component="label"
-                                            size="small"
-                                            fullWidth
-                                            sx={{
-                                                height: "50px",
-                                                backgroundColor: fileType === 1 ? "#5552ffff" : "#eeeeee",
-                                                borderRadius: 2,
-                                            }}
-                                            onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}
-                                        >
-                                            <Typography
-                                                variant="subtitle2"
-                                                fontWeight="bold"
-                                                color={fileType === 1 ? "white" : "lightgray"}
-                                                sx={{ whiteSpace: "nowrap", marginTop: 0.5 }}
-                                                gutterBottom
-                                            >
-                                                ไม่แนบไฟล์
-                                            </Typography>
-                                            <FolderOffIcon
-                                                sx={{
-                                                    fontSize: 30,
-                                                    color: fileType === 1 ? "white" : "lightgray",
-                                                    marginLeft: 0.5,
-                                                }}
-                                            />
-                                        </Button>
-                                        {/* <Chip label="หรือ" size="small" sx={{ marginLeft: 3, marginRight: 3 }} /> */}
-                                        <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
-                                        <Button
-                                            variant="contained"
-                                            component="label"
-                                            size="small"
-                                            fullWidth
-                                            sx={{
-                                                height: "50px",
-                                                backgroundColor: fileType === 2 ? "#ff5252" : "#eeeeee",
-                                                borderRadius: 2,
-                                                display: "flex",
-                                                justifyContent: "center",
-                                                alignItems: "center",
-                                            }}
-                                            onClick={() => setFileType(2)}
-                                        >
-                                            <Typography
-                                                variant="h6"
-                                                fontWeight="bold"
-                                                color={fileType === 2 ? "white" : "lightgray"}
-                                                gutterBottom
-                                            >
-                                                PDF
-                                            </Typography>
-                                            <PictureAsPdfIcon
-                                                sx={{
-                                                    fontSize: 40,
-                                                    color: fileType === 2 ? "white" : "lightgray",
-                                                    marginLeft: 0.5,
-                                                }}
-                                            />
-                                            <input
-                                                type="file"
-                                                hidden
-                                                accept="application/pdf"
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if (file) setFile(file);
-                                                }}
-                                            />
-                                        </Button>
-                                        <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
-                                        <Button
-                                            variant="contained"
-                                            component="label"
-                                            size="small"
-                                            fullWidth
-                                            sx={{
-                                                height: "50px",
-                                                backgroundColor: fileType === 3 ? "#29b6f6" : "#eeeeee",
-                                                borderRadius: 2,
-                                                display: "flex",
-                                                justifyContent: "center",
-                                                alignItems: "center",
-                                            }}
-                                            onClick={() => setFileType(3)}
-                                        >
-                                            <Typography
-                                                variant="h6"
-                                                fontWeight="bold"
-                                                color={fileType === 3 ? "white" : "lightgray"}
-                                                gutterBottom
-                                            >
-                                                รูปภาพ
-                                            </Typography>
-                                            <ImageIcon
-                                                sx={{
-                                                    fontSize: 40,
-                                                    color: fileType === 3 ? "white" : "lightgray",
-                                                    marginLeft: 0.5,
-                                                }}
-                                            />
-                                            <input
-                                                type="file"
-                                                hidden
-                                                accept="image/*"
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if (file) setFile(file);
-                                                }}
-                                            />
-                                        </Button>
-                                    </Box>
-                                    :
-                                    <Box display="flex" justifyContent="center" alignItems="center">
-                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1} sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 7.5 }} gutterBottom>File</Typography>
-                                        <Box component="form" sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                            <TextField
-                                                size="small"
-                                                type="text"
-                                                fullWidth
-                                                value={file.name}
-                                                sx={{ marginRight: 2 }}
-                                            />
-                                            <Button variant="outlined" color="error" size="small" sx={{ marginRight: 2 }} onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}>
-                                                ลบไฟล์
-                                            </Button>
+                                !edit ?
+                                    (
+                                        <Box textAlign="center">
+                                            {/* <TextField
+                                                                        size="small"
+                                                                        type="text"
+                                                                        fullWidth
+                                                                        value={file.name}
+                                                                        sx={{ marginRight: 2 }}
+                                                                    /> */}
+
+                                            <Box display="flex" alignItems="center" justifyContent="center" >
+                                                {
+                                                    file === "ไม่แนบไฟล์" ?
+                                                        <ImageNotSupportedIcon fontSize="small" color="disabled" sx={{ width: 200, height: 200 }} />
+                                                        :
+                                                        <FilePreview file={file} />
+                                                }
+                                            </Box>
+                                            <Box textAlign="center">
+                                                {file instanceof File ? (
+                                                    // ✅ กรณีเป็น File object
+                                                    <Typography variant="subtitle1" gutterBottom>
+                                                        {file.name}
+                                                    </Typography>
+                                                ) : (
+                                                    // ✅ กรณีเป็น path (string)
+                                                    file === "ไม่แนบไฟล์" ? null :
+                                                        <Typography
+                                                            variant="subtitle2"
+                                                            gutterBottom
+                                                            component="a"
+                                                            href={file.startsWith("http") ? file : `https://${file}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            sx={{
+                                                                wordBreak: "break-all",
+                                                                textDecoration: "underline",
+                                                                color: "primary.main",
+                                                                cursor: "pointer"
+                                                            }}
+                                                        >
+                                                            {file}
+                                                        </Typography>
+
+                                                )}
+                                            </Box>
                                         </Box>
-                                    </Box>
+                                    )
+                                    :
+                                    (
+                                        <React.Fragment>
+                                            {
+                                                file === "ไม่แนบไฟล์" ?
+                                                    <Box display="flex" alignItems="center" justifyContent="center" sx={{ paddingLeft: 3, paddingRight: 3 }}>
+                                                        <Button
+                                                            variant="contained"
+                                                            component="label"
+                                                            size="small"
+                                                            fullWidth
+                                                            sx={{
+                                                                height: "50px",
+                                                                backgroundColor: fileType === 1 ? "#5552ffff" : "#eeeeee",
+                                                                borderRadius: 2,
+                                                            }}
+                                                            onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}
+                                                        >
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                fontWeight="bold"
+                                                                color={fileType === 1 ? "white" : "lightgray"}
+                                                                sx={{ whiteSpace: "nowrap", marginTop: 0.5 }}
+                                                                gutterBottom
+                                                            >
+                                                                ไม่แนบไฟล์
+                                                            </Typography>
+                                                            <FolderOffIcon
+                                                                sx={{
+                                                                    fontSize: 30,
+                                                                    color: fileType === 1 ? "white" : "lightgray",
+                                                                    marginLeft: 0.5,
+                                                                }}
+                                                            />
+                                                        </Button>
+                                                        {/* <Chip label="หรือ" size="small" sx={{ marginLeft: 3, marginRight: 3 }} /> */}
+                                                        <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
+                                                        <Button
+                                                            variant="contained"
+                                                            component="label"
+                                                            size="small"
+                                                            fullWidth
+                                                            sx={{
+                                                                height: "50px",
+                                                                backgroundColor: fileType === 2 ? "#ff5252" : "#eeeeee",
+                                                                borderRadius: 2,
+                                                                display: "flex",
+                                                                justifyContent: "center",
+                                                                alignItems: "center",
+                                                            }}
+                                                            onClick={() => setFileType(2)}
+                                                        >
+                                                            <Typography
+                                                                variant="h6"
+                                                                fontWeight="bold"
+                                                                color={fileType === 2 ? "white" : "lightgray"}
+                                                                gutterBottom
+                                                            >
+                                                                PDF
+                                                            </Typography>
+                                                            <PictureAsPdfIcon
+                                                                sx={{
+                                                                    fontSize: 40,
+                                                                    color: fileType === 2 ? "white" : "lightgray",
+                                                                    marginLeft: 0.5,
+                                                                }}
+                                                            />
+                                                            <input
+                                                                type="file"
+                                                                hidden
+                                                                accept="application/pdf"
+                                                                onChange={(e) => {
+                                                                    const file = e.target.files?.[0];
+                                                                    if (file) setFile(file);
+                                                                }}
+                                                            />
+                                                        </Button>
+                                                        <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 3, marginRight: 3, marginTop: 0.5 }} gutterBottom>หรือ</Typography>
+                                                        <Button
+                                                            variant="contained"
+                                                            component="label"
+                                                            size="small"
+                                                            fullWidth
+                                                            sx={{
+                                                                height: "50px",
+                                                                backgroundColor: fileType === 3 ? "#29b6f6" : "#eeeeee",
+                                                                borderRadius: 2,
+                                                                display: "flex",
+                                                                justifyContent: "center",
+                                                                alignItems: "center",
+                                                            }}
+                                                            onClick={() => setFileType(3)}
+                                                        >
+                                                            <Typography
+                                                                variant="h6"
+                                                                fontWeight="bold"
+                                                                color={fileType === 3 ? "white" : "lightgray"}
+                                                                gutterBottom
+                                                            >
+                                                                รูปภาพ
+                                                            </Typography>
+                                                            <ImageIcon
+                                                                sx={{
+                                                                    fontSize: 40,
+                                                                    color: fileType === 3 ? "white" : "lightgray",
+                                                                    marginLeft: 0.5,
+                                                                }}
+                                                            />
+                                                            <input
+                                                                type="file"
+                                                                hidden
+                                                                accept="image/*"
+                                                                onChange={(e) => {
+                                                                    const file = e.target.files?.[0];
+                                                                    if (file) setFile(file);
+                                                                }}
+                                                            />
+                                                        </Button>
+                                                    </Box>
+                                                    :
+                                                    <Box textAlign="center">
+                                                        {/* <TextField
+                                                                        size="small"
+                                                                        type="text"
+                                                                        fullWidth
+                                                                        value={file.name}
+                                                                        sx={{ marginRight: 2 }}
+                                                                    /> */}
+
+                                                        <Box display="flex" alignItems="center" justifyContent="center" >
+                                                            <FilePreview file={file} />
+                                                            <Button variant="outlined" color="error" size="small" sx={{ marginLeft: 2 }} onClick={() => { setFileType(1); setFile("ไม่แนบไฟล์"); }}>
+                                                                <DeleteForeverIcon />
+                                                            </Button>
+                                                        </Box>
+                                                        <Box textAlign="center">
+                                                            <Typography variant="subtitle1" gutterBottom>{file.name}</Typography>
+                                                        </Box>
+                                                    </Box>
+                                            }
+                                        </React.Fragment>
+                                    )
                                 // <Box sx={{
                                 //     display: "flex",
                                 //     alignItems: "center",
@@ -1607,8 +1759,16 @@ const InsertFinancial = () => {
                     </Grid>
                 </DialogContent>
                 <DialogActions sx={{ display: "flex", textAlign: "center", alignItems: "center", justifyContent: "center", borderTop: "2px solid " + theme.palette.panda.dark }}>
-                    <Button onClick={handlePost} variant="contained" fullWidth color="success">บันทึก</Button>
-                    <Button onClick={handleClose} variant="contained" fullWidth color="error">ยกเลิก</Button>
+                    {
+                        edit ?
+                            <React.Fragment>
+                                <Button onClick={handlePost} variant="contained" fullWidth color="success">บันทึก</Button>
+                                <Button onClick={handleClose} variant="contained" fullWidth color="error">ยกเลิก</Button>
+                            </React.Fragment>
+                            :
+                            <Button onClick={() => setEdit(true)} variant="contained" fullWidth color="warning">แก้ไข</Button>
+                    }
+
                 </DialogActions>
             </Dialog>
         </React.Fragment>
@@ -1616,4 +1776,4 @@ const InsertFinancial = () => {
     );
 };
 
-export default InsertFinancial;
+export default UpdateFinancial;

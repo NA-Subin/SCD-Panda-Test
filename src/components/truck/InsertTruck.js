@@ -180,14 +180,14 @@ const InsertTruck = (props) => {
                     id: regheads.length + 1,
                     Company: companies,
                     RegHead: regHead,
-                    RegTail: tail.split(":")[1],
+                    RegTail: tail? `${tail.split(":")[0]}:${tail.split(":")[1]}` : "0:ไม่มี",
                     RepairTruck: "00/00/0000:ยังไม่ตรวจสอบสภาพรถ",
                     Weight: weight,
                     TotalWeight: (parseFloat(weight) + parseFloat(tail.split(":")[3])),
                     Insurance: "-",
                     Act: "-",
                     Status: "ว่าง",
-                    Driver: "ไม่มี",
+                    Driver: "0:ไม่มี",
                     VehicleRegistration: licenseRegHead === "มี" ? vehicleRegistration : "ไม่มี",
                     DateEndTax: licenseRegHead === "มี" ? dateEndTax : "ไม่มี",
                     DateEndInsurance: licenseRegHead === "มี" ? dateEndInsurance : "ไม่มี",
@@ -198,7 +198,7 @@ const InsertTruck = (props) => {
                     if (tail.split(":")[1] !== "ไม่มี") {
                         database
                             .ref("/truck/registrationTail/")
-                            .child(tail.split(":")[0] - 1)
+                            .child(Number(tail.split(":")[0]) - 1)
                             .update({
                                 Status: "เชื่อมทะเบียนหัวแล้ว",
                             })

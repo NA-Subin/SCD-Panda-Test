@@ -18,36 +18,43 @@ function format(d) {
 // ฟังก์ชันสร้างงวดทั้งปี
 export function buildPeriodsForYear(Y) {
     const periods = [];
-    let id = 0; // เริ่ม id ที่ 0
+    let id = 0;
 
     for (let M = 1; M <= 12; M++) {
-        // งวดคี่ (2M - 1)
-        const oddStart =
-            M === 1 ? makeDate(Y - 1, 12, 28) : makeDate(Y, M - 1, 28);
-        const oddEnd = makeDate(Y, M, 11);
+
+        const currentMonth = dayjs(`${Y}-${M}-01`);
+        const daysInMonth = currentMonth.endOf("month").date();
+
+        const prevMonth = currentMonth.subtract(1, "month");
+        const prevDaysInMonth = prevMonth.endOf("month").date();
+
+        // 🔹 รอบกลางเดือน
+        const midStart = prevMonth.date(prevDaysInMonth - 3); // วันสุดท้ายเดือนก่อน -3
+        const midEnd = currentMonth.date(11);
+
         periods.push({
-            id: id++, // เก็บ id แล้วเพิ่ม
+            id: id++,
             no: 2 * M - 1,
             year: Y,
-            start: format(oddStart),
-            end: format(oddEnd),
+            start: midStart.format("DD/MM/YYYY"),
+            end: midEnd.format("DD/MM/YYYY"),
         });
 
-        // งวดคู่ (2M)
-        const evenStart = makeDate(Y, M, 12);
-        const evenEnd = makeDate(Y, M, 27);
+        // 🔹 รอบสิ้นเดือน
+        const endStart = currentMonth.date(12);
+        const endEnd = currentMonth.date(daysInMonth - 4);
+
         periods.push({
-            id: id++, // เก็บ id แล้วเพิ่ม
+            id: id++,
             no: 2 * M,
             year: Y,
-            start: format(evenStart),
-            end: format(evenEnd),
+            start: endStart.format("DD/MM/YYYY"),
+            end: endEnd.format("DD/MM/YYYY"),
         });
     }
 
     return periods;
 }
-
 
 export function findCurrentPeriod(periods) {
     const today = dayjs().startOf("day"); // วันนี้
