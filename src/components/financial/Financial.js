@@ -352,7 +352,7 @@ const Financial = () => {
 
     const handleChangDelete = (id) => {
         ShowConfirm(
-            `ต้องการลบบิลลำดับที่ ${id + 1} ใช่หรือไม่`,
+            `ต้องการลบบิลลำดับที่ ${id} ใช่หรือไม่`,
             () => {
                 database
                     .ref("report/invoice")
@@ -626,7 +626,7 @@ const Financial = () => {
             });
     }
 
-    const summary = finalData.reduce(
+    const summary = finalData.filter((f) => f.Status !== "ยกเลิก").reduce(
         (acc, row) => {
             acc.price += Number(row.Price || 0);
             acc.vat += Number(row.Vat || 0);
@@ -996,6 +996,12 @@ const Financial = () => {
                                         </Box>
                                     </TablecellSelling>
                                 }
+                                {
+                                    group === "ทั้งหมด" &&
+                                    <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 100, position: "sticky", left: 300, zIndex: 3, cursor: "pointer" }}>
+                                        Group
+                                    </TablecellSelling>
+                                }
                                 <TablecellSelling sx={{ textAlign: "center", fontSize: 16, width: 320, cursor: "pointer" }}
                                     onClick={() => handleSort("Company")}
                                 >
@@ -1043,7 +1049,7 @@ const Financial = () => {
                         </TableHead>
                         <TableBody>
                             {
-                                finalData.map((row, index) => (
+                                finalData.filter((f) => f.Status !== "ยกเลิก").map((row, index) => (
                                     <TableRow
                                         key={index}
                                         sx={{
@@ -1055,7 +1061,13 @@ const Financial = () => {
                                         }
                                         }
                                         onClick={() => handleUpdateFinancial(row)}>
-                                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 2, cursor: "pointer", backgroundColor: "white" }}>{index + 1}</TableCell>
+                                        <TableCell sx={{
+                                            textAlign: "center", position: "sticky", left: 0, zIndex: 2, cursor: "pointer",
+                                            backgroundColor: "white",
+                                            "&:hover": {
+                                                backgroundColor: "#ffebee",
+                                            },
+                                        }}>{index + 1}</TableCell>
                                         <TableCell sx={{ textAlign: "left" }}>
                                             <Typography variant="subtitle2" sx={{ marginLeft: 2, whiteSpace: "nowrap", lineHeight: 1 }} >{row.InvoiceID}</Typography>
                                             {/* {
@@ -1164,7 +1176,13 @@ const Financial = () => {
                                         </TableCell>
                                         {
                                             group !== "กลุ่ม" &&
-                                            <TableCell sx={{ textAlign: "left", position: "sticky", left: 50, zIndex: 2, backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
+                                            <TableCell sx={{
+                                                textAlign: "left", position: "sticky", left: 50, zIndex: 2,
+                                                backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
+                                                "&:hover": {
+                                                    backgroundColor: "#ffebee",
+                                                },
+                                            }}>
                                                 {
                                                     row.Group !== "กลุ่ม" &&
                                                     <Typography variant="subtitle2" sx={{ marginLeft: 2, whiteSpace: "nowrap", lineHeight: 1 }} >{`${row.Registration.split(":")[1]} (${row.TruckType})`}</Typography>
@@ -1208,6 +1226,18 @@ const Financial = () => {
                                                     //     </Paper>
                                                     // )
                                                 }
+                                            </TableCell>
+                                        }
+                                        {
+                                            group === "ทั้งหมด" &&
+                                            <TableCell sx={{
+                                                textAlign: "center", position: "sticky", left: 300, zIndex: 2,
+                                                backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff",
+                                                "&:hover": {
+                                                    backgroundColor: "#ffebee",
+                                                },
+                                            }}>
+                                                <Typography variant="subtitle2" sx={{ marginLeft: 2, whiteSpace: "nowrap", lineHeight: 1 }} >{row.Group !== "กลุ่ม" ? "เดี่ยว" : "กลุ่ม"}</Typography>
                                             </TableCell>
                                         }
                                         <TableCell sx={{ textAlign: "left" }}>
@@ -1682,7 +1712,7 @@ const Financial = () => {
 
                                                 </Box> */}
                                                 {
-                                                    row.Group !== "กลุ่ม" && (
+                                                    row.Group !== "กลุ่ม" ? (
                                                         <Box>
                                                             {/* <IconButton size="small" color="warning" onClick={() => handleUpdateBill(row)}>
                                                                 <DriveFileRenameOutlineIcon />
@@ -1724,6 +1754,14 @@ const Financial = () => {
                                                         //         </IconButton>
                                                         //     </Box>
                                                     )
+                                                        :
+                                                        (
+                                                            <Box>
+                                                                <IconButton size="small" color="error" onClick={() => handleChangDelete(row.id)} disabled>
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                            </Box>
+                                                        )
                                                 }
                                                 {/* <Button variant="contained" size="small" color="error" fullWidth onClick={() => handleChangDelete(row.id)}>ลบ</Button> */}
                                             </TableCell>
@@ -1736,7 +1774,7 @@ const Financial = () => {
                             }
                         </TableBody>
                         {
-                            finalData.length !== 0 &&
+                            finalData.filter((f) => f.Status !== "ยกเลิก").length !== 0 &&
                             <TableFooter
                                 sx={{
                                     position: "sticky",

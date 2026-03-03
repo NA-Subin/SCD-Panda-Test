@@ -789,15 +789,35 @@ const CloseFS = ({ openNavbar }) => {
                     bankGroup.Registrations.push(regGroup);
                 }
 
-                regGroup.TotalPrice += Number(curr.Total || 0);
-                regGroup.TotalAmount += Number(curr.Price || 0);
-                regGroup.TotalVat += Number(curr.Vat || 0);
+                if (check) {
+                    const total = Number(curr.Total) || 0;
+                    const price = Number(curr.Price) || 0;
+                    const vat = Number(curr.Vat) || 0;
+
+                    regGroup.TotalPrice += total;
+                    regGroup.TotalAmount += price;
+                    regGroup.TotalVat += vat;
+                }
             });
 
         filteredReports
             .filter(r => {
                 const name = r.Name.split(":")[1]?.trim();
-                return ["เงินเดือน", "ประกันสังคม", "ค่าโทรศัพท์"].includes(name);
+                const rowDate = dayjs(r.Date, "DD/MM/YYYY");
+                const selectedMonth = dayjs(months);
+                const selectedYear = dayjs(years);
+                const truck = registrationH.find((h) => h.id === Number(r.RegHead.split(":")[0]));
+                const companyCheck =
+                    companyName === "0:ทั้งหมด"
+                        ? true
+                        : companyName === truck?.Company;
+
+                const dateMatch = !date
+                    ? rowDate.format("MM") === selectedMonth.format("MM") &&
+                    rowDate.format("YYYY") === selectedMonth.format("YYYY")
+                    : rowDate.format("YYYY") === selectedYear.format("YYYY");
+
+                return ["เงินเดือน", "ประกันสังคม", "ค่าโทรศัพท์"].includes(name) && r.Status !== "ยกเลิก" && r.VehicleType === "รถใหญ่" && dateMatch && companyCheck;
             })
             .forEach((curr) => {
                 const bankName = curr.Name.split(":")[1]?.trim() || curr.Name;
@@ -806,9 +826,6 @@ const CloseFS = ({ openNavbar }) => {
                     bankGroup = { Bank: bankName, Type: "ค่าใช้จ่าย", Registrations: [] };
                     reportInit.push(bankGroup);
                 }
-
-                console.log("reportInit : ", reportInit);
-                console.log("bankGroup.Registrations : ", bankGroup.Registrations);
 
                 // สำหรับ filteredReports: สร้าง Registration ชื่อเดียวกับ bankName หรือใช้ "รวม"
                 const registration = curr.RegHead;
@@ -827,30 +844,51 @@ const CloseFS = ({ openNavbar }) => {
                     bankGroup.Registrations.push(regGroup);
                 }
 
-                regGroup.TotalPrice += Number(curr.Money || curr.Total || 0);
-                regGroup.TotalAmount += Number(curr.Price || 0);
-                regGroup.TotalVat += Number(curr.Vat || 0);
+                if (check) {
+                    const total = Number(curr.Money || curr.Total || 0);
+                    const price = Number(curr.Price) || 0;
+                    const vat = Number(curr.Vat) || 0;
+
+                    regGroup.TotalPrice += total;
+                    regGroup.TotalAmount += price;
+                    regGroup.TotalVat += vat;
+                }
+                // check ? regGroup.TotalPrice += Number(curr.Money || curr.Total || 0) : 0;
+                // check ? regGroup.TotalAmount += Number(curr.Price || 0) : 0;
+                // check ? regGroup.TotalVat += Number(curr.Vat || 0) : 0;
             });
 
-        console.log("filteredReports : ", filteredReports.filter((r) => r.VehicleType === "รถเล็ก"));
+        console.log("filteredReports : : ", filteredReports.filter((r) => r.Name.split(":")[1]?.trim() === "เงินเดือน" && r.Status !== "ยกเลิก" && r.VehicleType === "รถใหญ่"));
 
         // 3️⃣ merge trips
         trips
             .filter((tr) => {
-                if (tr.Status === "ยกเลิก") return false;
-
-                if (tr.StatusTrip === "ยกเลิก") return false;
-
-                if (tr.TruckType === "รถเล็ก") return false;
                 // ตรวจสอบเดือนและปีของ DateReceive
-                const tripDate = dayjs(tr.DateReceive, ['DD/MM/YYYY', 'YYYY-MM-DD']); // รองรับหลาย format
+                // const tripDate = dayjs(tr.DateReceive, ['DD/MM/YYYY', 'YYYY-MM-DD']); // รองรับหลาย format
+                // const selectedMonth = dayjs(months);
+                // const selectedYear = dayjs(years);
+
+                const rowDate = dayjs(tr.DateReceive, "DD/MM/YYYY");
                 const selectedMonth = dayjs(months);
                 const selectedYear = dayjs(years);
 
+                const dateMatch = !date
+                    ? rowDate.format("MM") === selectedMonth.format("MM") &&
+                    rowDate.format("YYYY") === selectedMonth.format("YYYY")
+                    : rowDate.format("YYYY") === selectedYear.format("YYYY");
+
+                const truck = registrationH.find((h) => h.id === Number(tr.Registration.split(":")[0]));
+                const companyCheck =
+                    companyName === "0:ทั้งหมด"
+                        ? true
+                        : companyName === truck?.Company;
+
                 // ถ้า date = false ให้กรองตามเดือน+ปี, ถ้า date = true ให้กรองตามปี
-                return !date
-                    ? tripDate.month() === selectedMonth.month() && tripDate.year() === selectedMonth.year()
-                    : tripDate.year() === selectedYear.year();
+                return dateMatch
+                    && companyCheck
+                    && tr.TruckType === "รถใหญ่"
+                    && tr.Status !== "ยกเลิก"
+                    ;
             })
             .forEach((curr) => {
                 const bankName = "2:ค่าเที่ยวรถ"; // กำหนด BankName เป็น "ค่าเที่ยว"
@@ -885,9 +923,18 @@ const CloseFS = ({ openNavbar }) => {
                     bankGroup.Registrations.push(regGroup);
                 }
 
-                regGroup.TotalPrice += Number(curr.CostTrip || 0);
-                regGroup.TotalAmount += Number(curr.Price || 0);
-                regGroup.TotalVat += Number(curr.Vat || 0);
+                if (check) {
+                    const total = Number(curr.CostTrip || 0);
+                    const price = Number(curr.Price) || 0;
+                    const vat = Number(curr.Vat) || 0;
+
+                    regGroup.TotalPrice += total;
+                    regGroup.TotalAmount += price;
+                    regGroup.TotalVat += vat;
+                }
+                // check ? regGroup.TotalPrice += Number(curr.CostTrip || 0) : 0;
+                // check ? regGroup.TotalAmount += Number(curr.Price || 0) : 0;
+                // check ? regGroup.TotalVat += Number(curr.Vat || 0) : 0;
             });
 
 
@@ -913,9 +960,10 @@ const CloseFS = ({ openNavbar }) => {
                 else return indexA - indexB;
             });
 
-    }, [expenseitem, reports, date, months, years, companyName, filteredReports, trips]);
+    }, [expenseitem, reports, date, months, years, companyName, filteredReports, trips, check, driverGroups]);
 
     console.log("trips : ", trips);
+    console.log("reportDetail Salary : ", reportDetail.filter((r) => r.Bank.split(":")[1].trim() === "เงินเดือน"));
 
     // ===============================
     // 4️⃣ สร้าง TicketGroups

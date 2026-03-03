@@ -51,11 +51,11 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useData } from "../../server/path";
 import dayjs from "dayjs";
-import { ShowError, ShowSuccess } from "../sweetalert/sweetalert";
+import { ShowConfirm, ShowError, ShowSuccess, ShowWarning } from "../sweetalert/sweetalert";
 import InsertSpendingAbout from "./InsertSpendingAbout";
 import { useBasicData } from "../../server/provider/BasicDataProvider";
 import { useTripData } from "../../server/provider/TripProvider";
-import { Details, Group } from "@mui/icons-material";
+import { Details, Edit, Group } from "@mui/icons-material";
 import { formatThaiFull, formatThaiShort, formatThaiSlash } from "../../theme/DateTH";
 import FileUploadCard from "../../theme/FileUploadCard";
 import FilePreview from "../truck/UploadButton";
@@ -237,13 +237,14 @@ const UpdateFinancial = (props) => {
             registration: item.Registration,
             company: item.Company,
             details: item.Details,
-            Group: item.Group,
+            Group: group,
             bank: item.Bank,
             note: item.Note,
             price: price,
             vat: vat,
             total: price + vat,
             truckType: item.TruckType,
+            type: "old"
         };
     });
 
@@ -275,35 +276,75 @@ const UpdateFinancial = (props) => {
         setRegistrationTruck("");
     };
 
-    const handleDelete = (id) => {
-        setList((prev) => prev.filter((item) => item.id !== id));
+    const handleDelete = (item) => {
+        ShowConfirm(
+            `ต้องการลบทะเบียนรถ ${item.registration} ใช่หรือไม่`,
+            async () => {
+                try {
+                    if (item.type === "old") {
+                        await database
+                            .ref("report/invoice/" + item.id)
+                            .update({ Status: "ยกเลิก" });
+                    }
+
+                    setList(prev => {
+                        const newList = prev.filter(i => i.id !== item.id);
+
+                        const newLength = newList.length || 1; // กันหาร 0
+
+                        setResultPrice(price / newLength);
+                        setResultVat(vat / newLength);
+                        setResultTotal((price + vat) / newLength);
+
+                        return newList;
+                    });
+
+                    ShowSuccess("ลบข้อมูลสำเร็จ");
+
+                } catch (error) {
+                    console.error(error);
+                    ShowError("ลบข้อมูลไม่สำเร็จ");
+                }
+            },
+            () => {
+                console.log(`ยกเลิกลบทะเบียนรถ ${item.registration}`);
+            }
+        );
     };
 
-    useEffect(() => {
-        if (manualTotal) {
-            if (list.length > 0) {
-                const priceNum = parseNumber(price);
-                const vatNum = parseNumber(vat);
-                const totalNum = parseNumber(total);
-                setResultPrice((priceNum / list.length).toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }))
-                setResultVat((vatNum / list.length).toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }))
-                setResultTotal((totalNum / list.length).toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }))
-            } else {
-                setResultPrice(row.Group === "กลุ่ม" ? (row.Price / row.MergedDetails?.length || 0).toFixed(2) : "0.00");
-                setResultVat(row.Group === "กลุ่ม" ? (row.Vat / row.MergedDetails?.length || 0).toFixed(2) : "0.00");
-                setResultTotal(row.Group === "กลุ่ม" ? (row.Total / row.MergedDetails?.length || 0).toFixed(2) : "0.00");
-            }
+    // useEffect(() => {
+    //     if (manualTotal) {
+    //         if (row.Group === "กลุ่ม") {
+    //             const priceNum = parseNumber(price);
+    //             const vatNum = parseNumber(vat);
+    //             const totalNum = parseNumber(total);
+    //             setResultPrice((priceNum / list.length).toLocaleString("en-US", {
+    //                 minimumFractionDigits: 2,
+    //                 maximumFractionDigits: 2,
+    //             }))
+    //             setResultVat((vatNum / list.length).toLocaleString("en-US", {
+    //                 minimumFractionDigits: 2,
+    //                 maximumFractionDigits: 2,
+    //             }))
+    //             setResultTotal((totalNum / list.length).toLocaleString("en-US", {
+    //                 minimumFractionDigits: 2,
+    //                 maximumFractionDigits: 2,
+    //             }))
+    //         } else {
+    //             setResultPrice(price);
+    //             setResultVat(vat);
+    //             setResultTotal(total);
+    //         }
+    //     }
+    // }, [price, vat, list]);  // 👈 เพิ่ม list เข้าไป
+
+    const handleCloseTab = () => {
+        if (edit) {
+            ShowWarning("คุณมีการแก้ไขข้อมูลอยู่ กรุณาบันทึกรายการให้เรียบร้อยก่อนปิดหน้าต่าง");
+        } else {
+            onClose();
         }
-    }, [price, vat, list]);  // 👈 เพิ่ม list เข้าไป
+    }
 
     const handleClose = () => {
         setEdit(false);
@@ -316,6 +357,9 @@ const UpdateFinancial = (props) => {
         setPrice(row.Price);
         setVat(row.Vat);
         setTotal(row.Total);
+        setResultPrice(row.Group === "กลุ่ม" ? (row.Price / row.MergedDetails?.length) : row.Price);
+        setResultVat(row.Group === "กลุ่ม" ? (row.Vat / row.MergedDetails?.length) : row.Vat);
+        setResultTotal(row.Group === "กลุ่ม" ? (row.Total / row.MergedDetails?.length).toFixed(2) : row.Total);
         setFile(initialFile);
         setFileType(initialFileType);
         setSelectedDateInvoice(dayjs(row.SelectedDateInvoice, "DD/MM/YYYY"));
@@ -353,11 +397,6 @@ const UpdateFinancial = (props) => {
 
         let hasError = false;
 
-        if (!invoiceID || invoiceID.trim() === "") {
-            newErrors.invoiceID = true;
-            hasError = true;
-        }
-
         if (!selectedDateInvoice) {
             newErrors.selectedDateInvoice = true;
             hasError = true;
@@ -388,13 +427,15 @@ const UpdateFinancial = (props) => {
             hasError = true;
         }
 
-        if (!selectedValue) {
-            newErrors.registration[type] = true;
-            hasError = true;
+        if (group === "เดี่ยว") {
+            if (!selectedValue) {
+                newErrors.registration[type] = true;
+                hasError = true;
+            }
         }
 
-        if (vat === "0.00" || vat === "") {
-            newErrors.vat = true;
+        if (price === "0.00" || price === "") {
+            newErrors.price = true;
             hasError = true;
         }
 
@@ -420,89 +461,99 @@ const UpdateFinancial = (props) => {
     };
 
     const handlePost = async () => {
-        // if (!list || list.length === 0) {
-        //     ShowError("ไม่มีข้อมูลที่จะบันทึก");
-        //     return;
-        // }
+        if (!list || list.length === 0) {
+            ShowError("ไม่มีข้อมูลที่จะบันทึก");
+            return;
+        }
 
-        // if (!validateBeforeSave()) return;
+        if (!validateBeforeSave()) return;
 
-        // if (!file) return alert("กรุณาเลือกไฟล์ก่อน");
+        if (!file) return alert("กรุณาเลือกไฟล์ก่อน");
 
-        // let img = "ไม่แนบไฟล์"; // ตั้งค่าเริ่มต้นไว้เลย
+        let img = "ไม่แนบไฟล์"; // ตั้งค่าเริ่มต้นไว้เลย
 
-        // // ✅ ตรวจสอบก่อนว่า file เป็น "ไม่แนบไฟล์" หรือไม่
-        // if (file !== "ไม่แนบไฟล์") {
-        //     const formData = new FormData();
-        //     formData.append("pic", file);
+        // ✅ ตรวจสอบก่อนว่า file เป็น "ไม่แนบไฟล์" หรือไม่
+        if (file !== "ไม่แนบไฟล์") {
+            const formData = new FormData();
+            formData.append("pic", file);
 
-        //     try {
-        //         const response = await fetch("https://upload.happysoftth.com/panda/uploads", {
-        //             method: "POST",
-        //             body: formData,
-        //         });
+            try {
+                const response = await fetch("https://upload.happysoftth.com/panda/uploads", {
+                    method: "POST",
+                    body: formData,
+                });
 
-        //         const data = await response.json();
-        //         img = data.file_path;
-        //     } catch (err) {
-        //         console.error("Upload failed:", err);
-        //     }
-        // }
+                const data = await response.json();
+                img = data.file_path;
+            } catch (err) {
+                console.error("Upload failed:", err);
+            }
+        }
 
-        // console.log("Image after try/catch:", img);
+        console.log("Image after try/catch:", img);
 
-        // const startId = reportDetail.length; // ใช้ต่อจากของเดิม
-        // const updates = {};
+        const startId = reportDetail.length; // ใช้ต่อจากของเดิม
+        const updates = {};
 
-        // list.forEach((item, index) => {
-        //     const id = startId + index;
+        let newCounter = 0;
 
-        //     updates[id] = {
-        //         id: id,
-        //         InvoiceID: invoiceID,
-        //         SelectedDateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
-        //         SelectedDateTransfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
-        //         Registration: item.registration,
-        //         Company: `${company?.id}:${company?.Name}`,
-        //         Details: details,
-        //         Bank: `${bank?.id}:${bank?.Name}`,
-        //         Group: group,
-        //         Note: note,
-        //         Price: list.length <= 1 ? parseNumber(price) : parseNumber(resultPrice),
-        //         Vat: list.length <= 1 ? parseNumber(vat) : parseNumber(resultVat),
-        //         Total: list.length <= 1 ? parseNumber(total) : parseNumber(resultTotal),
-        //         TruckType: item.truckType,
-        //         Status: "อยู่ในระบบ",
-        //         Path: img, // ✅ ถ้าไม่แนบไฟล์ก็จะได้ "ไม่แนบไฟล์"
-        //     };
-        // });
+        list.forEach((item) => {
 
-        // console.log("updates : ", updates);
+            let id;
 
-        // database
-        //     .ref("report/invoice")
-        //     .update(updates)
-        //     .then(() => {
-        //         ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-        //         console.log("All data pushed successfully");
-        //         setList([]);
-        //         setInvoiceID("");
-        //         setSelectedDateInvoice(dayjs(new Date()).format("DD/MM/YYYY"));
-        //         setSelectedDateTransfer(dayjs(new Date()).format("DD/MM/YYYY"));
-        //         setCompany("");
-        //         setDetails("");
-        //         setBank("");
-        //         setNote("");
-        //         setPrice("");
-        //         setVat("");
-        //         onClose();
-        //         setFile("ไม่แนบไฟล์");
-        //         setFileType(1);
-        //     })
-        //     .catch((error) => {
-        //         ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-        //         console.error("Error pushing data:", error);
-        //     });
+            if (item.type === "new") {
+                id = startId + newCounter;
+                newCounter++;
+            } else {
+                id = item.id; // ใช้ id เดิม
+            }
+
+            updates[id] = {
+                id: id,
+                InvoiceID: invoiceID,
+                SelectedDateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
+                SelectedDateTransfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
+                Registration: item.registration,
+                Company: `${company?.id}:${company?.Name}`,
+                Details: details,
+                Bank: `${bank?.id}:${bank?.Name}`,
+                Group: group,
+                Note: note,
+                Price: list.length <= 1 ? parseNumber(price) : parseNumber(resultPrice),
+                Vat: list.length <= 1 ? parseNumber(vat) : parseNumber(resultVat),
+                Total: list.length <= 1 ? parseNumber(total) : parseNumber(resultTotal),
+                TruckType: item.truckType,
+                Status: "อยู่ในระบบ",
+                Path: img,
+            };
+        });
+
+        console.log("updates : ", updates);
+
+        database
+            .ref("report/invoice")
+            .update(updates)
+            .then(() => {
+                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+                console.log("All data pushed successfully");
+                setList([]);
+                setInvoiceID("");
+                setSelectedDateInvoice(dayjs(new Date()).format("DD/MM/YYYY"));
+                setSelectedDateTransfer(dayjs(new Date()).format("DD/MM/YYYY"));
+                setCompany("");
+                setDetails("");
+                setBank("");
+                setNote("");
+                setPrice("");
+                setVat("");
+                onClose();
+                setFile("ไม่แนบไฟล์");
+                setFileType(1);
+            })
+            .catch((error) => {
+                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+                console.error("Error pushing data:", error);
+            });
     };
 
     console.log("registrationTruck: ", registrationTruck);
@@ -516,12 +567,12 @@ const UpdateFinancial = (props) => {
                 open={open && FinancialID === row.id}
                 keepMounted
                 fullScreen={windowWidth <= 900 ? true : false}
-                onClose={onClose}
+                onClose={handleCloseTab}
                 maxWidth="sm"
                 sx={
                     (!result && group === "เดี่ยว") ?
                         {
-                            zIndex: 1200,
+                            zIndex: 900,
                         }
                         :
                         {
@@ -530,7 +581,7 @@ const UpdateFinancial = (props) => {
                                 alignItems: 'center',
                                 marginLeft: windowWidth <= 900 ? 0 : 15
                             },
-                            zIndex: 1200,
+                            zIndex: 900,
                         }
                 }
             >
@@ -540,7 +591,7 @@ const UpdateFinancial = (props) => {
                             <Typography variant="h6" fontWeight="bold" color="white" sx={{ marginTop: -1 }} >เพิ่มบิล</Typography>
                         </Grid>
                         <Grid item xs={2} textAlign="right">
-                            <IconButtonError onClick={onClose} sx={{ marginTop: -2 }}>
+                            <IconButtonError onClick={handleCloseTab} sx={{ marginTop: -2 }}>
                                 <CancelIcon fontSize="small" />
                             </IconButtonError>
                         </Grid>
@@ -707,7 +758,7 @@ const UpdateFinancial = (props) => {
 
                                                 setList((prev) => {
                                                     const newItem = {
-                                                        id: prev.length,
+                                                        id: group === "เดี่ยว" ? prev[0]?.id || 0 : prev.length,
                                                         invoiceID: invoiceID,
                                                         dateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
                                                         dateTranfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
@@ -721,11 +772,15 @@ const UpdateFinancial = (props) => {
                                                         vat: parseNumber(vat),
                                                         total: parseNumber(price) + parseNumber(vat),
                                                         truckType: newValue?.TruckType,
+                                                        type: group === "เดี่ยว" ? "old" : "new"
                                                     };
 
                                                     if (group === "เดี่ยว") {
                                                         return [newItem]; // ให้มีแค่ 1 รายการ
                                                     } else {
+                                                        setResultPrice(price / (prev.length + 1));
+                                                        setResultVat(vat / (prev.length + 1));
+                                                        setResultTotal((parseNumber(price) + parseNumber(vat)) / (prev.length + 1));
                                                         return [...prev, newItem]; // เพิ่มได้หลายรายการ
                                                     }
                                                 });
@@ -752,18 +807,29 @@ const UpdateFinancial = (props) => {
                                             },
                                         }}
                                         renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label={`กรุณาเลือก${type}`}
-                                                variant="outlined"
-                                                size="small"
-                                                error={errors.registration?.[type] || false}
-                                                helperText={
-                                                    errors.registration?.[type]
-                                                        ? `กรุณาเลือก${type}`
-                                                        : ""
-                                                }
-                                            />
+                                            group === "เดี่ยว" ? (
+                                                <TextField
+                                                    {...params}
+                                                    label={`กรุณาเลือก${type}`}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    error={errors.registration?.[type] || false}
+                                                    helperText={
+                                                        errors.registration?.[type]
+                                                            ? `กรุณาเลือก${type}`
+                                                            : ""
+                                                    }
+                                                />
+                                            )
+                                                :
+                                                (
+                                                    <TextField
+                                                        {...params}
+                                                        label={`กรุณาเลือก${type}`}
+                                                        variant="outlined"
+                                                        size="small"
+                                                    />
+                                                )
                                         )}
                                         renderOption={(props, option) => (
                                             <li {...props}>
@@ -1125,13 +1191,14 @@ const UpdateFinancial = (props) => {
                                             <Typography variant="h6" fontWeight="bold" color="white" sx={{ marginTop: 1, marginLeft: 2 }} >รายการทะเบียนรถ</Typography>
                                         </Grid>
                                         <Grid item xs={2} textAlign="right">
-                                            <IconButtonError onClick={() => setGroup("เดี่ยว")} sx={{ marginTop: 1, marginRight: 2 }}>
+                                            <IconButtonError onClick={handleCloseTab} sx={{ marginTop: 1, marginRight: 2 }}>
                                                 <CancelIcon fontSize="small" />
                                             </IconButtonError>
                                         </Grid>
                                     </Grid>
                                     {/* <Typography variant="h6" fontWeight="bold" textAlign="center" marginTop={0.5} gutterBottom>รายการทะเบียนรถ</Typography> */}
                                     <Box sx={{ p: 4 }}>
+                                        <Typography variant="subtitle1" fontWeight="bold" textAlign="right" sx={{ fontSize: "12px", color: theme.palette.error.main }}>*โปรดทราบ: หากมีการลบข้อมูลทะเบียนรถ กรุณากดบันทึกข้อมูลเพื่อยืนยัน มิฉะนั้นข้อมูลการคำนวณจะผิดพลาด*</Typography>
                                         <TableContainer component={Paper} sx={{ width: "100%", height: "35vh" }}>
                                             <Table
                                                 stickyHeader
@@ -1155,17 +1222,17 @@ const UpdateFinancial = (props) => {
                                                 <TableBody>
                                                     {list.map((item, index) => (
                                                         <TableRow key={item.id}>
-                                                            <TableCell sx={{ textAlign: "center" }}>{index + 1}</TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>
+                                                            <TableCell sx={{ textAlign: "center", color: !edit ? "gray" : "black" }}>{index + 1}</TableCell>
+                                                            <TableCell sx={{ textAlign: "center", color: !edit ? "gray" : "black" }}>
                                                                 {item.registration?.includes(":")
                                                                     ? item.registration.split(":")[1]
                                                                     : item.registration}
                                                             </TableCell>
-                                                            <TableCell sx={{ textAlign: "center" }}>{item.truckType}</TableCell>
+                                                            <TableCell sx={{ textAlign: "center", color: !edit ? "gray" : "black" }}>{item.truckType}</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>
                                                                 {
                                                                     edit &&
-                                                                    <IconButton size="smal" color="error" onClick={() => handleDelete(item.id)} sx={{ marginTop: -0.5, marginBottom: -0.5 }}>
+                                                                    <IconButton size="small" color="error" onClick={() => handleDelete(item)} sx={{ marginTop: -0.5, marginBottom: -0.5 }}>
                                                                         <DeleteForeverIcon fontSize="small" />
                                                                     </IconButton>
                                                                 }
@@ -1305,7 +1372,7 @@ const UpdateFinancial = (props) => {
                                                         <Grid item md={12} xs={12}>
                                                             <Box display="flex" justifyContent="center" alignItems="center">
                                                                 <Typography variant="subtitle1" fontWeight="bold" textAlign="right" marginTop={1}
-                                                                    sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5 }} gutterBottom>ยอดรวม</Typography>
+                                                                    sx={{ whiteSpace: "nowrap", marginRight: 1, marginLeft: 3.5, color: !edit ? "gray" : "black" }} gutterBottom>ยอดรวม</Typography>
                                                                 <Paper component="form" sx={{ width: "100%" }}>
                                                                     {/* <TextField size="small" type="number" fullWidth
                                                                         value={total}
