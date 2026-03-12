@@ -78,10 +78,12 @@ const TripsBigTruck = ({ openNavbar }) => {
     };
 
     // const { trip } = useData();
-    const { trip } = useTripData();
+    const { trip, order } = useTripData();
     const { reghead } = useBasicData();
     const registrations = Object.values(reghead || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
 
+    const orderDetail = Object.values(order || {});
+    console.log("orderDetail : ", orderDetail.filter((row) => row.TicketName === "35:S.NP..10 ล้อ นาครา 70-1662" && row.Status !== "ยกเลิก"));
     const trips = Object.values(trip || {}).filter(item => {
         const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
         const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");

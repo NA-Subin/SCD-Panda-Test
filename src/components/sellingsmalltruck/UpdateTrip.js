@@ -350,6 +350,8 @@ const UpdateTrip = (props) => {
         setOpen(false);
     }
 
+    console.log("Orderss : ", order.filter((row) => row.CustomerType === "-"));
+
     const [editMode, setEditMode] = useState(false);
     const [editableTickets, setEditableTickets] = useState([]);
     const [editableOrders, setEditableOrders] = useState([]);

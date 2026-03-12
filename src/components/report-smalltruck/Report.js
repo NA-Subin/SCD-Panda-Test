@@ -118,7 +118,7 @@ const ReportSmallTruck = () => {
   // const orders = Object.values(order || {});
   const orders = Object.values(order || {}).filter(item => {
     const itemDate = dayjs(item.Date, "DD/MM/YYYY");
-    return itemDate.isSameOrAfter(dayjs("01/12/2025", "DD/MM/YYYY"), 'day');
+    return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
   });
   const customerB = Object.values(customerbigtruck || {});
   const customerS = Object.values(customersmalltruck || {});
@@ -127,7 +127,7 @@ const ReportSmallTruck = () => {
   const trips = Object.values(trip || {}).filter(item => {
     const deliveryDate = dayjs(item.DateDelivery, "DD/MM/YYYY");
     const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
-    const targetDate = dayjs("01/12/2025", "DD/MM/YYYY");
+    const targetDate = dayjs("01/01/2026", "DD/MM/YYYY");
 
     return deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day');
   });
@@ -160,7 +160,7 @@ const ReportSmallTruck = () => {
   ];
 
   console.log("registration : ", registration.filter(item => item.RegHead === "ยจ.2652 ชม."));
-  console.log("orders : ", orders.filter(item => item.Registration.split(":")[1] === "ยจ.2652 ชม."));
+  console.log("orders : ", orders.filter(item => item.CustomerType === "-"));
   console.log("customerB : ", customerB);
   console.log("customerDetails : ", customerDetails);
   // แยกเฉพาะส่งออก (จาก trips)
@@ -170,15 +170,15 @@ const ReportSmallTruck = () => {
   };
 
   const outboundList = orders
-    .filter((trip) => {
-      // const orderDate = dayjs(trip.Date, "DD/MM/YYYY");
+    .filter((order) => {
+      // const orderDate = dayjs(order.Date, "DD/MM/YYYY");
       // const isInDateRange =
       //   orderDate.isValid() &&
       //   orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
 
       if (
-        trip.CustomerType !== "ตั๋วรถเล็ก" ||
-        trip.Status !== "จัดส่งสำเร็จ"
+        order.CustomerType !== "ตั๋วรถเล็ก" ||
+        order.Status === "ยกเลิก"
         // !isInDateRange
       ) {
         return false;
@@ -188,22 +188,33 @@ const ReportSmallTruck = () => {
         return true; // ✅ "แสดงทั้งหมด"
       }
 
-      const tripid = Number(trip.Registration?.split(":")[0] ?? "");
+      const orderid = Number(order.Registration?.split(":")[0] ?? "");
       const selectedid = Number(selectOrder?.id);
 
-      return tripid && selectedid && tripid === selectedid;
+      return orderid && selectedid && orderid === selectedid;
     })
-    .map((trip) => ({
-      id: trip.id.toString(),
+    .map((order) => ({
+      id: order.id.toString(),
       type: "ส่งออก",
-      ...trip,
+      ...order,
     }));
 
-  console.log("outboundList :", outboundList);
+  console.log("outboundList :", outboundList.filter(item => item.CustomerType === "-"));
 
   const travelSummary = {};
 
-  outboundList.forEach((trip) => {
+  outboundList.filter(item => {
+    const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+
+    if (
+      !itemDate.isValid() ||
+      !itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
+    ) {
+      return false;
+    }
+
+    return true;
+  }).forEach((trip) => {
     const travel = Number(trip.Travel) || 0;
 
     const dv = driver.find((item) => item.id === Number(trip.Driver.split(":")[0]))
@@ -227,8 +238,8 @@ const ReportSmallTruck = () => {
 
   console.log("ผลรวม Travel ตาม Driver + Registration:", summarizedList);
 
-  console.log("order : ", order);
-  console.log("ticket : ", ticketsdetail?.filter((row) => row.CustomerType === "ตั๋วรถเล็ก"));
+  console.log("order : ", orders.filter((row) => row.CustomerType === "-"));
+  console.log("ticket : ", ticketsdetail?.filter((row) => row.CustomerType === "-"));
   console.log("selectOrder : ", selectOrder);
 
   const customerMap = useMemo(() => {
@@ -251,80 +262,158 @@ const ReportSmallTruck = () => {
     if (selectedId === undefined || selectedId === null) return [];
 
     const selectedRegHead = selectOrder?.RegHead;
-
-    // ✅ กรองเฉพาะ ticketsdetail
     const filteredTickets = ticketsdetail
       .map((ticket) => {
-        const trip = trips.find((tp) => (tp.id - 1) === ticket.Trip && tp.TruckType === "รถเล็ก");
+        const trip = trips.find(
+          (tp) => (Number(tp.id) - 1) === Number(ticket.Trip) && tp.TruckType === "รถเล็ก"
+        );
         if (!trip) return null;
 
-        // const orderDate = dayjs(trip?.DateReceive, "DD/MM/YYYY");
-        // const isInDateRange =
-        //   orderDate.isValid() &&
-        //   orderDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]");
+        if (ticket.Status === "ยกเลิก") return null;
 
-        // if (!isInDateRange) return null;
-        if (ticket.Status !== "จัดส่งสำเร็จ") return null;
+        const tripReg =
+          typeof trip?.Registration === "string" && trip.Registration.includes(":")
+            ? trip.Registration.split(":")[1].trim()
+            : "";
 
-        // ✅ ถ้ายังไม่ได้เลือกทะเบียน → ผ่านได้
-        if (selectedRegHead !== "แสดงทั้งหมด" && Number(selectOrder) !== 0) {
-          const tripIdFromReg = Number(trip?.Registration?.split(":")[0]);
-          if (selectedId !== tripIdFromReg) return null;
+        let type = "รับเข้า";
+
+        // ===================================
+        // 🔍 กรณีกรองตามทะเบียน
+        // ===================================
+        if (selectedRegHead !== "แสดงทั้งหมด" && Number(selectedId) !== 0) {
+
+          if (ticket.CustomerType === "ตั๋วรถเล็ก") {
+
+            if (tripReg !== selectedRegHead) {
+
+              const ticketId = Number(ticket?.TicketName?.split(":")?.[0]);
+              if (!ticketId) return null;
+
+              const customer = customerB.find((b) => b.id === ticketId);
+              if (!customer) return null;
+              if (customer.RegistrationCheck !== true) return null;
+
+              const customerReg =
+                typeof customer.Registration === "string" &&
+                  customer.Registration.includes(":")
+                  ? customer.Registration.split(":")[1].trim()
+                  : "";
+
+              if (customerReg !== selectedRegHead) return null;
+
+            } else {
+
+              // ✅ ตรวจว่า TicketName มีทะเบียนเดียวกับที่เลือกหรือไม่
+              const ticketReg = ticket?.Registration
+                ? typeof ticket.Registration === "string" && ticket.Registration.includes(":")
+                  ? ticket.Registration.split(":")[1].trim()
+                  : ""
+                : "";
+
+              if (ticketReg === selectedRegHead) {
+                type = "ส่งออก";
+              }
+            }
+          } else {
+            type = "รับเข้า"
+            if (ticket.Registration.split(":")[1].trim() !== selectedRegHead) return null;
+          }
         }
 
         return {
           ...ticket,
-          Registration: trip?.Registration,  // ✅ เพิ่มข้อมูลจาก trip
+          Registration: trip?.Registration,
           Date: trip?.DateReceive,
-          TripDriver: trip.Driver,
+          TripDriver: trip?.Driver,
           sourceType: "ticket",
-          type: "รับเข้า",
+          type: type,
+          TruckType: trip?.TruckType,
         };
       })
-      .filter(Boolean); // ✅ ตัด null ออก
+      .filter(Boolean);
 
     // ✅ กรองเฉพาะ orders
     const filteredOrders = orders
       .filter(order => {
-        if (order.Status !== "จัดส่งสำเร็จ") return false;
+        if (order.Status === "ยกเลิก") return false;
+        const trip = trips.find(
+          (tp) => (Number(tp.id) - 1) === Number(order.Trip)
+        );
+        if (!trip) return null;
 
         const orderTicketId = Number(order.TicketName?.split(":")?.[0]);
         if (!orderTicketId) return false;
 
-        // ================================
-        // 🔍 กรณีกรองตามทะเบียน
-        // ================================
-        const customer = customerB.find(b => b.id === orderTicketId);
-        if (!customer) return false;
-        if (customer.RegistrationCheck !== true) return false;
-        if (customer?.Name !== order?.TicketName.split(":")[1]) return false;
+        // const ticketName = order?.TicketName?.split(":")?.[1]?.trim();
 
-        if (selectedRegHead === "แสดงทั้งหมด" || Number(selectedId) === 0) {
-          return true;
+        if (order.CustomerType === "ตั๋วรถใหญ่") {
+          const customer = customerB.find(b => Number(b.id) === orderTicketId);
+
+          if (!customer) return false;
+          if (customer.RegistrationCheck !== true) return false;
+          const ticketName = order?.TicketName?.split(":")?.[1]?.trim()?.toLowerCase();
+          const customerName = customer?.Name?.trim()?.toLowerCase();
+
+          if (!ticketName?.includes(customerName)) return false;
+
+          if (selectedRegHead === "แสดงทั้งหมด" || Number(selectedId) === 0) {
+            return true;
+          }
+
+          const orderReg =
+            typeof order.Registration === "string" && order.Registration.includes(":")
+              ? order.Registration.split(":")[1].trim()
+              : "";
+
+          if (orderReg === selectedRegHead) return true;
+
+          const customerReg =
+            typeof customer.Registration === "string" && customer.Registration.includes(":")
+              ? customer.Registration.split(":")[1].trim()
+              : "";
+
+          return customerReg === selectedRegHead;
+        } else if (order.CustomerType === "ตั๋วรถเล็ก") {
+          const customer = customerS.find(b => Number(b.id) === orderTicketId);
+
+          if (!customer) return false;
+          if (customer.RegistrationCheck !== true) return false;
+          const ticketParts = order?.TicketName?.split(":") || [];
+
+          const ticketName = ticketParts.slice(1).join(":").trim().toLowerCase();
+
+          const customerName =
+            ticketParts.length > 2
+              ? customer?.Name?.split(":")[0]?.trim()?.toLowerCase()
+              : customer?.Name?.trim()?.toLowerCase();
+
+          if (!ticketName.includes(customerName)) return false;
+
+          if (selectedRegHead === "แสดงทั้งหมด" || Number(selectedId) === 0) {
+            return true;
+          }
+
+          const orderReg =
+            typeof order.Registration === "string" && order.Registration.includes(":")
+              ? order.Registration.split(":")[1].trim()
+              : "";
+
+          // if (orderReg === selectedRegHead) return true;
+
+          const customerReg =
+            typeof customer.Registration === "string" && customer.Registration.includes(":")
+              ? customer.Registration.split(":")[1].trim()
+              : "";
+
+          return customerReg === selectedRegHead;
         }
-
-        // 1️⃣ ตรวจทะเบียนจาก order
-        const orderReg =
-          typeof order.Registration === "string" &&
-            order.Registration.includes(":")
-            ? order.Registration.split(":")[1].trim()
-            : "";
-
-        if (orderReg === selectedRegHead) return true;
-
-        // 2️⃣ ตรวจทะเบียนจาก customer
-        const customerReg =
-          typeof customer.Registration === "string" &&
-            customer.Registration.includes(":")
-            ? customer.Registration.split(":")[1].trim()
-            : "";
-
-        return customerReg === selectedRegHead;
       })
       .map(o => ({
         ...o,
         sourceType: "order",
         type: "รับเข้า",
+        TruckType: trip?.TruckType,
       }));
 
     // ✅ รวมผลลัพธ์ทั้งสอง
@@ -347,6 +436,7 @@ const ReportSmallTruck = () => {
 
       sourceType: "order",
       type: "รับเข้า",
+      TruckType: "รถใหญ่",
     };
 
     // const carryDate = dayjs(fixedCarryIn.Date, "DD/MM/YYYY");
@@ -364,21 +454,11 @@ const ReportSmallTruck = () => {
     }
 
     return result;
-  }, [orders, ticketsdetail, trips, customerB, selectedDateStart, selectedDateEnd, selectOrder]);
+  }, [orders, ticketsdetail, trips, customerB, customerS, selectedDateStart, selectedDateEnd, selectOrder]);
+
+  console.log("Matched Orders (ก่อนกรองวันที่): ", matchedOrders.filter((item) => item.sourceType === "ticket"));
 
   const matchedOrdersWithAll = [...matchedOrders, ...outboundList]
-    .filter(item => {
-      const itemDate = dayjs(item.Date, "DD/MM/YYYY");
-
-      if (
-        !itemDate.isValid() ||
-        !itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
-      ) {
-        return false;
-      }
-
-      return true;
-    })
     .sort((a, b) =>
       dayjs(a.Date, "DD/MM/YYYY").toDate() -
       dayjs(b.Date, "DD/MM/YYYY").toDate()
@@ -386,7 +466,18 @@ const ReportSmallTruck = () => {
 
 
   console.log("Customer Details: ", customerDetails);
-  console.log("Matched Orders: ", matchedOrdersWithAll);
+  console.log("Matched Orders: ", matchedOrdersWithAll.filter(item => {
+    const itemDate = dayjs(item.Date, "DD/MM/YYYY");
+
+    if (
+      !itemDate.isValid() ||
+      !itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
+    ) {
+      return false;
+    }
+
+    return true;
+  }));
 
   console.log("Order Filter : ", matchedOrders);
 
@@ -468,22 +559,35 @@ const ReportSmallTruck = () => {
     summary.balance[key] = 0;
   });
 
-  matchedOrdersWithAll.forEach((row) => {
-    Object.entries(row.Product || {})
-      .filter(([key]) => key !== "P") // ❌ ตัด P ออก
-      .forEach(([key, product]) => {
-        const volume = Number(product?.Volume) || 0;
-        // ✅ ถ้าเป็น ticket ไม่ต้อง *1000
-        const liters = row.sourceType === "order" ? volume * 1000 : volume;
+  matchedOrdersWithAll
+    .filter(item => {
+      const itemDate = dayjs(item.Date, "DD/MM/YYYY");
 
-        if (row.type === "รับเข้า") {
-          summary.inbound[key] += liters;
-        } else {
-          const outboundLiters = -liters; // ✅ ใช้ liters ติดลบ
-          summary.outbound[key] += outboundLiters;
-        }
-      });
-  });
+      if (
+        !itemDate.isValid() ||
+        !itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
+      ) {
+        return false;
+      }
+
+      return true;
+    })
+    .forEach((row) => {
+      Object.entries(row.Product || {})
+        .filter(([key]) => key !== "P") // ❌ ตัด P ออก
+        .forEach(([key, product]) => {
+          const volume = Number(product?.Volume) || 0;
+          // ✅ ถ้าเป็น ticket ไม่ต้อง *1000
+          const liters = row.sourceType === "order" ? (row.CustomerType !== "ตั๋วรถเล็ก" ? volume * 1000 : volume) : volume;
+
+          if (row.type === "รับเข้า") {
+            summary.inbound[key] += liters;
+          } else {
+            const outboundLiters = -liters; // ✅ ใช้ liters ติดลบ
+            summary.outbound[key] += outboundLiters;
+          }
+        });
+    });
 
   const carryOverSummary = useMemo(() => {
     const balance = {};
@@ -496,11 +600,11 @@ const ReportSmallTruck = () => {
       .subtract(1, "day")
       .endOf("day");
 
-    [...matchedOrders, ...outboundList].forEach((order) => {
+    matchedOrdersWithAll.forEach((order) => {
       const orderDate = dayjs(order.Date, "DD/MM/YYYY");
       if (!orderDate.isValid()) return;
       if (orderDate.isAfter(cutoff)) return;
-      if (order.Status !== "จัดส่งสำเร็จ") return;
+      if (order.Status === "ยกเลิก") return;
 
       Object.entries(order.Product || {})
         .filter(([key]) => key !== "P") // ❌ ตัด P ออก
@@ -511,7 +615,7 @@ const ReportSmallTruck = () => {
 
           const liters =
             order.sourceType === "order"
-              ? volume * 1000
+              ? (order.CustomerType !== "ตั๋วรถเล็ก" ? volume * 1000 : volume)
               : volume;
 
           if (order.type === "รับเข้า") {
@@ -782,34 +886,56 @@ const ReportSmallTruck = () => {
     pushSummaryHead("ยอดยกมา", carryOverSummary.balance, "FFF1F8E9");
 
     // 5️⃣ Data rows
-    matchedOrdersWithAll.forEach((row, index) => {
-      const dataRow = {
-        no: index + 1,
-        date: row.Date,
-        receivedBy: row.type === "รับเข้า" ? `${getPart(row.Driver)}/${getPart(row.Registration)}` : "",
-        destination: row.type === "ส่งออก" ? getPart(row.TicketName) : "-",
-      };
+    matchedOrdersWithAll
+      .filter(item => {
+        const itemDate = dayjs(item.Date, "DD/MM/YYYY");
 
-      productTypes.forEach((key) => {
-        const volume = row.Product?.[key]?.Volume;
-        dataRow[key] = (row.type === "รับเข้า" && row.CustomerType !== "ตั๋วรถเล็ก" && row.CustomerType !== "-") ? (volume ? Number(volume) * 1000 : "") : (volume ? -Number(volume) : "");
-      });
-
-      summarizedList.forEach((s) => {
-        const name = `${getPart(s.Driver)}/${getPart(s.Registration)}`;
-        dataRow[`travel_${name}`] = s.Driver === row.Driver && s.Registration === row.Registration ? row.Travel : "-";
-      });
-
-      const newRow = worksheet.addRow(dataRow);
-      newRow.height = 20;
-      newRow.alignment = { horizontal: "center", vertical: "middle" };
-      newRow.eachCell((cell, colNumber) => {
-        cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-        if (!["no", "date", "receivedBy", "destination"].includes(worksheet.columns[colNumber - 1].key)) {
-          cell.numFmt = "#,##0.00";
+        if (
+          !itemDate.isValid() ||
+          !itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
+        ) {
+          return false;
         }
+
+        return true;
+      })
+      .forEach((row, index) => {
+        const dataRow = {
+          no: index + 1,
+          date: row.Date,
+          receivedBy: row.type === "รับเข้า" ? `${getPart(row.Driver)}/${getPart(row.Registration)}` : "",
+          destination: row.type === "ส่งออก" ? getPart(row.TicketName) : "-",
+        };
+
+        productTypes.forEach((key) => {
+          const volume = row.Product?.[key]?.Volume;
+          const numVolume = Number(row.Product?.[key]?.Volume) || 0;
+
+          dataRow[key] =
+            row.type === "รับเข้า" && row.CustomerType !== "-"
+              ? (numVolume
+                ? ((row.TruckType !== "รถเล็ก")
+                  ? numVolume * 1000
+                  : numVolume)
+                : "")
+              : (numVolume ? -numVolume : "");
+        });
+
+        summarizedList.forEach((s) => {
+          const name = `${getPart(s.Driver)}/${getPart(s.Registration)}`;
+          dataRow[`travel_${name}`] = s.Driver === row.Driver && s.Registration === row.Registration ? row.Travel : "-";
+        });
+
+        const newRow = worksheet.addRow(dataRow);
+        newRow.height = 20;
+        newRow.alignment = { horizontal: "center", vertical: "middle" };
+        newRow.eachCell((cell, colNumber) => {
+          cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+          if (!["no", "date", "receivedBy", "destination"].includes(worksheet.columns[colNumber - 1].key)) {
+            cell.numFmt = "#,##0.00";
+          }
+        });
       });
-    });
 
     // 6️⃣ Summary rows
     const pushSummaryRow = (title, summaryData, fillColor) => {
@@ -846,6 +972,7 @@ const ReportSmallTruck = () => {
   };
 
   console.log("matchedOrdersWithAll : ", matchedOrdersWithAll);
+  console.log("productTypes : ", productTypes);
 
   return (
     <Container maxWidth="xl" sx={{ marginTop: 13, marginBottom: 5, width: windowWidth <= 900 && windowWidth > 600 ? (windowWidth - 110) : windowWidth <= 600 ? (windowWidth) : (windowWidth - 260) }}>
@@ -1011,10 +1138,10 @@ const ReportSmallTruck = () => {
                 <TablecellPink sx={{ textAlign: "center", height: "40px", fontSize: 16, width: 50, position: "sticky", left: 0, zIndex: 4, borderRight: "2px solid white" }}>
                   ลำดับ
                 </TablecellPink>
-                <TablecellPink sx={{ textAlign: "center", height: "40px", fontSize: 16, width: 130 }}>
+                <TablecellPink sx={{ textAlign: "center", height: "40px", fontSize: 16, width: 110 }}>
                   วันที่
                 </TablecellPink>
-                <TablecellPink sx={{ textAlign: "center", height: "40px", fontSize: 16, width: 300, position: "sticky", left: 50, zIndex: 4, borderRight: "2px solid white" }}>
+                <TablecellPink sx={{ textAlign: "center", height: "40px", fontSize: 16, width: 350, position: "sticky", left: 50, zIndex: 4, borderRight: "2px solid white" }}>
                   รับเข้าโดย
                 </TablecellPink>
                 <TableCellG95 sx={{ textAlign: "center", height: "40px", fontSize: 16, width: 100 }}>
@@ -1057,115 +1184,57 @@ const ReportSmallTruck = () => {
             </TableHead>
             <TableBody>
               {
-                matchedOrdersWithAll.map((row, index) => (
-                  row.type === "รับเข้า" ? (
-                    <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
-                      <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 1, borderRight: "2px solid white", backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
-                        {index + 1}
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>
-                        {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "left", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
-                        <Typography variant="subtitle2" sx={{ marginLeft: 2 }} >{`${row.Driver ? row.Driver.split(":")[1] : row.Driver} / ${row.Registration ? row.Registration.split(":")[1] : row.Registration}`}</Typography>
-                      </TableCell>
-                      {/* ✅ ตรงกับ column ที่หัว */}
-                      {productTypes.map((productKey) => {
-                        const volume = row.Product?.[productKey]?.Volume;
-                        const value = (row.sourceType === "order" && row.CustomerType !== "ตั๋วรถเล็ก" && row.CustomerType !== "-") ? Number(volume) * 1000 : Number(volume);
+                matchedOrdersWithAll
+                  .filter(item => {
+                    const itemDate = dayjs(item.Date, "DD/MM/YYYY");
 
-                        return (
-                          <TableCell
-                            key={productKey}
-                            sx={{
-                              textAlign: "right",              // ✅ ชิดขวา
-                              fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
-                              paddingLeft: "10px !important",
-                              paddingRight: "10px !important",
-                              color: value ? "#003003ff" : "lightgray",
-                            }}
-                          >
-                            {value ? value.toLocaleString() : "0"}
-                          </TableCell>
-                        );
-                      })}
+                    if (
+                      !itemDate.isValid() ||
+                      !itemDate.isBetween(selectedDateStart, selectedDateEnd, null, "[]")
+                    ) {
+                      return false;
+                    }
 
-                      <TableCell sx={{ textAlign: "center", color: "lightgray" }} colSpan={2}>
-                        -
-                      </TableCell>
-                      {
-                        summarizedList.map((d) => (
-                          <TableCell
-                            sx={{
-                              textAlign: "center",
-                              color: "lightgray",
-                              paddingLeft: "10px !important",
-                              paddingRight: "10px !important",
-                              fontVariantNumeric: "tabular-nums"
-                            }}
-                          >
-                            -
-                          </TableCell>
-                        ))
-                      }
-                      {/* {data.map((h) => (
-                      <TableCell key={`${h.Driver}:${h.Registration}`} sx={{ textAlign: "center" }}>
-                        {row.amounts[`${h.Driver}:${h.Registration}`] || "-"}
-                      </TableCell>
-                    ))} */}
-                    </TableRow>
-                  ) : (
-                    <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
-                      <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 1, borderRight: "2px solid white", backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
-                        {index + 1}
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>
-                        {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "center", color: "lightgray", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
-                        -
-                      </TableCell>
-                      {/* ✅ ตรงกับ column ที่หัว */}
-                      {productTypes.map((productKey) => {
-                        const volume = row.Product?.[productKey]?.Volume;
-                        const value = (row.sourceType === "order" && row.CustomerType !== "ตั๋วรถเล็ก" && row.CustomerType !== "-") ? Number(volume) * 1000 : Number(volume);
+                    return true;
+                  })
+                  .map((row, index) => (
+                    row.type === "รับเข้า" ? (
+                      <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
+                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 1, borderRight: "2px solid white", backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
+                          {index + 1}
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                          {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "left", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
+                          <Typography variant="subtitle2" sx={{ marginLeft: 2 }} >{`${row.Driver ? row.Driver.split(":")[1] : row.Driver} / ${row.Registration ? row.Registration.split(":")[1] : row.Registration}`}</Typography>
+                        </TableCell>
+                        {/* ✅ ตรงกับ column ที่หัว */}
+                        {productTypes.map((productKey) => {
+                          const volume = row.Product?.[productKey]?.Volume;
+                          const value = (row.sourceType === "order" && row.CustomerType !== "ตั๋วรถเล็ก" && row.CustomerType !== "-") ? Number(volume) * 1000 : Number(volume);
 
-                        return (
-                          <TableCell
-                            key={productKey}
-                            sx={{
-                              textAlign: "right",              // ✅ ชิดขวา
-                              fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
-                              paddingLeft: "10px !important",
-                              paddingRight: "10px !important",
-                              color: value ? "#720000ff" : "lightgray",
-                            }}
-                          >
-                            {(value ? (-Number(value)).toLocaleString() : "0")}
-                          </TableCell>
-                        );
-                      })}
-
-                      <TableCell sx={{ textAlign: "left" }} colSpan={2}>
-                        <Typography variant="subtitle2" sx={{ marginLeft: 2 }}>{row.TicketName.split(":")[1] || "-"}</Typography>
-                      </TableCell>
-                      {
-                        summarizedList.map((d) => (
-                          d.Driver === row.Driver && d.Registration === row.Registration ? (
+                          return (
                             <TableCell
+                              key={productKey}
                               sx={{
-                                textAlign: "right",
-                                fontSize: 16,
-                                width: 200,
+                                textAlign: "right",              // ✅ ชิดขวา
+                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
                                 paddingLeft: "10px !important",
                                 paddingRight: "10px !important",
-                                fontVariantNumeric: "tabular-nums"
+                                color: value ? "#003003ff" : "lightgray",
                               }}
                             >
-                              <Typography variant="subtitle2" sx={{ whiteSpace: "nowrap", lineHeight: 1 }} gutterBottom>{row.Travel}</Typography>
+                              {value ? value.toLocaleString() : "0"}
                             </TableCell>
-                          )
-                            :
+                          );
+                        })}
+
+                        <TableCell sx={{ textAlign: "center", color: "lightgray" }} colSpan={2}>
+                          -
+                        </TableCell>
+                        {
+                          summarizedList.map((d) => (
                             <TableCell
                               sx={{
                                 textAlign: "center",
@@ -1177,11 +1246,82 @@ const ReportSmallTruck = () => {
                             >
                               -
                             </TableCell>
-                        ))
-                      }
-                    </TableRow>
-                  )
-                ))
+                          ))
+                        }
+                        {/* {data.map((h) => (
+                      <TableCell key={`${h.Driver}:${h.Registration}`} sx={{ textAlign: "center" }}>
+                        {row.amounts[`${h.Driver}:${h.Registration}`] || "-"}
+                      </TableCell>
+                    ))} */}
+                      </TableRow>
+                    ) : (
+                      <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
+                        <TableCell sx={{ textAlign: "center", position: "sticky", left: 0, zIndex: 1, borderRight: "2px solid white", backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
+                          {index + 1}
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                          {formatThaiSlash(dayjs(row.Date, "DD/MM/YYYY"))}
+                        </TableCell>
+                        <TableCell sx={{ textAlign: "center", color: "lightgray", position: "sticky", left: 50, zIndex: 1, borderRight: "2px solid white", backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#f3f6fcff" }}>
+                          -
+                        </TableCell>
+                        {/* ✅ ตรงกับ column ที่หัว */}
+                        {productTypes.map((productKey) => {
+                          const volume = row.Product?.[productKey]?.Volume;
+                          const value = (row.sourceType === "order" && row.CustomerType !== "ตั๋วรถเล็ก" && row.CustomerType !== "-") ? Number(volume) * 1000 : Number(volume);
+
+                          return (
+                            <TableCell
+                              key={productKey}
+                              sx={{
+                                textAlign: "right",              // ✅ ชิดขวา
+                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน
+                                paddingLeft: "10px !important",
+                                paddingRight: "10px !important",
+                                color: value ? "#720000ff" : "lightgray",
+                              }}
+                            >
+                              {(value ? (-Number(value)).toLocaleString() : "0")}
+                            </TableCell>
+                          );
+                        })}
+
+                        <TableCell sx={{ textAlign: "left" }} colSpan={2}>
+                          <Typography variant="subtitle2" sx={{ marginLeft: 2 }}>{row.TicketName.split(":")[1] || "-"}</Typography>
+                        </TableCell>
+                        {
+                          summarizedList.map((d) => (
+                            d.Driver === row.Driver && d.Registration === row.Registration ? (
+                              <TableCell
+                                sx={{
+                                  textAlign: "right",
+                                  fontSize: 16,
+                                  width: 200,
+                                  paddingLeft: "10px !important",
+                                  paddingRight: "10px !important",
+                                  fontVariantNumeric: "tabular-nums"
+                                }}
+                              >
+                                <Typography variant="subtitle2" sx={{ whiteSpace: "nowrap", lineHeight: 1 }} gutterBottom>{row.Travel}</Typography>
+                              </TableCell>
+                            )
+                              :
+                              <TableCell
+                                sx={{
+                                  textAlign: "center",
+                                  color: "lightgray",
+                                  paddingLeft: "10px !important",
+                                  paddingRight: "10px !important",
+                                  fontVariantNumeric: "tabular-nums"
+                                }}
+                              >
+                                -
+                              </TableCell>
+                          ))
+                        }
+                      </TableRow>
+                    )
+                  ))
               }
             </TableBody>
             <TableFooter

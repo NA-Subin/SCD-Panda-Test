@@ -603,6 +603,7 @@ const UpdateReport = (props) => {
             DateEnd: ticket.DateEnd,
             CompanyName: ticket.CompanyName,
             CompanyAddress: ticket.CompanyAddress,
+            CodeIDCustomer: ticket.CodeID,
             // DateStart: ticket.Date,
             // DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime)
         };
@@ -682,6 +683,7 @@ const UpdateReport = (props) => {
             DateEnd: ticket.DateEnd,
             CompanyName: ticket.CompanyName,
             CompanyAddress: ticket.CompanyAddress,
+            CodeIDCustomer: ticket.CodeID,
             // DateStart: ticket.Date,
             // DateEnd: calculateDueDate(ticket.Date, ticket.CreditTime)
         };

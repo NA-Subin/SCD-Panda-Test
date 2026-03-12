@@ -539,6 +539,7 @@ const Report = ({ openNavbar }) => {
 
       if (!acc[key]) {
         acc[key] = {
+          CodeID: item.CodeID,
           CompanyName: item.CompanyName,
           CompanyAddress: item.CompanyAddress,
           TicketAddress: item.Address,
@@ -740,6 +741,7 @@ const Report = ({ openNavbar }) => {
 
       if (!acc[key]) {
         acc[key] = {
+          CodeID: item.CodeID,
           CompanyName: item.CompanyName,
           CompanyAddress: item.CompanyAddress,
           TicketAddress: item.Address,
@@ -986,6 +988,7 @@ const Report = ({ openNavbar }) => {
 
       if (!acc[key]) {
         acc[key] = {
+          CodeID: item.CodeID,
           CompanyName: item.CompanyName,
           CompanyAddress: item.CompanyAddress,
           TicketAddress: item.Address,

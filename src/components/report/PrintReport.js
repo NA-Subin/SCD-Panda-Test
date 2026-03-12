@@ -509,7 +509,7 @@ const PrintReport = () => {
                       </Box>
                       <Box display="flex" alignItems="center" justifyContent="left" marginTop={0.5} >
                         <Typography variant="subtitle2"><b>เลขประจำตัวผู้เสียภาษีอากร:</b></Typography>
-                        <Typography variant="subtitle2" marginLeft={1}>{formatTaxID(invoiceData?.CardID)}</Typography>
+                        <Typography variant="subtitle2" marginLeft={1}>{formatTaxID(invoiceData?.CodeIDCustomer)}</Typography>
                       </Box>
                     </Box>
                   </Grid>

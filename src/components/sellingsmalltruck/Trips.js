@@ -90,6 +90,9 @@ const TripsSmallTruck = ({ openNavbar }) => {
 
     const ticketsdetail = Object.values(tickets || {})
     console.log("ticketsdetail : ", ticketsdetail.filter((row) => row.CustomerType === "ตั๋วรถเล็ก"))
+    console.log("ticketsdetails : ", ticketsdetail.filter((row) => row.TicketName === "35:S.NP..10 ล้อ นาครา 70-1662"));
+    console.log("1.tickets : ", ticketsdetail);
+    console.log("2.Trips : ", trips.filter((item) => item.TruckType === "รถเล็ก"));
     const result = trips.filter(item =>
         item.TruckType === "รถเล็ก" &&
         item.StatusTrip !== "ยกเลิก" &&
