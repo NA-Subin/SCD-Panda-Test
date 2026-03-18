@@ -305,7 +305,7 @@ const Tickets = ({ openNavbar }) => {
 
     const handleDelete = () => {
         ShowConfirm(
-            `ต้องการยกเลิกตั๋วน้ำมันที่ ${rowIndex} ใช่หรือไม่`,
+            `ต้องการยกเลิกตั๋วน้ำมันที่ ${selectedRowId} ใช่หรือไม่`,
             () => {
                 database
                     .ref("/customers/tickets/")
@@ -326,7 +326,7 @@ const Tickets = ({ openNavbar }) => {
                     });
             },
             () => {
-                console.log(`ยกเลิกลบตั๋วน้ำมันที่ ${rowIndex}`);
+                console.log(`ยกเลิกลบตั๋วน้ำมันที่ ${selectedRowId}`);
             }
         )
     }
@@ -636,6 +636,51 @@ const Tickets = ({ openNavbar }) => {
                         </TableBody>
                     </Table>
                 </TableContainer>
+                {
+                    ticket.length <= 10 ? null :
+                        <TablePagination
+                            rowsPerPageOptions={[10, 25, 30]}
+                            component="div"
+                            count={ticket.length}
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            onPageChange={handleChangePage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                            labelRowsPerPage="เลือกจำนวนแถวที่ต้องการ:"  // เปลี่ยนข้อความตามที่ต้องการ
+                            labelDisplayedRows={({ from, to, count }) =>
+                                `${from} - ${to} จากทั้งหมด ${count !== -1 ? count : `มากกว่า ${to}`}`
+                            }
+                            sx={{
+                                overflow: "hidden", // ซ่อน scrollbar ที่อาจเกิดขึ้น
+                                borderBottomLeftRadius: 5,
+                                borderBottomRightRadius: 5,
+                                '& .MuiTablePagination-toolbar': {
+                                    backgroundColor: "lightgray",
+                                    height: "20px", // กำหนดความสูงของ toolbar
+                                    alignItems: "center",
+                                    paddingY: 0, // ลด padding บนและล่างให้เป็น 0
+                                    overflow: "hidden", // ซ่อน scrollbar ภายใน toolbar
+                                    fontWeight: "bold", // กำหนดให้ข้อความใน toolbar เป็นตัวหนา
+                                },
+                                '& .MuiTablePagination-select': {
+                                    paddingY: 0,
+                                    fontWeight: "bold", // กำหนดให้ข้อความใน select เป็นตัวหนา
+                                },
+                                '& .MuiTablePagination-actions': {
+                                    '& button': {
+                                        paddingY: 0,
+                                        fontWeight: "bold", // กำหนดให้ข้อความใน actions เป็นตัวหนา
+                                    },
+                                },
+                                '& .MuiTablePagination-displayedRows': {
+                                    fontWeight: "bold", // กำหนดให้ข้อความแสดงผลตัวเลขเป็นตัวหนา
+                                },
+                                '& .MuiTablePagination-selectLabel': {
+                                    fontWeight: "bold", // กำหนดให้ข้อความ label ของ select เป็นตัวหนา
+                                }
+                            }}
+                        />
+                }
             </Box>
             <Dialog
                 open={!!openCustomer}

@@ -288,28 +288,56 @@ const Setting = () => {
   };
 
 
-  const handleSaveCompany = () => {
-    const updatedData = {
-      Name: newName,
-      Address: newAddress,
-      Lat: newLat,
-      Lng: newLng,
-      CardID: newCardID,
-    };
+  const handleSaveCompany = async () => {
+    try {
+      const companyRef = database.ref("company").child(Number(companyID) - 1);
 
-    database
-      .ref("company")
-      .child(Number(companyID) - 1)
-      .update(updatedData)
-      .then(() => {
-        ShowSuccess("อัปเดตข้อมูลสำเร็จ");
-        setUpdate(true);
-      })
-      .catch((err) => {
-        ShowError("เกิดข้อผิดพลาดในการอัปเดต");
-        console.error(err);
-      });
-  }
+      const snapshot = await companyRef.once("value");
+      const companyData = snapshot.val();
+
+      const today = new Date();
+      const dateStr = today.toLocaleDateString("en-GB");
+
+      const updatedData = {
+        Name: newName,
+        Address: newAddress,
+        Lat: newLat,
+        Lng: newLng,
+        CardID: newCardID,
+        DateStart: dateStr
+      };
+
+      const isChanged =
+        companyData.CardID !== newCardID ||
+        companyData.Name !== newName ||
+        companyData.Address !== newAddress;
+
+      if (isChanged) {
+        const history = companyData.History || {};
+        const nextIndex = Object.keys(history).length;
+
+        const oldHistory = {
+          id: nextIndex,
+          Name: companyData.Name,
+          Address: companyData.Address,
+          CardID: companyData.CardID,
+          DateStart: companyData.DateStart || "",
+          DateEnd: dateStr,
+        };
+
+        await companyRef.child("History").child(nextIndex).set(oldHistory);
+      }
+
+      await companyRef.update(updatedData);
+
+      ShowSuccess("อัปเดตข้อมูลสำเร็จ");
+      setUpdate(true);
+
+    } catch (err) {
+      ShowError("เกิดข้อผิดพลาดในการอัปเดต");
+      console.error(err);
+    }
+  };
 
   const handleSavePosition = () => {
     database
@@ -583,7 +611,7 @@ const Setting = () => {
 
                                             <TextField
                                               variant="standard"
-                                              value={update ? newName : row.Name}
+                                              value={!update ? newName : row.Name}
                                               onChange={(e) => setNewName(e.target.value)}
                                               disabled={update}
                                               fullWidth
@@ -609,7 +637,7 @@ const Setting = () => {
 
                                             <TextField
                                               variant="standard"
-                                              value={update ? newCardID : row.CardID}
+                                              value={!update ? newCardID : row.CardID}
                                               onChange={(e) => setNewCardID(e.target.value)}
                                               disabled={update}
                                               fullWidth
@@ -635,7 +663,7 @@ const Setting = () => {
 
                                             <TextField
                                               variant="standard"
-                                              value={update ? newAddress.no : row.Address.no}
+                                              value={!update ? newAddress.no : row.Address.no}
                                               onChange={(e) => setNewAddress({ ...newAddress, no: e.target.value })}
                                               disabled={update}
                                               fullWidth
@@ -661,7 +689,7 @@ const Setting = () => {
 
                                             <TextField
                                               variant="standard"
-                                              value={update ? newAddress.village : row.Address.village}
+                                              value={!update ? newAddress.village : row.Address.village}
                                               onChange={(e) => setNewAddress({ ...newAddress, village: e.target.value })}
                                               disabled={update}
                                               fullWidth
@@ -687,7 +715,7 @@ const Setting = () => {
 
                                             <TextField
                                               variant="standard"
-                                              value={update ? newAddress.road : row.Address.road}
+                                              value={!update ? newAddress.road : row.Address.road}
                                               onChange={(e) => setNewAddress({ ...newAddress, road: e.target.value })}
                                               disabled={update}
                                               fullWidth
@@ -713,7 +741,7 @@ const Setting = () => {
 
                                             <TextField
                                               variant="standard"
-                                              value={update ? newAddress.subDistrict : row.Address.subDistrict}
+                                              value={!update ? newAddress.subDistrict : row.Address.subDistrict}
                                               onChange={(e) => setNewAddress({ ...newAddress, subDistrict: e.target.value })}
                                               disabled={update}
                                               fullWidth
@@ -739,7 +767,7 @@ const Setting = () => {
 
                                             <TextField
                                               variant="standard"
-                                              value={update ? newAddress.district : row.Address.district}
+                                              value={!update ? newAddress.district : row.Address.district}
                                               onChange={(e) => setNewAddress({ ...newAddress, district: e.target.value })}
                                               disabled={update}
                                               fullWidth
@@ -765,7 +793,7 @@ const Setting = () => {
 
                                             <TextField
                                               variant="standard"
-                                              value={update ? newAddress.province : row.Address.province}
+                                              value={!update ? newAddress.province : row.Address.province}
                                               onChange={(e) => setNewAddress({ ...newAddress, province: e.target.value })}
                                               disabled={update}
                                               fullWidth
@@ -791,7 +819,7 @@ const Setting = () => {
 
                                             <TextField
                                               variant="standard"
-                                              value={update ? newAddress.zipCode : row.Address.zipCode}
+                                              value={!update ? newAddress.zipCode : row.Address.zipCode}
                                               onChange={(e) => setNewAddress({ ...newAddress, zipCode: e.target.value })}
                                               disabled={update}
                                               fullWidth
@@ -817,7 +845,7 @@ const Setting = () => {
 
                                             <TextField
                                               variant="standard"
-                                              value={update ? newLat : row.Lat}
+                                              value={!update ? newLat : row.Lat}
                                               onChange={(e) => setNewLat(e.target.value)}
                                               disabled={update}
                                               fullWidth
@@ -843,7 +871,7 @@ const Setting = () => {
 
                                             <TextField
                                               variant="standard"
-                                              value={update ? newLng : row.Lng}
+                                              value={!update ? newLng : row.Lng}
                                               onChange={(e) => setNewLng(e.target.value)}
                                               disabled={update}
                                               fullWidth

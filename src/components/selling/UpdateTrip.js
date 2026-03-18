@@ -926,15 +926,18 @@ const UpdateTrip = (props) => {
     const getTickets = () => {
         const tickets = [
             { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: 1, Rate1: 0, Rate2: 0, Rate3: 0, CustomerType: "ตั๋วเปล่า" },  // เพิ่มตั๋วเปล่าเข้าไป
-            ...[...ticketsA].map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" }))
+            ...[...ticketsA]
+                .filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ")
+                .map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" }))
                 .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' })),
 
-            ...[...ticketsPS].map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" }))
+            ...[...ticketsPS]
                 .filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ")
+                .map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" }))
                 .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' })),
 
             ...[...ticketsT]
-                .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
+                .filter((item) => (item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ") && item.SystemStatus !== "ไม่อยู่ในระบบ")
                 .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
         ];
@@ -949,11 +952,12 @@ const UpdateTrip = (props) => {
                 .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' })),
 
             ...[...ticketsT]
-                .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
+                .filter((item) => (item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ") && item.SystemStatus !== "ไม่อยู่ในระบบ")
                 .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
 
-            ...[...ticketsB].filter((item) => item.Status === "ลูกค้าประจำ")
+            ...[...ticketsB]
+                .filter((item) => item.Status === "ลูกค้าประจำ" && item.SystemStatus !== "ไม่อยู่ในระบบ")
                 .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" }))
         ];

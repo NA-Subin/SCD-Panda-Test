@@ -383,7 +383,7 @@ const TicketsTransport = ({ openNavbar }) => {
 
     const handleDelete = () => {
         ShowConfirm(
-            `ต้องการยกเลิกตั๋วรับจ้างขนส่งที่ ${rowIndex} ใช่หรือไม่`,
+            `ต้องการยกเลิกตั๋วรับจ้างขนส่งที่ ${selectedRowId} ใช่หรือไม่`,
             () => {
                 database
                     .ref("/customers/transports/")
@@ -404,7 +404,7 @@ const TicketsTransport = ({ openNavbar }) => {
                     });
             },
             () => {
-                console.log(`ยกเลิกลบตั๋วรับจ้างขนส่งที่ ${rowIndex}`);
+                console.log(`ยกเลิกลบตั๋วรับจ้างขนส่งที่ ${selectedRowId}`);
             }
         );
     }

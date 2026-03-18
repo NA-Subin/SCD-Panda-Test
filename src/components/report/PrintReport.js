@@ -467,8 +467,7 @@ const PrintReport = () => {
                       <React.Fragment>
                         <Typography variant="h6" fontWeight="bold" gutterBottom>
                           {
-                            invoiceData?.Company === "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" ? "บริษัท นาครา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
-                              : "ห้างหุ้นส่วน พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
+                            invoiceData?.Company
                           }
                         </Typography>
                         <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>
@@ -930,14 +929,19 @@ const PrintReport = () => {
                     <Grid container spacing={2}>
                       <Grid item xs={8}>
                         <Typography variant="subtitle2" fontWeight="bold" gutterBottom>โอนเงินเข้าบัญชี
-                          {
+                          {/* {
                             invoiceData?.Company === "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" ? "บริษัท นาครา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
                               : "ห้างหุ้นส่วน พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
-                          }
+                          } */}
+                          {invoiceData?.Company}
                         </Typography>
                         <Typography variant="subtitle2" gutterBottom>
-                          {
+                          {/* {
                             invoiceData?.Company === "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" ? "1. KBANK สาขา เฟสติเวล 663-1-00798-6"
+                              : "1. KBANK สาขา เฟสติเวล 663-1-00629-7"
+                          } */}
+                          {
+                            invoiceData?.CompanyID === 2 ? "1. KBANK สาขา เฟสติเวล 663-1-00798-6"
                               : "1. KBANK สาขา เฟสติเวล 663-1-00629-7"
                           }
                         </Typography>

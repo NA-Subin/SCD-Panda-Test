@@ -76,7 +76,21 @@ const TicketsSmallTruck = ({ openNavbar }) => {
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     const { customersmalltruck, company, small } = useBasicData();
-    const ticket = Object.values(customersmalltruck || {});
+    const ticket = Object.values(customersmalltruck || {}).map((item) => {
+
+        const companies = Object.values(company || {}).find((c) =>
+            c.id === (
+                item.Company && item.Company !== "0:ไม่มี"
+                    ? Number(item.Company.split(":")[0])
+                    : null
+            )
+        );
+
+        return {
+            ...item,
+            CompanyTicket: companies?.Name || ""
+        };
+    });
     const companyDetail = Object.values(company || {});
     const registrations = Object.values(small || {});
 
@@ -177,7 +191,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
     const [registration, setRegistration] = useState("ไม่มี");
 
     // ฟังก์ชันสำหรับกดแก้ไข
-    const handleSetting = (index, rowId, statusCompany, status, rowCreditTime, newname, newCompany, newregistrantionCheck, newregistraion
+    const handleSetting = (index, rowId, statusCompany, status, rowCreditTime, newname, newCompany, newregistrantionCheck, newregistraion, newCompanyTicket
         // , rowRate1, rowRate2, rowRate3
     ) => {
         setRowId(index + 1);
@@ -201,7 +215,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
         setRegistration(newregistraion);
         setCreditTimeEdit(rowCreditTime);
         setName(newname);
-        setCompanies(newCompany || "ไม่มี");
+        setCompanies((newCompany && newCompany !== "0:ไม่มี") ? `${Number(newCompany.split(":")[0])}:${newCompanyTicket}` : "ไม่มี");
         // เซ็ตค่า RateEdit เป็นค่าปัจจุบันของ row ที่เลือก
         // setRate1Edit(rowRate1);
         // setRate2Edit(rowRate2);
@@ -353,7 +367,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
         setCredit(row.Credit);
         setBill(row.Bill);
         setType(row.Type);
-        setCompanies(row.Company ? row.Company : "ไม่มี");
+        setCompanies((row.Company && row.Company !== "0:ไม่มี") ? `${row.Company.split(":")[0]}:${row.CompanyTicket}` : "ไม่มี");
         setRegistrationChecked(row.RegistrationCheck ?? false);
         setRegistration(row.Registration ?? "ไม่มี");
         if (row.StatusCompany === "อยู่บริษัทในเครือ") {
@@ -415,7 +429,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
 
     const handleDelete = () => {
         ShowConfirm(
-            `ต้องการยกเลิกตั๋วรถเล็กที่ ${rowId} ใช่หรือไม่`,
+            `ต้องการยกเลิกตั๋วรถเล็กที่ ${selectedRowId} ใช่หรือไม่`,
             () => {
                 database
                     .ref("/customers/smalltruck/")
@@ -436,7 +450,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                     });
             },
             () => {
-                console.log(`ยกเลิกลบตั๋วรถเล็กที่ ${rowId}`);
+                console.log(`ยกเลิกลบตั๋วรถเล็กที่ ${selectedRowId}`);
             }
         )
     }
@@ -883,7 +897,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         {
                                                             !setting || row.id !== selectedRowId ?
-                                                                ((row.Company) ? (row.Company === "ไม่มี") ? "ไม่มี" : row.Company.split(":")[1] : "ไม่มี")
+                                                                ((row.Company) ? (row.Company === "ไม่มี") ? "ไม่มี" : row.CompanyTicket : "ไม่มี")
                                                                 :
                                                                 <Paper sx={{ width: "100%" }}>
                                                                     <TextField
@@ -936,7 +950,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                                                                     startIcon={<EditNoteIcon />}
                                                                     size="small"
                                                                     sx={{ height: "25px" }}
-                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.CreditTime, row.Name, row.Company, row.RegistrationCheck, row.Registration)}
+                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.CreditTime, row.Name, row.Company, row.RegistrationCheck, row.Registration, row.CompanyTicket)}
                                                                 >
                                                                     แก้ไข
                                                                 </Button>
@@ -1321,7 +1335,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                                                     <TableCell sx={{ textAlign: "center" }}>
                                                         {
                                                             !setting || row.id !== selectedRowId ?
-                                                                row.Company ? row.Company.split(":")[1] : "ไม่มี"
+                                                                row.Company ? row.CompanyTicket : "ไม่มี"
                                                                 :
                                                                 <Paper sx={{ width: "100%" }}>
                                                                     <TextField
@@ -1374,7 +1388,7 @@ const TicketsSmallTruck = ({ openNavbar }) => {
                                                                     startIcon={<EditNoteIcon />}
                                                                     size="small"
                                                                     sx={{ height: "25px" }}
-                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.CreditTime, row.Name, row.Company, row.RegistrationCheck, row.Registration)}
+                                                                    onClick={() => handleSetting(index, row.id, row.StatusCompany, row.Status, row.CreditTime, row.Name, row.Company, row.RegistrationCheck, row.Registration, row.CompanyTicket)}
                                                                 >
                                                                     แก้ไข
                                                                 </Button>

@@ -1227,7 +1227,7 @@ const InsertTrips = () => {
 
                     if (!Number.isInteger(id) || id <= 0) return null; // ❌ กัน 0 และ NaN
 
-                    return id-1;
+                    return id - 1;
                 };
 
                 const regId = getIdFromValue(registration);
@@ -1419,10 +1419,14 @@ const InsertTrips = () => {
 
         const tickets = [
             { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: "1", Rate1: 0, Rate2: 0, Rate3: 0, CustomerType: "ตั๋วเปล่า" },
-            ...ticketsA.map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" })),
-            ...ticketsPS.map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
+            ...ticketsA
+                .filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ")
+                .map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" })),
+            ...ticketsPS
+                .filter((item) => item.SystemStatus !== "ไม่อยู่ในระบบ")
+                .map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
             ...ticketsT
-                .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
+                .filter((item) => (item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ") && item.SystemStatus !== "ไม่อยู่ในระบบ")
                 .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
             ...ticketsB.filter((t) => t.RegistrationCheck === true && t.Registration !== "" && t.Registration !== undefined).map((item) => ({ ...item })),
         ];
@@ -1445,7 +1449,7 @@ const InsertTrips = () => {
             //     .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
             //     .map((item) => ({ ...item })),
             ...ticketsS
-                .filter((item) => item.Status === "ลูกค้าประจำ")
+                .filter((item) => item.Status === "ลูกค้าประจำ" && item.SystemStatus !== "ไม่อยู่ในระบบ")
                 .sort((a, b) => {
                     const nameA = (a.Name || "").trim();
                     const nameB = (b.Name || "").trim();

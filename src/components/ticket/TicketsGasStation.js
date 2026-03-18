@@ -195,7 +195,7 @@ const TicketsGasStation = (props) => {
 
     const handleDelete = () => {
         ShowConfirm(
-            `ต้องการยกเลิกตั๋วปั้มที่ ${index + 1} ใช่หรือไม่`,
+            `ต้องการยกเลิกตั๋วปั้มที่ ${row.id} ใช่หรือไม่`,
             () => {
                 database
                     .ref("/customers/gasstations/")
@@ -204,7 +204,7 @@ const TicketsGasStation = (props) => {
                         SystemStatus: "ไม่อยู่ในระบบ"
                     }) // อัพเดท values ทั้งหมด
                     .then(() => {
-                        ShowSuccess(`ลบข้อตั๋วปั้มลำดับที่ ${index + 1} สำเร็จ`);
+                        ShowSuccess(`ลบข้อตั๋วปั้มลำดับที่ ${row.id} สำเร็จ`);
                         console.log("Data updated successfully");
                         setOpen(false);
                     })
@@ -214,7 +214,7 @@ const TicketsGasStation = (props) => {
                     });
             },
             () => {
-                console.log(`ยกเลิกลบตั๋วปั้มที่ ${index + 1}`);
+                console.log(`ยกเลิกลบตั๋วปั้มที่ ${row.id}`);
             }
         )
     }

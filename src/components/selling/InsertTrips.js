@@ -1427,6 +1427,7 @@ const InsertTrips = () => {
             { Name: "ตั๋วเปล่า", TicketName: "ตั๋วเปล่า", id: 1, Rate1: 0, Rate2: 0, Rate3: 0, CustomerType: "ตั๋วเปล่า" },
 
             ...[...ticketsA]
+                .filter((row) => row.SystemStatus !== "ไม่อยู่ในระบบ")
                 .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, CustomerType: "ตั๋วน้ำมัน" })),
 
@@ -1436,7 +1437,7 @@ const InsertTrips = () => {
                 .map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
 
             ...[...ticketsT]
-                .filter((item) => item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ")
+                .filter((item) => (item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ") && (item.SystemStatus !== "ไม่อยู่ในระบบ"))
                 .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
         ];
@@ -1467,11 +1468,11 @@ const InsertTrips = () => {
                 .map((item) => ({ ...item, CustomerType: "ตั๋วปั้ม" })),
 
             ...[...ticketsT]
-                .filter((item) => item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ")
+                .filter((item) => (item.Status === "ผู้รับ" || item.Status === "ตั๋ว/ผู้รับ") && item.SystemStatus !== "ไม่อยู่ในระบบ")
                 .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
 
-            ...[...ticketsB].filter((item) => item.Status === "ลูกค้าประจำ")
+            ...[...ticketsB].filter((item) => item.Status === "ลูกค้าประจำ" && item.SystemStatus !== "ไม่อยู่ในระบบ")
                 .sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: 'base' }))
                 .map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" })) // รถใหญ่ใช้ ticketsB
         ];
@@ -1694,9 +1695,9 @@ const InsertTrips = () => {
                                                     {
                                                         option.Type === "รถบริษัท" ?
                                                             <Typography fontSize="16px">{`${option.Driver.split(":")[1]} : ${option.RegHead}${option.RegTail &&
-                                                                    option.RegTail !== "0:ไม่มี"
-                                                                    ? `/${option.RegTail.split(":")[1]}`
-                                                                    : ""
+                                                                option.RegTail !== "0:ไม่มี"
+                                                                ? `/${option.RegTail.split(":")[1]}`
+                                                                : ""
                                                                 }`}</Typography>
                                                             :
                                                             <Typography fontSize="16px">{`${option.Name}  ${option.Registration === "ไม่มี" ? "" : `:${option.Registration}`}`}</Typography>
@@ -2348,10 +2349,10 @@ const InsertTrips = () => {
                                                 );
                                                 return selectedItem && selectedItem.Type === "รถบริษัท"
                                                     ? `${selectedItem.Driver ? selectedItem.Driver.split(":")[1] : ""} : ${selectedItem.RegHead ? selectedItem.RegHead : ""}${selectedItem.RegTail &&
-                                                                    selectedItem.RegTail !== "0:ไม่มี"
-                                                                    ? `/${selectedItem.RegTail.split(":")[1]}`
-                                                                    : ""
-                                                                }`
+                                                        selectedItem.RegTail !== "0:ไม่มี"
+                                                        ? `/${selectedItem.RegTail.split(":")[1]}`
+                                                        : ""
+                                                    }`
                                                     : selectedItem && selectedItem.Type === "รถรับจ้างขนส่ง"
                                                         ? `${selectedItem.Name ? selectedItem.Name : ""} ${selectedItem.Registration === "ไม่มี" ? "" : `:${selectedItem.Registration}`}`
                                                         : "";

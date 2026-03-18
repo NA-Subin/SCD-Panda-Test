@@ -99,6 +99,9 @@ const InsertCompany = () => {
     console.log("Company : ", companyDetail);
 
     const handlePost = () => {
+        const today = new Date();
+        const dateStr = today.toLocaleDateString("en-GB");
+
         database
             .ref("company")
             .child(companyDetail.length)
@@ -115,6 +118,7 @@ const InsertCompany = () => {
                     province: province === "-" ? "" : province,
                     zipCode: zipCode === "-" ? "" : zipCode,
                 },
+                DateStart: dateStr,
                 lat: lat,
                 lng: lng,
             })

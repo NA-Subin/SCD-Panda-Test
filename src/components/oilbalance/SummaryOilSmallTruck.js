@@ -308,7 +308,7 @@ const SummaryOilBalanceSmallTruck = ({ openNavbar }) => {
                 driverReg: `${row.Driver.split(":")[1]}/${row.Registration.split(":")[1]}`,
                 ticket: row.TicketName.split(":")[1],
                 product: row.ProductName,
-                volume: Number(row.VolumeProduct) * 1000,
+                volume: Number(row.VolumeProduct),
                 rate: Number(row.RateOil),
                 amount: Number(row.Amount),
             };
@@ -328,7 +328,7 @@ const SummaryOilBalanceSmallTruck = ({ openNavbar }) => {
         // 5️⃣ Footer row รวมค่า
         const footerRow = worksheet.addRow({
             ticket: "รวม",
-            volume: sortedOrderDetail.reduce((acc, r) => acc + Number(r.VolumeProduct) * 1000, 0),
+            volume: sortedOrderDetail.reduce((acc, r) => acc + Number(r.VolumeProduct), 0),
             amount: sortedOrderDetail.reduce((acc, r) => acc + Number(r.Amount), 0),
         });
 

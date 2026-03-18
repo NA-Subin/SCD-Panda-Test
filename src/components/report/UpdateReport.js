@@ -455,6 +455,68 @@ const UpdateReport = (props) => {
 
     console.log("processedTickets  : ", processedTickets);
 
+    const parseDate = (dateStr) => {
+        if (!dateStr) return null;
+        const [d, m, y] = dateStr.split("/");
+        return new Date(`${y}-${m}-${d}`);
+    };
+
+    const getCompanyByDate = (company, date) => {
+
+        const start = parseDate(company?.DateStart);
+
+        if (start && date < start && company?.History) {
+
+            const histories = Object.values(company.History);
+
+            const match = histories.find((h) => {
+                const s = parseDate(h.DateStart);
+                const e = parseDate(h.DateEnd);
+
+                return (!s || date >= s) && (!e || date <= e);
+            });
+
+            if (match) {
+                return {
+                    ...match,
+                    Name: company?.id === 3
+                        ? "หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)"
+                        : match.Name
+                };
+            }
+
+            // กรณีเข้าเงื่อนไข date < DateStart แต่ไม่เจอ history
+            if (company?.id === 3) {
+                return {
+                    ...company,
+                    Name: "บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
+                };
+            }
+        }
+
+        // กรณีใช้ข้อมูลปัจจุบัน
+        if (company?.id === 3) {
+            return {
+                ...company,
+                Name: "บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
+            };
+        }
+
+        return company;
+    };
+
+    const getInvoiceDate = (t) => {
+
+        const invoice = invoiceDetail.find(row =>
+            String(row.TicketNo) === String(ticket?.No) &&
+            String(row.TicketName) === String(ticket?.TicketName) &&
+            String(row.Transport.split(":")[0]) === String(t.Company.split(":")[0]) &&
+            row.TicketType !== "ตั๋วรถใหญ่" && row.TicketType !== "ตั๋วรถเล็ก"
+        );
+
+        return invoice?.DateStart ? parseDate(invoice.DateStart) : new Date();
+    };
+
     // แยก processedTickets ออกเป็น 2 ส่วนตาม Company และเริ่ม No ใหม่ให้แต่ละส่วน
     const splitByCompany = (processedTickets) => {
         const company1Tickets = processedTickets.filter(row => row.Company.split(":")[0] === "2");
@@ -463,14 +525,23 @@ const UpdateReport = (props) => {
         // รีเซ็ต No ให้กับแต่ละส่วน
         const resetNo = (tickets) => {
             return tickets.map((row, index) => {
+
                 const companyCode = row.Company.split(":")[0];
-                const companyName = companyCode === "2"
-                    ? "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)"
-                    : "หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)";
+
+                const company = companies.find((c) => String(c.id) === companyCode);
+
+                const invoiceDate = getInvoiceDate(row);
+
+                const companyData = getCompanyByDate(company, invoiceDate);
+
+
                 return {
                     ...row,
                     No: index + 1,
-                    Company: `${companyCode}:${companyName}`,
+                    companyData: companyData,
+                    Company: `${company?.id}:${companyData?.Name || ""}`,
+                    Address: companyData?.Address || "",
+                    CardID: companyData?.CardID || ""
                 };
             });
         };
@@ -523,11 +594,11 @@ const UpdateReport = (props) => {
     const total1 = calculateTotal(company1Tickets);
     const total2 = calculateTotal(company2Tickets);
 
-    console.log("บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)", company1Tickets);
-    console.log("หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)", company2Tickets);
+    console.log("บริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่)", company1Tickets);
+    console.log("บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)", company2Tickets);
 
-    console.log("Total for บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)", total1);
-    console.log("Total for หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)", total2);
+    console.log("Total for บริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่)", total1);
+    console.log("Total for บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)", total2);
 
     console.log("invoiceDetail : ", invoiceDetail);
     console.log("ticket No : ", ticket?.No);
@@ -535,17 +606,30 @@ const UpdateReport = (props) => {
     console.log("Company 1 : ", company1Tickets[0]?.Company);
     console.log("Company 2 : ", company2Tickets[0]?.Company);
 
-    const invoices1 = invoiceDetail.filter((row) =>
+    const invoices = invoiceDetail.filter((row) =>
         String(row.TicketNo) === String(ticket?.No) &&
-        String(row.TicketName) === String(ticket?.TicketName) &&
-        String(row.Transport) === String(company1Tickets[0]?.Company)
+        String(row.TicketName) === String(ticket?.TicketName)
     );
 
-    const invoices2 = invoiceDetail.filter((row) =>
-        String(row.TicketNo) === String(ticket?.No) &&
-        String(row.TicketName) === String(ticket?.TicketName) &&
-        String(row.Transport) === String(company2Tickets[0]?.Company)
+    const invoices1 = invoices.filter(
+        row => row.Transport?.split(":")[0] === (company1Tickets[0]?.Company.split(":")[0])
     );
+
+    const invoices2 = invoices.filter(
+        row => row.Transport?.split(":")[0] === (company2Tickets[0]?.Company.split(":")[0])
+    );
+
+    // const invoices1 = invoiceDetail.filter((row) =>
+    //     String(row.TicketNo) === String(ticket?.No) &&
+    //     String(row.TicketName) === String(ticket?.TicketName) &&
+    //     String(row.Transport) === String(company1Tickets[0]?.Company)
+    // );
+
+    // const invoices2 = invoiceDetail.filter((row) =>
+    //     String(row.TicketNo) === String(ticket?.No) &&
+    //     String(row.TicketName) === String(ticket?.TicketName) &&
+    //     String(row.Transport) === String(company2Tickets[0]?.Company)
+    // );
 
     console.log("invoices1 : ", invoices1);
     console.log("invoices2 : ", invoices2);
@@ -591,12 +675,14 @@ const UpdateReport = (props) => {
         const invoiceData = {
             Report: company1Tickets,
             Total: total1,
+            CompanyID: Number(company1Tickets[0]?.Company.split(":")[0]),
             Company: company1Tickets[0]?.Company.split(":")[1],
             Address: company1Tickets[0]?.CompanyAddress,
             CardID: company1Tickets[0]?.CardID,
             Phone: company1Tickets[0]?.Phone,
             Code: Code,
             Date: invoices1[0]?.DateStart ?? dayjs(new Date).format("DD/MM/YYYY"),
+            Transport: invoices1[0]?.Transport,
             TicketName: ticket.TicketName,
             TicketAddress: ticket.TicketAddress,
             DateStart: ticket.DateStart,
@@ -671,12 +757,14 @@ const UpdateReport = (props) => {
         const invoiceData = {
             Report: company2Tickets,
             Total: total2,
+            CompanyID: Number(company2Tickets[0]?.Company.split(":")[0]),
             Company: company2Tickets[0]?.Company.split(":")[1],
             Address: company2Tickets[0]?.CompanyAddress,
             CardID: company2Tickets[0]?.CardID,
             Phone: company2Tickets[0]?.Phone,
             Code: Code,
-            Date: invoices2[0]?.DateStart,
+            Date: invoices2[0]?.DateStart ?? dayjs(new Date).format("DD/MM/YYYY"),
+            Transport: invoices2[0]?.Transport,
             TicketName: ticket.TicketName,
             TicketAddress: ticket.TicketAddress,
             DateStart: ticket.DateStart,
@@ -986,13 +1074,13 @@ const UpdateReport = (props) => {
                     {
                         windowWidth >= 900 &&
                         <Grid item md={5} xs={12}>
-                            <Typography variant='subtitle1' fontWeight="bold" sx={{ marginBottom: -3, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*พิมพ์ใบวางบิลของบจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่) ตรงนี้*</Typography>
+                            <Typography variant='subtitle1' fontWeight="bold" sx={{ marginBottom: -3, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*พิมพ์ใบวางบิลของบริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่) ตรงนี้*</Typography>
                         </Grid>
                     }
 
                     <Grid item md={5.5} xs={12}>
                         <Typography variant="subtitle1" sx={{ marginTop: 1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
-                            บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)
+                            บริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่)
                         </Typography>
                     </Grid>
                     <Grid item md={2} xs={12}>
@@ -1728,12 +1816,12 @@ const UpdateReport = (props) => {
                     {
                         windowWidth >= 900 &&
                         <Grid item md={12} xs={12}>
-                            <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "right", marginBottom: -1 }} gutterBottom>*พิมพ์ใบวางบิลของหจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่) ตรงนี้*</Typography>
+                            <Typography variant='subtitle1' fontWeight="bold" sx={{ fontSize: "12px", color: "red", textAlign: "right", marginBottom: -1 }} gutterBottom>*พิมพ์ใบวางบิลของบริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่) ตรงนี้*</Typography>
                         </Grid>
                     }
                     <Grid item md={5.5} xs={12}>
                         <Typography variant="subtitle1" sx={{ marginTop: 1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
-                            หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)
+                            บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)
                         </Typography>
                     </Grid>
                     <Grid item md={2} xs={12}>
@@ -2519,8 +2607,8 @@ const UpdateReport = (props) => {
                                                                             onChange={(e) => setTransport(e.target.value)}
                                                                         >
                                                                             <MenuItem value={transport} sx={{ fontSize: "14px", }}>{transport.split(":")[1]}</MenuItem>
-                                                                            {Number(transport.split(":")[0]) !== 2 && <MenuItem value="2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>}
-                                                                            {Number(transport.split(":")[0]) !== 3 && <MenuItem value="3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>}
+                                                                            {Number(transport.split(":")[0]) !== 2 && <MenuItem value="2:บริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่)</MenuItem>}
+                                                                            {Number(transport.split(":")[0]) !== 3 && <MenuItem value="3:บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)</MenuItem>}
                                                                         </Select>
                                                                     </FormControl>
                                                                 </Paper>
@@ -2772,8 +2860,8 @@ const UpdateReport = (props) => {
                                                             <MenuItem value={`${row.id}:${row.Name}`} sx={{ fontSize: "14px", }}>{row.Name}</MenuItem>
                                                         ))
                                                     } */}
-                                                    <MenuItem value="2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
-                                                    <MenuItem value="3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
+                                                    <MenuItem value="2:บริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่)</MenuItem>
+                                                    <MenuItem value="3:บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)</MenuItem>
                                                 </Select>
                                             </FormControl>
                                         </Paper>
