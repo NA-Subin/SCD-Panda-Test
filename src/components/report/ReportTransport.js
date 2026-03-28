@@ -95,8 +95,8 @@ const ReportTransports = ({ openNavbar }) => {
 
     const companies = [
         { value: "0:ทั้งหมด", label: "ทั้งหมด" },
-        { value: "2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)", label: "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" },
-        { value: "3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)", label: "หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" },
+        { value: "2:บริษัท นาคราปิโตรเลียม2016 จำกัด (สำนักงานใหญ่)", label: "บริษัท นาคราปิโตรเลียม2016 จำกัด (สำนักงานใหญ่)" },
+        { value: "3:บริษัท พิชยาทรานสปอร์ต จำกัด (สำนักงานใหญ่)", label: "บริษัท พิชยาทรานสปอร์ต จำกัด (สำนักงานใหญ่)" },
         { value: "4:รถรับจ้างขนส่ง", label: "รถรับจ้างขนส่ง" },
     ];
 
@@ -208,12 +208,9 @@ const ReportTransports = ({ openNavbar }) => {
     const ticketsT = Object.values(customertransports || {});
     // const trips = Object.values(trip || {});
     const registration = Object.values(reghead || {});
-    const transferMoneyDetail = Object.values(transferMoney || {}).filter(item => {
-        const itemDate = dayjs(item.DateStart, "DD/MM/YYYY");
-        return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day') && item.Status !== "ยกเลิก";
-    });
+    const transferMoneyDetail = Object.values(transferMoney || {}).filter((t) => t.Status !== "ยกเลิก");
 
-    console.log("1.Orders : ", ticket);
+    console.log("1.Orders : ", Object.values(tickets || {}).filter((t) => t.CustomerType === "-"));
     // const orderDetail = ticket
     //     .filter((item) => {
     //         const itemDate = dayjs(item.Date, "DD/MM/YYYY");
@@ -370,7 +367,7 @@ const ReportTransports = ({ openNavbar }) => {
                 return aNamePart.localeCompare(bNamePart, "th");
             });
     }, [ticket, trips, registrationH, registrationT, date, months, years]);
-    console.log("filteredOrders truck : ", filteredOrders.filter((tk) => tk.TruckType === "รถใหญ่" && tk.TruckCompany === "2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" && tk.Status !== "ยกเลิก" && tk.TicketName.split(":")[1] === "ศรีพลัง").reduce((sum, tk) => sum + (tk.ProductTotal || 0), 0));
+    console.log("filteredOrders truck : ", filteredOrders);
 
     const orderDetail = useMemo(() => {
         if (!selectedDateStart || !selectedDateEnd) return [];
@@ -408,7 +405,7 @@ const ReportTransports = ({ openNavbar }) => {
                 console.log("❌ Parse date fail:", item.Date);
             }
 
-            const isValidStatus = item.Status === "จัดส่งสำเร็จ" && item.Status !== undefined;
+            const isValidStatus = item.Status === "จัดส่งสำเร็จ" && item.Status !== undefined && item.Trip !== "ยกเลิก";
 
             let isRegistration = false;
             if (check === "0:ทั้งหมด") {
@@ -527,7 +524,7 @@ const ReportTransports = ({ openNavbar }) => {
                         return baseCondition && item.Registration === "1:ไม่มี";
                     }
 
-                    return baseCondition && t.Transport === check;
+                    return baseCondition && (t.Transport.split(":")[0]) === (check.split(":")[0]);
                 });
 
                 totalIncomingMoney = matchedTrans.reduce((sum, t) => {
@@ -562,7 +559,7 @@ const ReportTransports = ({ openNavbar }) => {
         flattenedRef.current = flattened;
 
         console.log("registraion : ", registration.filter((row) => row.Company.split(":")[0] === check.split(":")[0]));
-        console.log("flattened : ", flattened.filter((row) => row.TruckType === "รถเล็ก"));
+        console.log("flattened : ", flattened.filter((row) => row.CustomerType === "ตั๋วรับจ้างขนส่ง"));
         console.log("transferMoneyDetail.filter((t) => ", transferMoneyDetail.filter((t) => t.Status !== "ยกเลิก" && t.TicketType === "ตั๋วรับจ้างขนส่ง"))
 
         // 3. รวมข้อมูลที่มี TicketName เดียวกัน (เฉพาะที่อยู่ในช่วงวันที่ที่เลือกแล้วเท่านั้น)
@@ -972,17 +969,17 @@ const ReportTransports = ({ openNavbar }) => {
                                         <MenuItem value="0:ทั้งหมด" sx={{ fontSize: "16px" }}>
                                             ทั้งหมด
                                         </MenuItem>
-                                        <MenuItem value="2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "16px" }}>
-                                            บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)
+                                        <MenuItem value="2:บริษัท นาคราปิโตรเลียม2016 จำกัด (สำนักงานใหญ่)" sx={{ fontSize: "16px" }}>
+                                            บริษัท นาคราปิโตรเลียม2016 จำกัด (สำนักงานใหญ่)
                                         </MenuItem>
-                                        <MenuItem value="3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "16px" }}>
-                                            หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)
+                                        <MenuItem value="3:บริษัท พิชยาทรานสปอร์ต จำกัด (สำนักงานใหญ่)" sx={{ fontSize: "16px" }}>
+                                            บริษัท พิชยาทรานสปอร์ต จำกัด (สำนักงานใหญ่)
                                         </MenuItem>
                                     </TextField> */}
                                     <Autocomplete
                                         options={companies}
                                         getOptionLabel={(option) => option.label}
-                                        value={companies.find((opt) => opt.value === check) || null}
+                                        value={companies.find((opt) => (opt.value.split(":")[0]) === check.split(":")[0]) || null}
                                         onChange={(event, newValue) => setCheck(newValue ? newValue.value : "")}
                                         size="small"
                                         fullWidth
@@ -1123,11 +1120,11 @@ const ReportTransports = ({ openNavbar }) => {
                                         <MenuItem value="0:ทั้งหมด" sx={{ fontSize: "16px" }}>
                                             ทั้งหมด
                                         </MenuItem>
-                                        <MenuItem value="2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "16px" }}>
-                                            บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)
+                                        <MenuItem value="2:บริษัท นาคราปิโตรเลียม2016 จำกัด (สำนักงานใหญ่)" sx={{ fontSize: "16px" }}>
+                                            บริษัท นาคราปิโตรเลียม2016 จำกัด (สำนักงานใหญ่)
                                         </MenuItem>
-                                        <MenuItem value="3:หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "16px" }}>
-                                            หจก.พิชยา ทรานสปอร์ต (สำนักงานใหญ่)
+                                        <MenuItem value="3:บริษัท พิชยาทรานสปอร์ต จำกัด (สำนักงานใหญ่)" sx={{ fontSize: "16px" }}>
+                                            บริษัท พิชยาทรานสปอร์ต จำกัด (สำนักงานใหญ่)
                                         </MenuItem>
                                         <MenuItem value="4:รถรับจ้างขนส่ง" sx={{ fontSize: "16px" }}>
                                             รถรับจ้างขนส่ง

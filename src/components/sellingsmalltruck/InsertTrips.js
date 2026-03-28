@@ -1428,7 +1428,7 @@ const InsertTrips = () => {
             ...ticketsT
                 .filter((item) => (item.Status === "ตั๋ว" || item.Status === "ตั๋ว/ผู้รับ") && item.SystemStatus !== "ไม่อยู่ในระบบ")
                 .map((item) => ({ ...item, CustomerType: "ตั๋วรับจ้างขนส่ง" })),
-            ...ticketsB.filter((t) => t.RegistrationCheck === true && t.Registration !== "" && t.Registration !== undefined).map((item) => ({ ...item })),
+            ...ticketsB.filter((t) => t.RegistrationCheck === true && t.Registration !== "" && t.Registration !== undefined).map((item) => ({ ...item, CustomerType: "ตั๋วรถใหญ่" })),
         ];
 
         return tickets.filter((item) => item.id || item.TicketsCode);

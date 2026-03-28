@@ -349,6 +349,9 @@ const TicketsGasStation = (props) => {
                             <Paper component="form" sx={{ width: "100%" }}>
                                 <TextField size="small" fullWidth
                                     type="number"
+                                    inputProps={{
+                                        step: 0.01
+                                    }}
                                     InputLabelProps={{
                                         sx: {
                                             fontSize: '14px',
@@ -374,6 +377,9 @@ const TicketsGasStation = (props) => {
                             <Paper component="form" sx={{ width: "100%" }}>
                                 <TextField size="small" fullWidth
                                     type="number"
+                                    inputProps={{
+                                        step: 0.01
+                                    }}
                                     InputLabelProps={{
                                         sx: {
                                             fontSize: '14px',
@@ -399,6 +405,9 @@ const TicketsGasStation = (props) => {
                             <Paper component="form" sx={{ width: "100%" }}>
                                 <TextField size="small" fullWidth
                                     type="number"
+                                    inputProps={{
+                                        step: 0.01
+                                    }}
                                     InputLabelProps={{
                                         sx: {
                                             fontSize: '14px',

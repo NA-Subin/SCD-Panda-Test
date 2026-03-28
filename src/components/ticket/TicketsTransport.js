@@ -625,6 +625,9 @@ const TicketsTransport = ({ openNavbar }) => {
                                                                     <TextField
                                                                         type="number"
                                                                         fullWidth
+                                                                        inputProps={{
+                                                                            step: 0.01
+                                                                        }}
                                                                         InputLabelProps={{
                                                                             sx: {
                                                                                 fontSize: '14px',
@@ -658,6 +661,9 @@ const TicketsTransport = ({ openNavbar }) => {
                                                                     <TextField
                                                                         type="number"
                                                                         fullWidth
+                                                                        inputProps={{
+                                                                            step: 0.01
+                                                                        }}
                                                                         InputLabelProps={{
                                                                             sx: {
                                                                                 fontSize: '14px',
@@ -691,6 +697,9 @@ const TicketsTransport = ({ openNavbar }) => {
                                                                     <TextField
                                                                         type="number"
                                                                         fullWidth
+                                                                        inputProps={{
+                                                                            step: 0.01
+                                                                        }}
                                                                         InputLabelProps={{
                                                                             sx: {
                                                                                 fontSize: '14px',

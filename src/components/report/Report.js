@@ -229,6 +229,7 @@ const Report = ({ openNavbar }) => {
         CreditTime: Match?.CreditTime || 0,
         CompanyName: Match?.CompanyName || "-",
         CompanyAddress: Match?.Address || "-",
+        CodeID: Match?.CodeID || "-",
         TruckType: isContractTransport ? "รถรับจ้างขนส่ง" : TruckType
       };
     });
@@ -312,6 +313,7 @@ const Report = ({ openNavbar }) => {
         CreditTime: Match?.CreditTime || 0,
         CompanyName: Match?.CompanyName || "-",
         CompanyAddress: Match?.Address || "-",
+        CodeID: Match?.CodeID || "-",
         TruckType: isContractTransport ? "รถรับจ้างขนส่ง" : TruckType
       };
     });
@@ -395,6 +397,7 @@ const Report = ({ openNavbar }) => {
         CreditTime: Match?.CreditTime || 0,
         CompanyName: Match?.CompanyName || "-",
         CompanyAddress: Match?.Address || "-",
+        CodeID: Match?.CodeID || "-",
         TruckType: isContractTransport ? "รถรับจ้างขนส่ง" : TruckType
       };
     });
@@ -533,6 +536,16 @@ const Report = ({ openNavbar }) => {
       } else if (creditTime === 30 || creditTime === 0) {
         DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
         DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+      } else {
+        // ✅ ใช้ item.Date เป็นวันเริ่มต้น
+        const start = dayjs(item.Date, "DD/MM/YYYY");
+
+        DateStart = start.format("DD/MM/YYYY");
+
+        // ✅ บวกตาม creditTime (จำนวนวันเครดิต)
+        const endDate = start.add(creditTime, "day");
+
+        DateEnd = endDate.format("DD/MM/YYYY");
       }
 
       const key = item.TicketName;
@@ -735,6 +748,16 @@ const Report = ({ openNavbar }) => {
       } else if (creditTime === 30 || creditTime === 0) {
         DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
         DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+      } else {
+        // ✅ ใช้ item.Date เป็นวันเริ่มต้น
+        const start = dayjs(item.Date, "DD/MM/YYYY");
+
+        DateStart = start.format("DD/MM/YYYY");
+
+        // ✅ บวกตาม creditTime (จำนวนวันเครดิต)
+        const endDate = start.add(creditTime, "day");
+
+        DateEnd = endDate.format("DD/MM/YYYY");
       }
 
       const key = item.TicketName;
@@ -982,6 +1005,16 @@ const Report = ({ openNavbar }) => {
       } else if (creditTime === 30 || creditTime === 0) {
         DateStart = dayjs(`${monthKey}-01`).format("DD/MM/YYYY");
         DateEnd = dayjs(monthKey).endOf("month").format("DD/MM/YYYY");
+      } else {
+        // ✅ ใช้ item.Date เป็นวันเริ่มต้น
+        const start = dayjs(item.Date, "DD/MM/YYYY");
+
+        DateStart = start.format("DD/MM/YYYY");
+
+        // ✅ บวกตาม creditTime (จำนวนวันเครดิต)
+        const endDate = start.add(creditTime, "day");
+
+        DateEnd = endDate.format("DD/MM/YYYY");
       }
 
       const key = item.TicketName;
