@@ -76,7 +76,7 @@ const InsertFinancial = () => {
     const [company, setCompany] = React.useState("");
     const [bank, setBank] = React.useState("");
     const [price, setPrice] = useState("0.00");
-    const [vat, setVat] = useState("0.00");
+    const [vat, setVat] = useState(0.00);
     const [total, setTotal] = useState("0.00");
     const [resultPrice, setResultPrice] = useState("0.00");
     const [resultVat, setResultVat] = useState("0.00");
@@ -94,7 +94,6 @@ const InsertFinancial = () => {
         details: false,
         file: false,   // เผื่ออยากบังคับแนบไฟล์
         list: false,
-        vat: false,
         total: false,
         registration: {
             "หัวรถ": false,
@@ -332,10 +331,10 @@ const InsertFinancial = () => {
             hasError = true;
         }
 
-        if (vat === "0.00" || vat === "") {
-            newErrors.vat = true;
-            hasError = true;
-        }
+        // if (vat === "0.00" || vat === "") {
+        //     newErrors.vat = true;
+        //     hasError = true;
+        // }
 
         if (total === "0.00" || total === "") {
             newErrors.total = true;
@@ -359,27 +358,23 @@ const InsertFinancial = () => {
     };
 
     const handlePost = async () => {
-        // if (!list || list.length === 0) {
-        //     ShowError("ไม่มีข้อมูลที่จะบันทึก");
-        //     return;
-        // }
-
         if (!validateBeforeSave()) return;
-
         if (!file) return alert("กรุณาเลือกไฟล์ก่อน");
 
-        let img = "ไม่แนบไฟล์"; // ตั้งค่าเริ่มต้นไว้เลย
+        let img = "ไม่แนบไฟล์";
 
-        // ✅ ตรวจสอบก่อนว่า file เป็น "ไม่แนบไฟล์" หรือไม่
         if (file !== "ไม่แนบไฟล์") {
             const formData = new FormData();
             formData.append("pic", file);
 
             try {
-                const response = await fetch("https://upload.happysoftth.com/panda/uploads", {
-                    method: "POST",
-                    body: formData,
-                });
+                const response = await fetch(
+                    "https://upload.happysoftth.com/panda/uploads",
+                    {
+                        method: "POST",
+                        body: formData,
+                    }
+                );
 
                 const data = await response.json();
                 img = data.file_path;
@@ -388,60 +383,54 @@ const InsertFinancial = () => {
             }
         }
 
-        console.log("Image after try/catch:", img);
+        const ref = database.ref("report/invoice");
 
-        const startId = reportDetail.length; // ใช้ต่อจากของเดิม
-        const updates = {};
+        try {
+            await Promise.all(
+                list.map((item) => {
+                    const newRef = ref.push(); // ✅ สร้าง id auto
 
-        list.forEach((item, index) => {
-            const id = startId + index;
+                    return newRef.set({
+                        id: newRef.key, // ถ้ายังอยากเก็บ id
+                        InvoiceID: invoiceID,
+                        SelectedDateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
+                        SelectedDateTransfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
+                        Registration: item.registration,
+                        Company: `${company?.id}:${company?.Name}`,
+                        Details: details,
+                        Bank: `${bank?.id}:${bank?.Name}`,
+                        Group: group,
+                        Note: note,
+                        Price: list.length <= 1 ? parseNumber(price) : parseNumber(resultPrice),
+                        Vat: list.length <= 1 ? parseNumber(vat) : parseNumber(resultVat),
+                        Total: list.length <= 1 ? parseNumber(total) : parseNumber(resultTotal),
+                        TruckType: item.truckType,
+                        Status: "อยู่ในระบบ",
+                        Path: img,
+                    });
+                })
+            );
 
-            updates[id] = {
-                id: id,
-                InvoiceID: invoiceID,
-                SelectedDateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
-                SelectedDateTransfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
-                Registration: item.registration,
-                Company: `${company?.id}:${company?.Name}`,
-                Details: details,
-                Bank: `${bank?.id}:${bank?.Name}`,
-                Group: group,
-                Note: note,
-                Price: list.length <= 1 ? parseNumber(price) : parseNumber(resultPrice),
-                Vat: list.length <= 1 ? parseNumber(vat) : parseNumber(resultVat),
-                Total: list.length <= 1 ? parseNumber(total) : parseNumber(resultTotal),
-                TruckType: item.truckType,
-                Status: "อยู่ในระบบ",
-                Path: img, // ✅ ถ้าไม่แนบไฟล์ก็จะได้ "ไม่แนบไฟล์"
-            };
-        });
+            ShowSuccess("เพิ่มข้อมูลสำเร็จ");
 
-        console.log("updates : ", updates);
-
-        database
-            .ref("report/invoice")
-            .update(updates)
-            .then(() => {
-                ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-                console.log("All data pushed successfully");
-                setList([]);
-                setInvoiceID("");
-                setSelectedDateInvoice(dayjs(new Date()).format("DD/MM/YYYY"));
-                setSelectedDateTransfer(dayjs(new Date()).format("DD/MM/YYYY"));
-                setCompany("");
-                setDetails("");
-                setBank("");
-                setNote("");
-                setPrice("");
-                setVat("");
-                setOpen(false);
-                setFile("ไม่แนบไฟล์");
-                setFileType(1);
-            })
-            .catch((error) => {
-                ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-                console.error("Error pushing data:", error);
-            });
+            // reset state
+            setList([]);
+            setInvoiceID("");
+            setSelectedDateInvoice(dayjs().format("DD/MM/YYYY"));
+            setSelectedDateTransfer(dayjs().format("DD/MM/YYYY"));
+            setCompany("");
+            setDetails("");
+            setBank("");
+            setNote("");
+            setPrice("");
+            setVat("");
+            setOpen(false);
+            setFile("ไม่แนบไฟล์");
+            setFileType(1);
+        } catch (error) {
+            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+            console.error(error);
+        }
     };
 
     console.log("registrationTruck: ", registrationTruck);

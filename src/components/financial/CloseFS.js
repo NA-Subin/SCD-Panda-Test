@@ -1059,23 +1059,37 @@ const CloseFS = ({ openNavbar }) => {
         }, []);
     }, [filteredOrders, trips, registrationH, registrationT, registrationSm, date, months, years, companyName]);
 
-    console.log("ticketGroups : ", ticketGroups.filter((r) => r.TruckType === "รถเล็ก"));
+    console.log("ticketGroups : ", ticketGroups);
 
     // ===============================
     // 5️⃣ คำนวณ Totals
     // ===============================
     const grandTotal = useMemo(() => {
-        return ticketGroups.reduce(
-            (sum, ticket) => {
-                ticket.TotalVolume = ticket.Drivers.reduce((v, d) => v + d.Volume, 0);
-                ticket.TotalAmount = ticket.Drivers.reduce((a, d) => a + d.Amount, 0);
-                sum.Volume += ticket.TotalVolume;
-                sum.Amount += ticket.TotalAmount;
+        return driverGroups.reduce(
+            (sum, h) => {
+                // loop ticket แต่ละใบ
+                ticketGroups.forEach((ticket) => {
+                    const total = ticket.Drivers
+                        .filter(
+                            (dv) =>
+                                dv.Driver === h.Driver &&
+                                dv.Registration === h.Registration
+                        )
+                        .reduce(
+                            (s, dv) =>
+                                s + Number((check ? dv.Amount : dv.Volume) || 0),
+                            0
+                        );
+
+                    sum.Volume += check ? 0 : total;
+                    sum.Amount += check ? total : 0;
+                });
+
                 return sum;
             },
             { Volume: 0, Amount: 0 }
         );
-    }, [ticketGroups]);
+    }, [ticketGroups, driverGroups, check]);
 
     const driverTotals = useMemo(() => {
         return ticketGroups.reduce((acc, ticket) => {
@@ -1095,12 +1109,29 @@ const CloseFS = ({ openNavbar }) => {
         // =======================
         const calcGrandDriver = (filterType) => {
             const tickets = ticketGroups.filter(t => t.CustomerType === filterType);
-            const grand = tickets.reduce(
-                (sum, t) => {
-                    t.TotalVolume = t.Drivers.reduce((v, d) => v + d.Volume, 0);
-                    t.TotalAmount = t.Drivers.reduce((a, d) => a + d.Amount, 0);
-                    sum.Volume += t.TotalVolume;
-                    sum.Amount += t.TotalAmount;
+            const grand = driverGroups.reduce(
+                (sum, h) => {
+                    tickets.forEach((t) => {
+                        const totalVolume = t.Drivers
+                            .filter(
+                                (d) =>
+                                    d.Driver === h.Driver &&
+                                    d.Registration === h.Registration
+                            )
+                            .reduce((v, d) => v + d.Volume, 0);
+
+                        const totalAmount = t.Drivers
+                            .filter(
+                                (d) =>
+                                    d.Driver === h.Driver &&
+                                    d.Registration === h.Registration
+                            )
+                            .reduce((a, d) => a + d.Amount, 0);
+
+                        sum.Volume += totalVolume;
+                        sum.Amount += totalAmount;
+                    });
+
                     return sum;
                 },
                 { Volume: 0, Amount: 0 }
@@ -1409,7 +1440,12 @@ const CloseFS = ({ openNavbar }) => {
                     "รายได้",
                     row.TicketName?.split(":")[1] || row.TicketName,
                     row.Rate,
-                    row.Drivers.reduce((sum, dv) => sum + Number(check ? dv.Amount : dv.Volume || 0), 0),
+                    driverGroups.reduce((sum, h) => {
+                        const total = row.Drivers
+                            .filter((dv) => dv.Driver === h.Driver && dv.Registration === h.Registration)
+                            .reduce((s, dv) => s + Number((check ? dv.Amount : dv.Volume) || 0), 0);
+                        return sum + total;
+                    }, 0),
                     ...driverGroups.map(dg => {
                         const found = row.Drivers.find(dv => dv.Driver === dg.Driver && dv.Registration === dg.Registration);
                         return found ? Number(check ? found.Amount : found.Volume) : 0;

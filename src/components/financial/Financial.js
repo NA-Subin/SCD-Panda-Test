@@ -197,18 +197,33 @@ const Financial = () => {
             ? reportDetail
             : reportDetail.filter(row => (row.Group ?? "เดี่ยว") === group);
 
+    // 🔥 สร้าง finalData ใหม่
+    let finalData;
 
-    // 🔥 ฟังก์ชันรวมข้อมูลกลุ่ม
+    const getMergeKey = (row) => {
+        return [
+            row.Bank ?? "",
+            row.Company ?? "",
+            row.Details ?? "",
+            row.InvoiceID ?? "",
+            row.Group ?? "เดี่ยว",
+            row.SelectedDateInvoice ?? "",
+            row.Note ?? "",
+        ]
+            .map(v => String(v).trim())
+            .join("|");
+    };
+
     const mergeGroupData = (data) =>
         Object.values(
             data.reduce((acc, row) => {
 
-                const mergeKey = row.Group || "เดี่ยว";
+                const mergeKey = getMergeKey(row); // 🔥 ใช้ key ใหม่
 
                 if (!acc[mergeKey]) {
                     acc[mergeKey] = {
                         id: row.id,
-                        Group: mergeKey,
+                        Group: row.Group ?? "เดี่ยว",
                         InvoiceID: row.InvoiceID,
                         SelectedDateInvoice: row.SelectedDateInvoice,
                         SelectedDateTransfer: row.SelectedDateTransfer,
@@ -236,12 +251,7 @@ const Financial = () => {
             }, {})
         );
 
-
-    // 🔥 สร้าง finalData ใหม่
-    let finalData;
-
     if (group === "กลุ่ม") {
-
         finalData = mergeGroupData(filteredData);
 
     } else if (group === "ทั้งหมด") {
@@ -255,7 +265,6 @@ const Financial = () => {
         ];
 
     } else {
-
         finalData = filteredData;
     }
 

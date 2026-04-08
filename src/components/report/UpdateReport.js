@@ -130,7 +130,7 @@ const UpdateReport = (props) => {
         const receiveDate = dayjs(item.DateReceive, "DD/MM/YYYY");
         const targetDate = dayjs("01/01/2026", "DD/MM/YYYY");
 
-        return (deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day')) && item.StatusTrip !== "ยกเลิก";
+        return (deliveryDate.isSameOrAfter(targetDate, 'day') || receiveDate.isSameOrAfter(targetDate, 'day')) && item.StatusTrip !== "ยกเลิก" && item.TruckType !== "รถเล็ก";
     });
     const registrationHead = Object.values(reghead || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
     const registrationSmall = Object.values(small || {}).filter((item) => item.StatusTruck !== "ยกเลิก");
@@ -139,7 +139,7 @@ const UpdateReport = (props) => {
     const transferMoneyDetail = Object.values(transferMoney || {});
     const invoiceDetail = Object.values(invoiceReport || {});
 
-    console.log("small : ", registrationSmall);
+    console.log("transferMoneyDetail : ", transferMoneyDetail);
 
     const transfer = transferMoneyDetail.filter((row) => row.TicketName === ticket.TicketName && row.Status !== "ยกเลิก" && row.month === months);
 
@@ -594,10 +594,10 @@ const UpdateReport = (props) => {
     const total1 = calculateTotal(company1Tickets);
     const total2 = calculateTotal(company2Tickets);
 
-    console.log("บริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่)", company1Tickets);
+    console.log("บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)", company1Tickets);
     console.log("บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)", company2Tickets);
 
-    console.log("Total for บริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่)", total1);
+    console.log("Total for บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)", total1);
     console.log("Total for บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)", total2);
 
     console.log("invoiceDetail : ", invoiceDetail);
@@ -1074,13 +1074,13 @@ const UpdateReport = (props) => {
                     {
                         windowWidth >= 900 &&
                         <Grid item md={5} xs={12}>
-                            <Typography variant='subtitle1' fontWeight="bold" sx={{ marginBottom: -3, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*พิมพ์ใบวางบิลของบริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่) ตรงนี้*</Typography>
+                            <Typography variant='subtitle1' fontWeight="bold" sx={{ marginBottom: -3, fontSize: "12px", color: "red", textAlign: "right" }} gutterBottom>*พิมพ์ใบวางบิลของบจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่) ตรงนี้*</Typography>
                         </Grid>
                     }
 
                     <Grid item md={5.5} xs={12}>
                         <Typography variant="subtitle1" sx={{ marginTop: 1, fontSize: "18px" }} fontWeight="bold" gutterBottom>
-                            บริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่)
+                            บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)
                         </Typography>
                     </Grid>
                     <Grid item md={2} xs={12}>
@@ -1406,7 +1406,7 @@ const UpdateReport = (props) => {
                                                 {rowSpan > 0 && (
                                                     <TableCell rowSpan={rowSpan + 1} sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle", borderBottom: "3px solid lightgray" }}>
                                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                            {row.TruckType === "รถใหญ่" ? ` ${row.Registration.split(":")[1]} / ${row.RegTail.split(":")[1]}` : row.TruckType === "รถเล็ก" ? `${row.ShortName}${row.Registration.split(":")[1]}` : "รถรับจ้างขนส่ง"}
+                                                            {row.TruckType === "รถใหญ่" ? ` ${row.Registration.split(":")[1]} / ${row.RegTail !== "0:ไม่มี" ? row.RegTail.split(":")[1] : ""}` : row.TruckType === "รถเล็ก" ? `${row.ShortName}${row.Registration.split(":")[1]}` : "รถรับจ้างขนส่ง"}
                                                         </Typography>
                                                     </TableCell>
                                                 )}
@@ -1451,7 +1451,7 @@ const UpdateReport = (props) => {
                                                         fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน  
                                                     }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {formatNumber(row.Rate)}
+                                                        {row.Rate}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell
@@ -2044,7 +2044,7 @@ const UpdateReport = (props) => {
                                                         sx={{ textAlign: "center", height: '30px', width: 300, verticalAlign: "middle", borderBottom: "3px solid lightgray" }}
                                                     >
                                                         <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                            {row.TruckType === "รถใหญ่" ? ` ${row.Registration.split(":")[1]} / ${row.RegTail.split(":")[1]}` : row.TruckType === "รถเล็ก" ? `${row.ShortName}${row.Registration.split(":")[1]}` : "รถรับจ้างขนส่ง"}
+                                                            {row.TruckType === "รถใหญ่" ? ` ${row.Registration.split(":")[1]} / ${row.RegTail !== "0:ไม่มี" ? row.RegTail.split(":")[1] : ""}` : row.TruckType === "รถเล็ก" ? `${row.ShortName}${row.Registration.split(":")[1]}` : "รถรับจ้างขนส่ง"}
                                                         </Typography>
                                                     </TableCell>
                                                 )}
@@ -2088,7 +2088,7 @@ const UpdateReport = (props) => {
                                                         fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน  
                                                     }}>
                                                     <Typography variant="subtitle2" fontSize="14px" sx={{ lineHeight: 1, margin: 0 }} gutterBottom>
-                                                        {formatNumber(row.Rate)}
+                                                        {row.Rate}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell
@@ -2607,7 +2607,7 @@ const UpdateReport = (props) => {
                                                                             onChange={(e) => setTransport(e.target.value)}
                                                                         >
                                                                             <MenuItem value={transport} sx={{ fontSize: "14px", }}>{transport.split(":")[1]}</MenuItem>
-                                                                            {Number(transport.split(":")[0]) !== 2 && <MenuItem value="2:บริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่)</MenuItem>}
+                                                                            {Number(transport.split(":")[0]) !== 2 && <MenuItem value="2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>}
                                                                             {Number(transport.split(":")[0]) !== 3 && <MenuItem value="3:บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)</MenuItem>}
                                                                         </Select>
                                                                     </FormControl>
@@ -2860,7 +2860,7 @@ const UpdateReport = (props) => {
                                                             <MenuItem value={`${row.id}:${row.Name}`} sx={{ fontSize: "14px", }}>{row.Name}</MenuItem>
                                                         ))
                                                     } */}
-                                                    <MenuItem value="2:บริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บริษัท นาคราปิโตรเลียม 2016 จำกัด (สำนักงานใหญ่)</MenuItem>
+                                                    <MenuItem value="2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)</MenuItem>
                                                     <MenuItem value="3:บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)" sx={{ fontSize: "14px", }}>บริษัท พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)</MenuItem>
                                                 </Select>
                                             </FormControl>

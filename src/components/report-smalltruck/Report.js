@@ -409,12 +409,15 @@ const ReportSmallTruck = () => {
           return customerReg === selectedRegHead;
         }
       })
-      .map(o => ({
-        ...o,
-        sourceType: "order",
-        type: "รับเข้า",
-        TruckType: trip?.TruckType,
-      }));
+      .map(order => {
+        const trip = trips.find(tp => (Number(tp.id) - 1) === Number(order.Trip));
+        return {
+          ...order,
+          sourceType: "order",
+          type: "รับเข้า",
+          TruckType: trip?.TruckType,
+        };
+      });
 
     // ✅ รวมผลลัพธ์ทั้งสอง
     let result = [...filteredTickets, ...filteredOrders];

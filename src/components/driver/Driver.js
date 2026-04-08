@@ -46,6 +46,7 @@ import {
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
+import PrintIcon from '@mui/icons-material/Print';
 import ReplyAllIcon from '@mui/icons-material/ReplyAll';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -344,6 +345,32 @@ const Driver = () => {
         }
     }
 
+    const generatePDF = (row) => {
+
+        const invoiceData = { order: row, trip: check, depot: depotNew };
+
+        // บันทึกข้อมูลลง sessionStorage
+        sessionStorage.setItem("invoiceData", JSON.stringify(invoiceData));
+
+        const screenWidth = window.screen.width;
+        const screenHeight = window.screen.height;
+        const windowWidth = 820;
+        const windowHeight = 559;
+
+        const left = (screenWidth - windowWidth) / 2;
+        const top = (screenHeight - windowHeight) / 2;
+
+        const printWindow = window.open(
+            "/pda-printer",
+            "_blank",
+            `width=${windowWidth},height=${windowHeight},left=${left},top=${top}`
+        );
+
+        if (!printWindow) {
+            alert("กรุณาปิด pop-up blocker แล้วลองใหม่");
+        }
+    };
+
     const handleSaveStatus = async (no) => {
         if (!file) {
             alert("กรุณาเลือกไฟล์ก่อน");
@@ -600,7 +627,7 @@ const Driver = () => {
                                                     <TableCellPWD sx={{ textAlign: "center", fontSize: 16, width: 50 }}>
                                                         PWD
                                                     </TableCellPWD>
-                                                    <TablecellSelling sx={{ width: 100, position: "sticky", right: 0 }} />
+                                                    <TablecellSelling sx={{ width: 150, position: "sticky", right: 0 }} />
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
@@ -653,6 +680,12 @@ const Driver = () => {
                                                                                     whiteSpace: "nowrap"
                                                                                 }} color="primary" onClick={() => { setDialogOpen(true); setDataNo(row.No); }}>จัดส่งแล้ว</Button>
                                                                         }
+                                                                        <Button variant="contained" sx={{
+                                                                            marginLeft: 1,
+                                                                            fontSize: { xs: "16px", sm: "14px", md: "12px" },
+                                                                            padding: { xs: "12px 20px", sm: "10px 18px", md: "8px 16px" },
+                                                                            whiteSpace: "nowrap"
+                                                                        }} color="primary" onClick={() => generatePDF(row)}><PrintIcon sx={{ color: "white" }} /></Button>
                                                                     </TableCell>
                                                                     <Dialog open={dialogOpen} onClose={handleClose}>
                                                                         <DialogTitle sx={{

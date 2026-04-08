@@ -467,14 +467,14 @@ const PrintReport = () => {
                       <React.Fragment>
                         <Typography variant="h6" fontWeight="bold" gutterBottom>
                           {
-                            invoiceData?.Company
+                            invoiceData?.Transport.split(":")[0] === "2" ? "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" : invoiceData?.Company
                           }
                         </Typography>
                         <Typography variant="subtitle2" sx={{ marginTop: -1 }} gutterBottom>
                           {formatAddressStandard(invoiceData?.Address)}
                           {/* เบอร์โทร : {formatPhoneNumber(invoiceData?.Phone)} */}
                         </Typography>
-                        <Typography variant="subtitle2" gutterBottom>เลขประจำตัวผู้เสียภาษีอากร : {formatTaxID(invoiceData?.CardID)}</Typography>
+                        <Typography variant="subtitle2" gutterBottom>เลขประจำตัวผู้เสียภาษีอากร : {invoiceData?.Transport.split(":")[0] === "2" ? "051 5559 00102 9" : formatTaxID(invoiceData?.CardID)}</Typography>
                       </React.Fragment>
                     )
                   }

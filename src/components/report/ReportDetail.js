@@ -183,7 +183,10 @@ const ReportDetail = (props) => {
                 if (trans.Status === "ยกเลิก") return false;
                 if (trans.TicketName !== order.TicketName) return false;
                 if (trans.TicketType !== order.CustomerType) return false;
-                if (trans.Transport !== order.Company) return false;
+                if (
+                    (trans.Transport?.split?.(":")?.[0] ?? "") !==
+                    (order.Company?.split?.(":")?.[0] ?? "")
+                ) return false;
 
                 const transMonth = trans.month || `${orderMonth}_ทั้งเดือน`;
                 return transMonth === `${orderMonth}_${matchedPeriod}`;
@@ -248,7 +251,7 @@ const ReportDetail = (props) => {
     // 2. แปลงเป็น array สำหรับแสดงผล
     const groupedOrders = Object.entries(grouped); // [ [key, [order1, order2]], ... ]
 
-    console.log("groupedOrders : ", groupedOrders);
+    console.log("groupedOrders : ", groupedOrders.transfers);
 
     const formatted = `${dayjs(dateStart).locale("th").format("วันที่ D เดือนMMMM พ.ศ.BBBB")} - ${dayjs(dateEnd).format("วันที่ D เดือนMMMM พ.ศ.BBBB")}`;
 

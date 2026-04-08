@@ -78,9 +78,9 @@ const UpdateFinancial = (props) => {
     const [details, setDetails] = React.useState(row.Details || "");
     const [company, setCompany] = React.useState(companypaymentDetail.find((item) => item.id === Number(row.Company?.split(":")[0])) || null);
     const [bank, setBank] = React.useState(expenseitem.find((item) => item.id === Number(row.Bank?.split(":")[0])) || null);
-    const [price, setPrice] = useState(row.Price);
-    const [vat, setVat] = useState(row.Vat);
-    const [total, setTotal] = useState(row.Total);
+    const [price, setPrice] = useState(row.Price.toString());
+    const [vat, setVat] = useState(row.Vat.toString());
+    const [total, setTotal] = useState(row.Total.toString());
     const [resultPrice, setResultPrice] = useState(row.Group === "กลุ่ม" ? (row.Price / row.MergedDetails?.length) : row.Price);
     const [resultVat, setResultVat] = useState(row.Group === "กลุ่ม" ? (row.Vat / row.MergedDetails?.length) : row.Vat);
     const [resultTotal, setResultTotal] = useState(row.Group === "กลุ่ม" ? (row.Total / row.MergedDetails?.length).toFixed(2) : row.Total);
@@ -119,7 +119,6 @@ const UpdateFinancial = (props) => {
         details: false,
         file: false,   // เผื่ออยากบังคับแนบไฟล์
         list: false,
-        vat: false,
         total: false,
         registration: {
             "หัวรถ": false,
@@ -385,7 +384,6 @@ const UpdateFinancial = (props) => {
             price: false,
             file: false,
             list: false,
-            vat: false,
             total: false,
             registration: {
                 "หัวรถ": false,
@@ -467,12 +465,10 @@ const UpdateFinancial = (props) => {
         }
 
         if (!validateBeforeSave()) return;
-
         if (!file) return alert("กรุณาเลือกไฟล์ก่อน");
 
-        let img = "ไม่แนบไฟล์"; // ตั้งค่าเริ่มต้นไว้เลย
+        let img = "ไม่แนบไฟล์";
 
-        // ✅ ตรวจสอบก่อนว่า file เป็น "ไม่แนบไฟล์" หรือไม่
         if (file !== "ไม่แนบไฟล์") {
             const formData = new FormData();
             formData.append("pic", file);
@@ -490,26 +486,21 @@ const UpdateFinancial = (props) => {
             }
         }
 
-        console.log("Image after try/catch:", img);
-
-        const startId = reportDetail.length; // ใช้ต่อจากของเดิม
+        const ref = database.ref("report/invoice");
         const updates = {};
 
-        let newCounter = 0;
-
         list.forEach((item) => {
-
             let id;
 
             if (item.type === "new") {
-                id = startId + newCounter;
-                newCounter++;
+                const newRef = ref.push(); // ✅ สร้าง key จาก Firebase
+                id = newRef.key;
             } else {
-                id = item.id; // ใช้ id เดิม
+                id = item.id; // ของเดิมใช้ id เดิม
             }
 
             updates[id] = {
-                id: id,
+                id,
                 InvoiceID: invoiceID,
                 SelectedDateInvoice: dayjs(selectedDateInvoice, "DD/MM/YYYY").format("DD/MM/YYYY"),
                 SelectedDateTransfer: dayjs(selectedDateTransfer, "DD/MM/YYYY").format("DD/MM/YYYY"),
@@ -535,11 +526,11 @@ const UpdateFinancial = (props) => {
             .update(updates)
             .then(() => {
                 ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-                console.log("All data pushed successfully");
+
                 setList([]);
                 setInvoiceID("");
-                setSelectedDateInvoice(dayjs(new Date()).format("DD/MM/YYYY"));
-                setSelectedDateTransfer(dayjs(new Date()).format("DD/MM/YYYY"));
+                setSelectedDateInvoice(dayjs().format("DD/MM/YYYY"));
+                setSelectedDateTransfer(dayjs().format("DD/MM/YYYY"));
                 setCompany("");
                 setDetails("");
                 setBank("");
@@ -1283,6 +1274,18 @@ const UpdateFinancial = (props) => {
                                                                                 setPrice(raw);
                                                                             }
                                                                             setManualTotal(true);
+
+                                                                            setList(prev => {
+                                                                                // const newList = prev.filter(i => i.id !== item.id);
+
+                                                                                const newLength = prev.length || 1; // กันหาร 0
+
+                                                                                setResultPrice(Number(raw) / newLength);
+                                                                                setResultVat(Number(vat) / newLength);
+                                                                                setResultTotal((Number(raw) + Number(vat)) / newLength);
+
+                                                                                return prev;
+                                                                            });
                                                                         }}
                                                                         onBlur={(e) => {
                                                                             const val = parseFloat(price);
@@ -1343,6 +1346,18 @@ const UpdateFinancial = (props) => {
                                                                                 setVat(raw);
                                                                             }
                                                                             setManualTotal(true);
+
+                                                                            setList(prev => {
+                                                                                // const newList = prev.filter(i => i.id !== item.id);
+
+                                                                                const newLength = prev.length || 1; // กันหาร 0
+
+                                                                                setResultPrice(Number(price) / newLength);
+                                                                                setResultVat(Number(raw) / newLength);
+                                                                                setResultTotal((Number(raw) + Number(price)) / newLength);
+
+                                                                                return prev;
+                                                                            });
                                                                         }}
                                                                         onBlur={(e) => {
                                                                             const val = parseFloat(vat);

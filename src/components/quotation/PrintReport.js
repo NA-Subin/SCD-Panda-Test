@@ -488,10 +488,7 @@ const PrintReport = () => {
                           {/* ✅ จำนวน (ลิตร) */}
                           <TableCell align="right" sx={{ borderLeft: "2px solid rgba(0, 0, 0, 0.7)" }}>
                             <Box sx={{ mr: 1 }}>
-                              {new Intl.NumberFormat("en-US", {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
-                              }).format(data.Volume)}
+                              {new Intl.NumberFormat("en-US").format(data.Volume)}
                             </Box>
                           </TableCell>
 
@@ -649,7 +646,7 @@ const PrintReport = () => {
                 <Box display="flex" alignItems="center" justifyContent="left" sx={{ pl: 1 }} >
                   <Typography variant="subtitle2"><b>ธนาคาร </b></Typography>
                   <Typography variant="subtitle2" marginLeft={1}>
-                    {isBangchak ? "กสิกรไทย 663-100-9768" : "กสิกรไทย 633-101-3579"}
+                    {isBangchak ? "กสิกรไทย 663-100-9768" : "กสิกรไทย 663-101-3579"}
                   </Typography>
                 </Box>
                 <Typography variant="subtitle2" marginLeft={7.5}>

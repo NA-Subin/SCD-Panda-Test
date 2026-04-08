@@ -68,6 +68,7 @@ import Quotation from "./components/quotation/Quotation";
 import ProfitSmallTruck from "./components/financial/ProfitSmallTruck";
 import ReportGasStation from "./components/depots/report/ReportGasStation";
 import CloseFSSmallTruck from "./components/financial/CloseFSSmallTruck";
+import PdaPrinter from "./components/driver/PrintInvoice";
 //import { BasicDataProvider } from "./server/provider/BasicDataProvider";
 
 const MySwal = withReactContent(Swal);
@@ -248,6 +249,7 @@ function App() {
         <Route path="/print-trips" element={<TripDataProvider><PrintTrips /></TripDataProvider>} />
         <Route path="/print-tripssmall" element={<TripDataProvider><PrintTripsSmall /></TripDataProvider>} />
         <Route path="/print-report" element={<TripDataProvider><PrintReport /></TripDataProvider>} />
+        <Route path="/pda-printer" element={<PdaPrinter />} />
         <Route path="/driver-Detail" element={<TripDataProvider><DriverDetail /></TripDataProvider>} />
         <Route path="/driver" element={<TripDataProvider><Driver /></TripDataProvider>} />
         <Route path="/trade-payable" element={<TripDataProvider><TradePayable /></TripDataProvider>} />

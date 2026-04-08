@@ -174,7 +174,7 @@ const SummaryOilBalance = ({ openNavbar }) => {
 
                 const TruckType = trips.find((t) => (Number(t.id) - 1) === item.Trip);
 
-                return isValidStatus && isInDateRange && matchTickets && TruckType?.TruckType === "รถใหญ่" && TruckType?.Status !== "ยกเลิก";
+                return isValidStatus && isInDateRange && matchTickets && (TruckType?.TruckType === "รถใหญ่" || TruckType?.TruckType === "รถรับจ้างขนส่ง") && TruckType?.Status !== "ยกเลิก";
             })
             .flatMap((item) => {
                 if (!item.Product) return [];
@@ -931,7 +931,7 @@ const SummaryOilBalance = ({ openNavbar }) => {
                                                                     borderBottom: "1.5px solid lightgray",
                                                                 }}
                                                             >
-                                                                {driverKey}
+                                                                {driverKey.split("/")[1] === "ไม่มี" ? "รถรับจ้างงขนส่ง" : driverKey}
                                                             </TableCell>
                                                         </>
                                                     )}
