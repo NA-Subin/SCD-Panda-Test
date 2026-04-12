@@ -119,13 +119,16 @@ const RepairTruck = () => {
   const [repairSmallTruck, setRepairSmallTruck] = React.useState([]);
   const [repairRegHead, setRepairRegHead] = React.useState([]);
 
+  console.log("🚀 ~ file: RepairTruck.js:143 ~ RepairTruck ~ repairSmallTruck:", repairSmallTruck)
+  console.log("🚀 ~ file: RepairTruck.js:144 ~ RepairTruck ~ repairRegHead:", repairRegHead)
+
   const getTruck = async () => {
     database.ref("/truck/registration/").on("value", (snapshot) => {
       const datas = snapshot.val();
       const dataRepair = [];
       for (let id in datas) {
-        if(datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ"){
-          dataRepair.push({ id, ...datas[id] })
+        if (datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ") {
+          dataRepair.push({ id, ...datas[id], TruckType: "รถใหญ่" })
         }
       }
       setRepairRegHead(dataRepair);
@@ -135,8 +138,8 @@ const RepairTruck = () => {
       const datas = snapshot.val();
       const dataRepair = [];
       for (let id in datas) {
-        if(datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ"){
-          dataRepair.push({ id, ...datas[id] })
+        if (datas[id].RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ") {
+          dataRepair.push({ id, ...datas[id], TruckType: "รถเล็ก" })
         }
       }
       setRepairSmallTruck(dataRepair);
@@ -159,186 +162,215 @@ const RepairTruck = () => {
     getInspection();
   }, []);
 
-  const handlePost = () => {
-    database
-      .ref("inspection")
-      .child(inspection.length)
-      .update({
-        id: inspection.length + 1,
-        Dates: dayjs(new Date()).locale("th").format("DD/MM/YYYY"),
+  const resetForm = () => {
+    // Brake
+    setBrakeFluid("");
+    setClutchOil("");
+    setLeak_B("");
+    setLeak_BDetail("");
+    setBrake("");
+
+    // Electricity
+    setDistilledWater("");
+    setBatteryTerminals("");
+    setBatteryOrther("");
+    setBatteryStrap("");
+    setStrapOther("");
+    setLight("");
+    setHorn("");
+    setHornDetail("");
+
+    // Water
+    setRadiator("");
+    setWasherFluid("");
+    setRadiatorCap("");
+    setPressure("");
+    setBelt("");
+    setRadiatorHose("");
+    setRadiatorHoseDetail("");
+
+    // Air
+    setTireSize("");
+    setTirePressureMax("");
+    setWeightTruck("");
+    setSpeed("");
+    setDateTire("");
+    setTreadDepth("");
+    setCheekRubber("");
+    setCheekRubberDetail("");
+    setTirePressure("");
+    setTirePressureHigh("");
+    setTirePressureLow("");
+    setAirCap("");
+
+    // Gasoline
+    setLeak_G("");
+    setLeak_GDetail("");
+    setWaterFilter("");
+    setAirFilter("");
+
+    // Oils
+    setEngineOil("");
+    setPowersteeringOil("");
+    setTransmissionFluid("");
+    setLeak_O("");
+    setLeak_ODetail("");
+
+    // Noise
+    setUnusualNoise("");
+    setUnusualNoiseDetail("");
+    setMountRubber("");
+    setMountRubberDetail("");
+    setIntake("");
+    setIntakeDetail("");
+
+    // Other
+    setEmployee("");
+    setDriver("");
+    setRegTail("");
+    setType("");
+  };
+
+  const handlePost = async () => {
+    try {
+      const newRef = database.ref("inspection").push();
+      const newId = newRef.key;
+
+      const today = dayjs(new Date()).locale("th").format("DD/MM/YYYY");
+
+      const baseData = {
+        id: newId,
+        Dates: today,
+        RegHeadID: regHead.split(":")[0],
         RegHead: regHead.split(":")[1],
         RegTail: regTail,
-        Type: "รถช่อง",
+        Type: regHead.split(":")[2],
         Employee: employee,
-      })
-      .then(() => {
-        database
-          .ref("inspection/" + inspection.length)
-          .child("Brake")
-          .update({
-            BrakeFluid: brakeFluid,
-            ClutchOil: clutchOil,
-            Leak_B:
-              leak_B === "มีรอยรั่ว"
-                ? leak_B + "(" + leak_BDetail + ")"
-                : leak_B,
-            Brake: brake,
-          })
-          .then(() => {
-            console.log("Brake pushed successfully");
-          })
-          .catch((error) => {
-            console.error("Error pushing Brake:", error);
-          });
-        database
-          .ref("inspection/" + inspection.length)
-          .child("Electricity")
-          .update({
-            DistilledWater: distilledWater,
-            BatteryTerminals:
-              batteryTerminals === "อื่นๆ"
-                ? batteryTerminals + "(" + batteryOrther + ")"
-                : batteryTerminals,
-            BatteryStrap:
-              batteryStrap === "อื่นๆ"
-                ? batteryStrap + "(" + strapOther + ")"
-                : batteryStrap,
-            Light: light,
-            Horn: horn === "ใช้ไม่ได้" ? horn + "(" + hornDetail + ")" : horn,
-          })
-          .then(() => {
-            console.log("Electricity pushed successfully");
-          })
-          .catch((error) => {
-            console.error("Error pushing Electricity:", error);
-          });
-        database
-          .ref("inspection/" + inspection.length)
-          .child("Water")
-          .update({
-            Radiator: radiator,
-            WasherFluid: washerFluid,
-            RadiatorCap:
-              radiatorCap === "ความดันสปริงฝาหม้อน้ำ"
-                ? radiatorCap + "(" + pressure + ")"
-                : radiatorCap,
-            Belt: belt,
-            RadiatorHose:
-              radiatorHose === "ใช้ไม่ได้"
-                ? radiatorHose + "(" + radiatorHoseDetail + ")"
-                : radiatorHose,
-          })
-          .then(() => {
-            console.log("Water pushed successfully");
-          })
-          .catch((error) => {
-            console.error("Error pushing Water:", error);
-          });
-        database
-          .ref("inspection/" + inspection.length)
-          .child("Air")
-          .update({
-            TireSize: tireSize,
-            TirePressureMax: tirePressureMax,
-            WeightTruck: weightTruck,
-            Speed: speed,
-            DateTire: dateTire,
-            TreadDepth: treadDepth,
-            CheekRubber:
-              cheekRubber === "ผิดปรกติ"
-                ? cheekRubber + "(" + cheekRubberDetail + ")"
-                : cheekRubber,
-            TirePressure:
-              tirePressure === "สูงไป"
-                ? tirePressure + "(" + tirePressureHigh + ")"
-                : tirePressure === "ต่ำไป"
-                ? tirePressure + "(" + tirePressureLow + ")"
+      };
+
+      // 🔥 รวมทุกอย่างเป็น object เดียว
+      const data = {
+        ...baseData,
+
+        Brake: {
+          BrakeFluid: brakeFluid,
+          ClutchOil: clutchOil,
+          Leak_B:
+            leak_B === "มีรอยรั่ว"
+              ? `${leak_B}(${leak_BDetail})`
+              : leak_B,
+          Brake: brake,
+        },
+
+        Electricity: {
+          DistilledWater: distilledWater,
+          BatteryTerminals:
+            batteryTerminals === "อื่นๆ"
+              ? `${batteryTerminals}(${batteryOrther})`
+              : batteryTerminals,
+          BatteryStrap:
+            batteryStrap === "อื่นๆ"
+              ? `${batteryStrap}(${strapOther})`
+              : batteryStrap,
+          Light: light,
+          Horn:
+            horn === "ใช้ไม่ได้" ? `${horn}(${hornDetail})` : horn,
+        },
+
+        Water: {
+          Radiator: radiator,
+          WasherFluid: washerFluid,
+          RadiatorCap:
+            radiatorCap === "ความดันสปริงฝาหม้อน้ำ"
+              ? `${radiatorCap}(${pressure})`
+              : radiatorCap,
+          Belt: belt,
+          RadiatorHose:
+            radiatorHose === "ใช้ไม่ได้"
+              ? `${radiatorHose}(${radiatorHoseDetail})`
+              : radiatorHose,
+        },
+
+        Air: {
+          TireSize: tireSize,
+          TirePressureMax: tirePressureMax,
+          WeightTruck: weightTruck,
+          Speed: speed,
+          DateTire: dateTire,
+          TreadDepth: treadDepth,
+          CheekRubber:
+            cheekRubber === "ผิดปรกติ"
+              ? `${cheekRubber}(${cheekRubberDetail})`
+              : cheekRubber,
+          TirePressure:
+            tirePressure === "สูงไป"
+              ? `${tirePressure}(${tirePressureHigh})`
+              : tirePressure === "ต่ำไป"
+                ? `${tirePressure}(${tirePressureLow})`
                 : tirePressure,
-            AirCap: airCap,
-          })
-          .then(() => {
-            console.log("Air pushed successfully");
-          })
-          .catch((error) => {
-            console.error("Error pushing Air:", error);
-          });
-        database
-          .ref("inspection/" + inspection.length)
-          .child("Gasoline")
-          .update({
-            Leak_G:
-              leak_G === "มีรอยรั่ว"
-                ? leak_G + "(" + leak_GDetail + ")"
-                : leak_G,
-            WaterFilter: waterFilter,
-            AirFilter: airFilter,
-          })
-          .then(() => {
-            console.log("Gasoline pushed successfully");
-          })
-          .catch((error) => {
-            console.error("Error pushing Gasoline:", error);
-          });
-        database
-          .ref("inspection/" + inspection.length)
-          .child("Oils")
-          .update({
-            EngineOil: engineOil,
-            PowerSteeringOil: powerSteeringOil,
-            TransmissionFluid: transmissionFluid,
-            Leak_O:
-              leak_O === "มีรอยรั่ว"
-                ? leak_O + "(" + leak_ODetail + ")"
-                : leak_O,
-          })
-          .then(() => {
-            console.log("Oils pushed successfully");
-          })
-          .catch((error) => {
-            console.error("Error pushing Oils:", error);
-          });
-        database
-          .ref("inspection/" + inspection.length)
-          .child("Noise")
-          .update({
-            UnusualNoise:
-              unusualNoise === "มี"
-                ? unusualNoise + "(" + unusualNoiseDetail + ")"
-                : unusualNoise,
-            MountRubber:
-              mountRubber === "ควรเปลี่ยน"
-                ? mountRubber + "(" + mountRubberDetail + ")"
-                : mountRubber,
-            Intake:
-              intake === "รั่ว" ? intake + "(" + intakeDetail + ")" : intake,
-          })
-          .then(() => {
-            console.log("Noise pushed successfully");
-          })
-          .catch((error) => {
-            console.error("Error pushing Noise:", error);
-          });
-        database
+          AirCap: airCap,
+        },
+
+        Gasoline: {
+          Leak_G:
+            leak_G === "มีรอยรั่ว"
+              ? `${leak_G}(${leak_GDetail})`
+              : leak_G,
+          WaterFilter: waterFilter,
+          AirFilter: airFilter,
+        },
+
+        Oils: {
+          EngineOil: engineOil,
+          PowerSteeringOil: powerSteeringOil,
+          TransmissionFluid: transmissionFluid,
+          Leak_O:
+            leak_O === "มีรอยรั่ว"
+              ? `${leak_O}(${leak_ODetail})`
+              : leak_O,
+        },
+
+        Noise: {
+          UnusualNoise:
+            unusualNoise === "มี"
+              ? `${unusualNoise}(${unusualNoiseDetail})`
+              : unusualNoise,
+          MountRubber:
+            mountRubber === "ควรเปลี่ยน"
+              ? `${mountRubber}(${mountRubberDetail})`
+              : mountRubber,
+          Intake:
+            intake === "รั่ว" ? `${intake}(${intakeDetail})` : intake,
+        },
+      };
+
+      // ✅ ยิงครั้งเดียวจบ
+      await newRef.set(data);
+
+      // ✅ update truck
+      if (regHead.split(":")[2] === "รถใหญ่") {
+        await database
           .ref("truck/registration/")
           .child(regHead.split(":")[0])
           .update({
-            RepairTruck:
-              dayjs(new Date()).locale("th").format("DD/MM/YYYY") +
-              ":ตรวจสอบสภาพรถแล้ว",
-          })
-          .then(() => {
-            ShowSuccess("เพิ่มข้อมูลสำเร็จ");
-            setRegHead("");
-          })
-          .catch((error) => {
-            ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-            console.error("Error pushing data:", error);
+            RepairTruck: `${today}:ตรวจสอบสภาพรถแล้ว`,
           });
-      })
-      .catch((error) => {
-        ShowError("เพิ่มข้อมูลไม่สำเร็จ");
-        console.error("Error pushing data:", error);
-      });
+      } else if (regHead.split(":")[2] === "รถเล็ก") {
+        await database
+          .ref("truck/small/")
+          .child(regHead.split(":")[0])
+          .update({
+            RepairTruck: `${today}:ตรวจสอบสภาพรถแล้ว`,
+          });
+      }
+
+      ShowSuccess("เพิ่มข้อมูลสำเร็จ");
+      setRegHead("");
+      resetForm();
+    } catch (error) {
+      ShowError("เพิ่มข้อมูลไม่สำเร็จ");
+      console.error(error);
+    }
   };
 
   return (
@@ -358,7 +390,7 @@ const RepairTruck = () => {
               (row) =>
                 row.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ" && (
                   <MenuItem value={row.id - 1 + ":" + row.RegHead + ":รถใหญ่"}>
-                    {row.RegHead} : {row.Driver}
+                    {row.RegHead} : {row.Driver.split(":")[1]}
                   </MenuItem>
                 )
             )}
@@ -366,8 +398,8 @@ const RepairTruck = () => {
             {repairSmallTruck.map(
               (row) =>
                 row.RepairTruck.split(":")[1] === "ยังไม่ตรวจสอบสภาพรถ" && (
-                  <MenuItem value={row.id - 1 + ":" + row.Registration +":รถเล็ก"}>
-                    {row.Registration} : {row.Driver}
+                  <MenuItem value={row.id - 1 + ":" + row.RegHead + ":รถเล็ก"}>
+                    {row.ShortName} : {row.RegHead}
                   </MenuItem>
                 )
             )}
@@ -382,165 +414,165 @@ const RepairTruck = () => {
             marginBottom={2}
           >
             {
-            regHead.split(":")[2] === "รถใหญ่" ?
-            repairRegHead.map((row) =>
-              row.RegHead === regHead.split(":")[1] ? (
-                <>
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
-                    ชื่อ{" "}
-                  </Typography>
-                  <TextField
-                    placeholder="ระบุ"
-                    size="small"
-                    variant="standard"
-                    value={row.Driver}
-                    onChange={(e) => setDriver(e.target.value)}
-                    disabled
-                    sx={{ maxWidth: "20vw", marginLeft: 1 }}
-                  />
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
-                    ทะเบียนหัว{" "}
-                  </Typography>
-                  <TextField
-                    placeholder="ระบุ"
-                    size="small"
-                    variant="standard"
-                    value={row.RegHead}
-                    disabled
-                    sx={{ maxWidth: "10vw", marginLeft: 1 }}
-                  />
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
-                    ทะเบียนหาง{" "}
-                  </Typography>
-                  <TextField
-                    placeholder="ระบุ"
-                    size="small"
-                    variant="standard"
-                    value={row.RegTail}
-                    onChange={(e) => setRegTail(e.target.value)}
-                    disabled
-                    sx={{ maxWidth: "10vw", marginLeft: 1 }}
-                  />
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
-                    ชนิดรถ{" "}
-                  </Typography>
-                  <TextField
-                    placeholder="ระบุ"
-                    size="small"
-                    variant="standard"
-                    value={regHead.split(":")[2]}
-                    onChange={(e) => setType(e.target.value)}
-                    disabled
-                    sx={{ maxWidth: "10vw", marginLeft: 1 }}
-                  />
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
-                    วันที่{" "}
-                  </Typography>
-                  <TextField
-                    placeholder="ระบุ"
-                    size="small"
-                    variant="standard"
-                    value={dayjs(new Date()).locale("th").format("DD/MM/YYYY")}
-                    disabled
-                    sx={{ maxWidth: "10vw", marginLeft: 1 }}
-                  />
-                </>
-              ) : (
-                ""
-              )
-            )
-            : regHead.split(":")[2] === "รถเล็ก" ?
-            repairSmallTruck.map((row) =>
-              row.Registration === regHead.split(":")[1] ? (
-                <>
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
-                    ชื่อ{" "}
-                  </Typography>
-                  <TextField
-                    placeholder="ระบุ"
-                    size="small"
-                    variant="standard"
-                    value={row.Driver}
-                    onChange={(e) => setDriver(e.target.value)}
-                    disabled
-                    sx={{ maxWidth: "20vw", marginLeft: 1 }}
-                  />
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
-                    ทะเบียน{" "}
-                  </Typography>
-                  <TextField
-                    placeholder="ระบุ"
-                    size="small"
-                    variant="standard"
-                    value={row.Registration}
-                    disabled
-                    sx={{ maxWidth: "10vw", marginLeft: 1 }}
-                  />
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
-                    ชนิดรถ{" "}
-                  </Typography>
-                  <TextField
-                    placeholder="ระบุ"
-                    size="small"
-                    variant="standard"
-                    value={regHead.split(":")[2]}
-                    onChange={(e) => setType(e.target.value)}
-                    disabled
-                    sx={{ maxWidth: "10vw", marginLeft: 1 }}
-                  />
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
-                    วันที่{" "}
-                  </Typography>
-                  <TextField
-                    placeholder="ระบุ"
-                    size="small"
-                    variant="standard"
-                    value={dayjs(new Date()).locale("th").format("DD/MM/YYYY")}
-                    disabled
-                    sx={{ maxWidth: "10vw", marginLeft: 1 }}
-                  />
-                </>
-              ) : (
-                ""
-              )
-            )
-            : ""
+              regHead.split(":")[2] === "รถใหญ่" ?
+                repairRegHead.map((row) =>
+                  row.RegHead === regHead.split(":")[1] ? (
+                    <>
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight="bold"
+                        gutterBottom
+                      >
+                        ชื่อ{" "}
+                      </Typography>
+                      <TextField
+                        placeholder="ระบุ"
+                        size="small"
+                        variant="standard"
+                        value={row.Driver.split(":")[1]}
+                        onChange={(e) => setDriver(e.target.value)}
+                        disabled
+                        sx={{ maxWidth: "20vw", marginLeft: 1 }}
+                      />
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight="bold"
+                        gutterBottom
+                      >
+                        ทะเบียนหัว{" "}
+                      </Typography>
+                      <TextField
+                        placeholder="ระบุ"
+                        size="small"
+                        variant="standard"
+                        value={row.RegHead}
+                        disabled
+                        sx={{ maxWidth: "10vw", marginLeft: 1 }}
+                      />
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight="bold"
+                        gutterBottom
+                      >
+                        ทะเบียนหาง{" "}
+                      </Typography>
+                      <TextField
+                        placeholder="ระบุ"
+                        size="small"
+                        variant="standard"
+                        value={row.RegTail.split(":")[1]}
+                        onChange={(e) => setRegTail(e.target.value)}
+                        disabled
+                        sx={{ maxWidth: "10vw", marginLeft: 1 }}
+                      />
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight="bold"
+                        gutterBottom
+                      >
+                        ชนิดรถ{" "}
+                      </Typography>
+                      <TextField
+                        placeholder="ระบุ"
+                        size="small"
+                        variant="standard"
+                        value={regHead.split(":")[2]}
+                        onChange={(e) => setType(e.target.value)}
+                        disabled
+                        sx={{ maxWidth: "10vw", marginLeft: 1 }}
+                      />
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight="bold"
+                        gutterBottom
+                      >
+                        วันที่{" "}
+                      </Typography>
+                      <TextField
+                        placeholder="ระบุ"
+                        size="small"
+                        variant="standard"
+                        value={dayjs(new Date()).locale("th").format("DD/MM/YYYY")}
+                        disabled
+                        sx={{ maxWidth: "10vw", marginLeft: 1 }}
+                      />
+                    </>
+                  ) : (
+                    ""
+                  )
+                )
+                : regHead.split(":")[2] === "รถเล็ก" ?
+                  repairSmallTruck.map((row) =>
+                    row.RegHead === regHead.split(":")[1] ? (
+                      <>
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight="bold"
+                          gutterBottom
+                        >
+                          ชื่อ{" "}
+                        </Typography>
+                        <TextField
+                          placeholder="ระบุ"
+                          size="small"
+                          variant="standard"
+                          value={row.ShortName}
+                          onChange={(e) => setDriver(e.target.value)}
+                          disabled
+                          sx={{ maxWidth: "20vw", marginLeft: 1 }}
+                        />
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight="bold"
+                          gutterBottom
+                        >
+                          ทะเบียน{" "}
+                        </Typography>
+                        <TextField
+                          placeholder="ระบุ"
+                          size="small"
+                          variant="standard"
+                          value={row.RegHead}
+                          disabled
+                          sx={{ maxWidth: "10vw", marginLeft: 1 }}
+                        />
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight="bold"
+                          gutterBottom
+                        >
+                          ชนิดรถ{" "}
+                        </Typography>
+                        <TextField
+                          placeholder="ระบุ"
+                          size="small"
+                          variant="standard"
+                          value={regHead.split(":")[2]}
+                          onChange={(e) => setType(e.target.value)}
+                          disabled
+                          sx={{ maxWidth: "10vw", marginLeft: 1 }}
+                        />
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight="bold"
+                          gutterBottom
+                        >
+                          วันที่{" "}
+                        </Typography>
+                        <TextField
+                          placeholder="ระบุ"
+                          size="small"
+                          variant="standard"
+                          value={dayjs(new Date()).locale("th").format("DD/MM/YYYY")}
+                          disabled
+                          sx={{ maxWidth: "10vw", marginLeft: 1 }}
+                        />
+                      </>
+                    ) : (
+                      ""
+                    )
+                  )
+                  : ""
             }
           </Box>
         ) : (

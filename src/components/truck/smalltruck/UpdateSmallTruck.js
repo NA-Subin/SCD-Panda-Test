@@ -211,7 +211,7 @@ const UpdateSmallTruck = (props) => {
                 </DialogTitle>
                 <DialogContent>
                     <Box marginTop={2} marginBottom={-2}>
-                        <Typography variant="subtitle1" fontWeight="bold" color={theme.palette.warning.main} textAlign="right" marginRight={2} gutterBottom>{truck.RepairTruck.split(":")[1]}</Typography>
+                        <Typography variant="subtitle1" fontWeight="bold" color={truck.RepairTruck.split(":")[1] === "ตรวจสอบสภาพรถแล้ว" ? theme.palette.success.main : theme.palette.warning.main} textAlign="right" marginRight={2} gutterBottom>{truck.RepairTruck.split(":")[1]}</Typography>
                     </Box>
                     <Paper
                         sx={{ p: 2, border: "1px solid" + theme.palette.grey[600], marginTop: 2, marginBottom: 2 }}

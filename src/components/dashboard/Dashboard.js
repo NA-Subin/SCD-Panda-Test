@@ -1,14 +1,21 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
+  Checkbox,
   Container,
   Divider,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
   Grid,
   IconButton,
   InputAdornment,
+  InputLabel,
+  MenuItem,
   Paper,
   Popover,
+  Select,
   Stack,
   Table,
   TableBody,
@@ -83,7 +90,9 @@ const Dashboard = () => {
   const {
     order,
     trip,
-    tickets
+    tickets,
+    reportFinancial,
+    report
   } = useTripData();
 
   const {
@@ -98,7 +107,10 @@ const Dashboard = () => {
     customergasstations,
     customerbigtruck,
     customersmalltruck,
-    customertickets
+    customertickets,
+    deductibleincome,
+    companypayment,
+    expenseitems
   } = useBasicData();
 
   const { gasstationDetail } = useGasStationData();
@@ -125,15 +137,27 @@ const Dashboard = () => {
   });
   const officer = Object.values(officers || {});
   const gasstations = Object.values(gasstationDetail || {});
-  const regheads = Object.values(reghead || {});
-  const regtails = Object.values(regtail || {});
-  const smalls = Object.values(small || {});
+  const regheads = Object.values(reghead || {}).filter(r => r.StatusTruck !== "ยกเลิก");
+  const regtails = Object.values(regtail || {}).filter(r => r.StatusTruck !== "ยกเลิก");
+  const smalls = Object.values(small || {}).filter(s => s.StatusTruck !== "ยกเลิก");
   const depot = Object.values(depots || {});
   const Ctransport = Object.values(customertransports || {});
   const Cgasstations = Object.values(customergasstations || {});
   const Cbigtruck = Object.values(customerbigtruck || {});
   const Csmalltruck = Object.values(customersmalltruck || {});
   const Ctickets = Object.values(customertickets || {});
+
+  const reports_F = Object.values(reportFinancial || {})
+    .sort((a, b) => {
+      const driverA = (a.Driver || "").split(":")[1]?.trim() || "";
+      const driverB = (b.Driver || "").split(":")[1]?.trim() || "";
+      return driverA.localeCompare(driverB, 'th', { numeric: true });
+    });
+  const deductibleincomeDetail = Object.values(deductibleincome).filter((item) => item.StatusData === "อยู่ในระบบ");
+  const reports = Object.values(report || {});
+  const expenseitem = Object.values(expenseitems);
+  const companypaymentDetail = Object.values(companypayment);
+
   const Cbigtruck1 = Cbigtruck.filter((row) => (row.Type === "เชียงใหม่"));
   const Cbigtruck2 = Cbigtruck.filter((row) => (row.Type === "เชียงราย"));
   const Csmalltruck1 = Csmalltruck.filter((row) => (row.Type === "เชียงใหม่"));
@@ -141,6 +165,13 @@ const Dashboard = () => {
   const [date, setDate] = useState(dayjs(new Date())); // เก็บชื่อเดือน
   const [volumeAll, setVolumeAll] = useState([]); // เก็บข้อมูลทั้งหมด
   const [checkDate, setCheckDate] = useState(false); // เก็บข้อมูลทั้งหมด
+  const [selectedTruck, setSelectedTruck] = useState([
+    "รถใหญ่",
+    "รถเล็ก",
+    "รถรับจ้างขนส่ง"
+  ]);
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedFlow, setSelectedFlow] = useState(["in", "out"]);
 
   const handleDateChangeDate = (newValue) => {
     const monthName = newValue.format("MMMM"); // แปลงเป็นชื่อเดือนที่เลือก
@@ -269,6 +300,356 @@ const Dashboard = () => {
     setVolumeAll(fullOrders); // ตั้งค่าข้อมูลที่ใช้แสดง
     setCheckDate(true);
   };
+
+
+  let totalVolume = 0;
+
+  const getTotalVolumePerRow = (o) => {
+    let total = 0;
+
+    const truckType = trips.find(r => r.id === (Number(o.Trip) + 1))?.TruckType;
+
+    // กำหนด multiplier
+    const multiplier =
+      truckType === "รถใหญ่" || truckType === "รถรับจ้างขนส่ง"
+        ? 1000
+        : 1;
+
+    if (o.Product && typeof o.Product === 'object') {
+      Object.entries(o.Product).forEach(([key, value]) => {
+        if (key === 'p') return; // กัน key แปลก
+
+        const volume = Number(value?.Volume) || 0;
+        total += volume * multiplier;
+      });
+    }
+
+    return total;
+  };
+
+  const getTruckKey = (type) => {
+    if (type === "รถใหญ่") return "big";
+    if (type === "รถเล็ก") return "small";
+    if (type === "รถรับจ้างขนส่ง") return "outsource";
+    return "other";
+  };
+
+  const tripMap = Object.fromEntries(trips.filter((item) => item.StatusTrip === "จบทริป").map(t => [t.id, t]));
+  console.log("show Trips : ", trips.filter((item) => item.StatusTrip !== "จบทริป"))
+
+  const monthVolumes = {};
+
+  const ticketData = ticket
+    .filter((item) =>
+      !["ตั๋วรถใหญ่", "ตั๋วรถเล็ก"].includes(item.CustomerType) &&
+      item.Status === "จัดส่งสำเร็จ" &&
+      item.Trip !== "ยกเลิก"
+    )
+    .map((t) => {
+      const trip = tripMap[Number(t.Trip) + 1];
+      if (!trip) return null;
+
+      const date = dayjs(trip.DateReceive, "DD/MM/YYYY", true);
+      if (!date.isValid()) return null;
+
+      let registration = "";
+      if (trip?.TruckType === "รถใหญ่") {
+        const reghead = regheads.find(r => r.id === Number(t.Registration.split(":")[0]))
+        if (reghead) {
+          registration = `${reghead.id}: ${reghead.RegHead}`;
+        } else {
+          return null; // ถ้าไม่พบข้อมูลใน regheads ให้ข้ามรายการนี้
+        }
+      } else if (trip?.TruckType === "รถเล็ก") {
+        const reghead = smalls.find(r => r.id === Number(t.Registration.split(":")[0]))
+        if (reghead) {
+          registration = `${reghead.id}: ${reghead.RegHead}`;
+        } else {
+          return null; // ถ้าไม่พบข้อมูลใน regheads ให้ข้ามรายการนี้
+        }
+      } else if (trip?.TruckType === "รถรับจ้างขนส่ง") {
+        registration = trip?.Registration; // ใช้ Registration ตรงๆ สำหรับรถรับจ้างขนส่ง
+      }
+
+      return {
+        flowType: "in", // 🔥 สำคัญ
+        tripId: t.Trip,
+        truckType: trip.TruckType,
+        driver: trip.Driver,
+        registration: registration,
+        month: date.format("MM/YYYY"),
+        volume: getTotalVolumePerRow(t)
+      };
+    })
+    .filter(Boolean);
+
+  const orderData = orders
+    .filter((item) =>
+      item.status !== "ยกเลิก" &&
+      Number(item.Trip) &&
+      item.Status === "จัดส่งสำเร็จ" &&
+      item.Trip !== "ยกเลิก")
+    .map((o) => {
+      const trip = tripMap[Number(o.Trip) + 1];
+      if (!trip) return null;
+
+      const date = dayjs(trip.DateDelivery, "DD/MM/YYYY", true);
+      if (!date.isValid()) return null;
+
+      let registration = "";
+      if (trip?.TruckType === "รถใหญ่") {
+        const reghead = regheads.find(r => r.id === Number(o.Registration.split(":")[0]))
+        if (reghead) {
+          registration = `${reghead.id}: ${reghead.RegHead}`;
+        } else {
+          return null; // ถ้าไม่พบข้อมูลใน regheads ให้ข้ามรายการนี้
+        }
+      } else if (trip?.TruckType === "รถเล็ก") {
+        const reghead = smalls.find(r => r.id === Number(o.Registration.split(":")[0]))
+        if (reghead) {
+          registration = `${reghead.id}: ${reghead.RegHead}`;
+        } else {
+          return null; // ถ้าไม่พบข้อมูลใน regheads ให้ข้ามรายการนี้
+        }
+      } else if (trip?.TruckType === "รถรับจ้างขนส่ง") {
+        registration = trip?.Registration; // ใช้ Registration ตรงๆ สำหรับรถรับจ้างขนส่ง
+      }
+
+      return {
+        flowType: "out", // 🔥 สำคัญ
+        tripId: o.Trip,
+        truckType: trip.TruckType,
+        driver: trip.Driver,
+        registration: registration,
+        month: date.format("MM/YYYY"),
+        volume: getTotalVolumePerRow(o)
+      };
+    })
+    .filter(Boolean);
+
+  const allData = [...ticketData, ...orderData];
+
+  console.log("monthVolumes : ", monthVolumes);
+
+  const getDriverName = (driverStr = "") => {
+    return driverStr.split(":")[1]?.trim() || driverStr;
+  };
+
+  const getRegistration = (regStr = "") => {
+    return regStr.split(":")[1]?.trim().split(" ")[0] || regStr;
+  };
+
+  const driverMonthVolumes = {};
+
+  orders.filter((item) => item.status !== "ยกเลิก" && Number(item.Trip)).forEach((o) => {
+    if (!o.Date) return;
+
+    // const date = dayjs(o.Date, 'DD/MM/YYYY');
+    // const monthKey = date.format('MM/YYYY');
+
+    const trip = tripMap[Number(o.Trip) + 1];
+    if (!trip) return;
+
+    const truckType = trip.TruckType;
+
+    const date = dayjs(trip.DateDelivery, 'DD/MM/YYYY', true);
+    if (!date.isValid()) return;
+
+    const monthKey = date.format('MM/YYYY');
+
+    const driver = getDriverName(o.Driver);
+    const registration = getRegistration(o.Registration);
+
+    const totalVolume = getTotalVolumePerRow(o);
+
+    // ✅ ใช้ key เดียวทุกประเภท
+    const key = `${driver}|${registration}`;
+
+    // init เดือน
+    if (!driverMonthVolumes[monthKey]) {
+      driverMonthVolumes[monthKey] = {};
+    }
+
+    // init group
+    if (!driverMonthVolumes[monthKey][key]) {
+      driverMonthVolumes[monthKey][key] = {
+        driver,
+        registration,
+        truckType,
+        volume: 0
+      };
+    }
+
+    // sum
+    driverMonthVolumes[monthKey][key].volume += totalVolume;
+  });
+
+  console.log("driverMonthVolumes : ", driverMonthVolumes);
+
+
+  const driverChartData = [];
+
+  Object.values(driverMonthVolumes).forEach((monthData) => {
+    Object.values(monthData).forEach((d) => {
+      const name = `${d.driver} ${d.registration}`;
+
+      driverChartData.push({
+        name,
+        volume: d.volume,
+      });
+    });
+  });
+
+  const flatDriverData = [];
+
+  Object.entries(driverMonthVolumes).forEach(([month, monthData]) => {
+    Object.values(monthData).forEach((d) => {
+      flatDriverData.push({
+        month,
+        driver: d.driver,
+        registration: d.registration,
+        truckType: d.truckType,
+        volume: d.volume,
+      });
+    });
+  });
+
+  const big = flatDriverData.filter(d => d.truckType === "รถใหญ่");
+  const smalled = flatDriverData.filter(d => d.truckType === "รถเล็ก");
+  const outsource = flatDriverData.filter(d => d.truckType === "รถรับจ้างขนส่ง");
+
+  const getFilteredData = (truckTypes) => {
+    return flatDriverData.filter(d => truckTypes.includes(d.truckType));
+  };
+
+  const buildDriverChart = (data) => {
+    const map = {};
+
+    data.forEach(d => {
+      const key = `${d.driver} ${d.registration}`;
+      map[key] = (map[key] || 0) + d.volume;
+    });
+
+    return Object.entries(map).map(([name, volume]) => ({ name, volume }));
+  };
+
+  const buildRegChart = (data) => {
+    const map = {};
+
+    data.forEach(d => {
+      const key = d.registration;
+      map[key] = (map[key] || 0) + d.volume;
+    });
+
+    return Object.entries(map).map(([name, volume]) => ({ name, volume }));
+  };
+
+  const buildTotalChart = (data) => {
+    const map = {
+      "รถใหญ่": 0,
+      "รถเล็ก": 0,
+      "รถรับจ้างขนส่ง": 0
+    };
+
+    data.forEach((d) => {
+      if (map[d.truckType] !== undefined) {
+        map[d.truckType] += d.volume;
+      }
+    });
+
+    return Object.entries(map).map(([name, volume]) => ({
+      name,
+      volume
+    }));
+  };
+
+  const monthOptions = useMemo(() => {
+    const months = new Set();
+
+    flatDriverData.forEach(d => {
+      if (d.month) {
+        months.add(d.month);
+      }
+    });
+
+    return Array.from(months).sort(); // ["01/2026", "02/2026"]
+  }, [flatDriverData]);
+
+  const filtered = useMemo(() => {
+    return allData.filter((d) => {
+      const matchTruck = selectedTruck.includes(d.truckType);
+      const matchMonth = selectedMonth ? d.month === selectedMonth : true;
+      const matchFlow = selectedFlow.includes(d.flowType);
+
+      return matchTruck && matchMonth && matchFlow;
+    });
+  }, [allData, selectedTruck, selectedMonth, selectedFlow]);
+
+  const chartType1 = useMemo(() => buildDriverChart(filtered), [filtered]);
+  const chartType2 = useMemo(() => buildRegChart(filtered), [filtered]);
+  const chartType3 = useMemo(() => buildTotalChart(filtered), [filtered]);
+
+  const buildDriverTripChart = (data) => {
+    const map = {};
+
+    data.forEach(d => {
+      const key = `${d.driver} ${d.registration}`;
+      map[key] = (map[key] || 0) + 1; // 🔥 นับแทน volume
+    });
+
+    return Object.entries(map).map(([name, count]) => ({
+      name,
+      count
+    }));
+  };
+
+  const buildRegTripChart = (data) => {
+    const map = {};
+
+    data.forEach(d => {
+      const key = d.registration;
+      map[key] = (map[key] || 0) + 1;
+    });
+
+    return Object.entries(map).map(([name, count]) => ({
+      name,
+      count
+    }));
+  };
+
+  const buildTotalTripChart = (data, selectedTruck) => {
+    const map = {};
+
+    selectedTruck.forEach(type => {
+      map[type] = 0;
+    });
+
+    data.forEach((d) => {
+      if (map[d.truckType] !== undefined) {
+        map[d.truckType] += 1;
+      }
+    });
+
+    return Object.entries(map).map(([name, count]) => ({
+      name,
+      count
+    }));
+  };
+
+  const tripChartType1 = useMemo(
+    () => buildDriverTripChart(filtered),
+    [filtered]
+  );
+
+  const tripChartType2 = useMemo(
+    () => buildRegTripChart(filtered),
+    [filtered]
+  );
+
+  const tripChartType3 = useMemo(
+    () => buildTotalTripChart(filtered, selectedTruck),
+    [filtered, selectedTruck]
+  );
 
   const handleClearDate = () => {
     setCheckDate(false);
@@ -645,11 +1026,331 @@ const Dashboard = () => {
             sx={{
               height: "60vh",
               backgroundColor: theme.palette.panda.contrastText,
-              borderRadius: 5,
-              display: "flex",
-              flexDirection: "column"
+              borderRadius: 5
             }}
           >
+            {/* Top Header */}
+            <Box
+              sx={{
+                backgroundColor: theme.palette.panda.main,
+                borderTopLeftRadius: 15,
+                borderTopRightRadius: 15,
+                color: "white",
+                height: "5vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+              <Paper component="form" sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <FormControl size="small" sx={{ minWidth: 150, border: "1px solid white", borderRadius: 1, backgroundColor: "white" }}>
+                  <InputLabel>เดือน</InputLabel>
+                  <Select
+                    value={selectedMonth}
+                    label="เดือน"
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        height: "30px",
+                        paddingRight: "8px", // ลดพื้นที่ไอคอนให้แคบลง
+                      },
+                      "& .MuiInputBase-input": {
+                        fontSize: "14px", // ปรับขนาดตัวอักษรภายใน Input
+                      },
+                      "& .MuiInputAdornment-root": {
+                        marginLeft: "0px", // ลดช่องว่างด้านซ้ายของไอคอน
+                        paddingLeft: "0px", // เอาพื้นที่ด้านซ้ายของไอคอนออก
+                      },
+                    }}
+                  >
+                    <MenuItem value="">ทั้งหมด</MenuItem>
+                    {monthOptions.map((m) => (
+                      <MenuItem key={m} value={m}>
+                        {m}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedFlow.includes("in")}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedFlow([...selectedFlow, "in"]);
+                        } else {
+                          setSelectedFlow(selectedFlow.filter((f) => f !== "in"));
+                        }
+                      }}
+                    />
+                  }
+                  label="รับเข้า"
+                />
+
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedFlow.includes("out")}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedFlow([...selectedFlow, "out"]);
+                        } else {
+                          setSelectedFlow(selectedFlow.filter((f) => f !== "out"));
+                        }
+                      }}
+                    />
+                  }
+                  label="ส่งออก"
+                />
+                <FormGroup row>
+                  {["รถใหญ่", "รถเล็ก", "รถรับจ้างขนส่ง"].map((type) => (
+                    <FormControlLabel
+                      key={type}
+                      control={
+                        <Checkbox
+                          checked={selectedTruck.includes(type)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedTruck(prev => [...prev, type]);
+                            } else {
+                              setSelectedTruck(prev => prev.filter(t => t !== type));
+                            }
+                          }}
+                        />
+                      }
+                      label={type}
+                    />
+                  ))}
+                </FormGroup>
+              </Paper>
+            </Box>
+
+            {/* Middle Content */}
+            <Box
+              sx={{
+                backgroundColor: "white",
+                flex: 1,
+                mx: 0.5,
+                py: 1,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 1,
+                height: "50vh",
+                p: 2
+              }}
+            >
+              <BarChart
+                dataset={chartType1}
+                xAxis={[{ scaleType: 'band', dataKey: 'name' }]}
+                series={[
+                  {
+                    dataKey: 'volume',
+                    label: `${selectedTruck.join(", ")} (พนักงานขับรถ)`,
+                    color: theme.palette.success.main
+                  }
+                ]}
+              />
+              <BarChart
+                dataset={chartType2}
+                xAxis={[{ scaleType: 'band', dataKey: 'name' }]}
+                series={
+                  [
+                    {
+                      dataKey: 'volume',
+                      label: `${selectedTruck.join(", ")} (ทะเบียนรถ)`,
+                      color: theme.palette.warning.main
+                    }
+                  ]
+                }
+              />
+            </Box>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={12} lg={4}>
+          <Paper
+            sx={{
+              height: "60vh",
+              backgroundColor: theme.palette.panda.contrastText,
+              borderRadius: 5
+            }}
+          >
+            {/* Top Header */}
+            <Box
+              sx={{
+                backgroundColor: theme.palette.panda.main,
+                borderTopLeftRadius: 15,
+                borderTopRightRadius: 15,
+                color: "white",
+                height: "5vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+            </Box>
+
+            {/* Middle Content */}
+            <Box
+              sx={{
+                backgroundColor: "white",
+                flex: 1,
+                mx: 0.5,
+                py: 1,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 1,
+                height: "50vh",
+                p: 2
+              }}
+            >
+              {/* <BarChart
+                dataset={chartType2}
+                xAxis={[{ scaleType: 'band', dataKey: 'name' }]}
+                series={[
+                  {
+                    dataKey: 'volume',
+                    label: `${selectedTruck.join(", ")} (ทะเบียน)`
+                  }
+                ]}
+              /> */}
+
+              <BarChart
+                dataset={chartType3}
+                xAxis={[{ scaleType: 'band', dataKey: 'name' }]}
+                series={[
+                  {
+                    dataKey: 'volume',
+                    label: `${selectedTruck.join(", ")} (รวมปริมาณ)`,
+                    color: theme.palette.primary.main
+                  }
+                ]}
+              />
+            </Box>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={12} lg={8}>
+          <Paper
+            sx={{
+              height: "60vh",
+              backgroundColor: theme.palette.panda.contrastText,
+              borderRadius: 5
+            }}
+          >
+            {/* Top Header */}
+            <Box
+              sx={{
+                backgroundColor: theme.palette.panda.main,
+                borderTopLeftRadius: 15,
+                borderTopRightRadius: 15,
+                color: "white",
+                height: "5vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+            </Box>
+
+            {/* Middle Content */}
+            <Box
+              sx={{
+                backgroundColor: "white",
+                flex: 1,
+                mx: 0.5,
+                py: 1,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 1,
+                height: "50vh",
+                p: 2
+              }}
+            >
+              <BarChart
+                dataset={tripChartType1}
+                xAxis={[{ scaleType: 'band', dataKey: 'name' }]}
+                series={[{ dataKey: 'count', label: 'จำนวนเที่ยว (พนักงานขับรถ)', color: theme.palette.success.main }]}
+              />
+              <BarChart
+                dataset={tripChartType2}
+                xAxis={[{ scaleType: 'band', dataKey: 'name' }]}
+                series={[{ dataKey: 'count', label: 'จำนวนเที่ยว (ทะเบียน)', color: theme.palette.warning.main }]}
+              />
+            </Box>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={12} lg={4}>
+          <Paper
+            sx={{
+              height: "60vh",
+              backgroundColor: theme.palette.panda.contrastText,
+              borderRadius: 5
+            }}
+          >
+            {/* Top Header */}
+            <Box
+              sx={{
+                backgroundColor: theme.palette.panda.main,
+                borderTopLeftRadius: 15,
+                borderTopRightRadius: 15,
+                color: "white",
+                height: "5vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+            </Box>
+
+            {/* Middle Content */}
+            <Box
+              sx={{
+                backgroundColor: "white",
+                flex: 1,
+                mx: 0.5,
+                py: 1,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 1,
+                height: "50vh",
+                p: 2
+              }}
+            >
+              {/* <BarChart
+                dataset={chartType2}
+                xAxis={[{ scaleType: 'band', dataKey: 'name' }]}
+                series={[
+                  {
+                    dataKey: 'volume',
+                    label: `${selectedTruck.join(", ")} (ทะเบียน)`
+                  }
+                ]}
+              /> */}
+
+              <BarChart
+                dataset={tripChartType3}
+                xAxis={[{ scaleType: 'band', dataKey: 'name' }]}
+                series={[{ dataKey: 'count', label: 'จำนวนเที่ยวรวม', color: theme.palette.primary.main }]}
+              />
+            </Box>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={12} lg={8}>
+          <Paper
+            sx={{
+              height: "60vh",
+              backgroundColor: theme.palette.panda.contrastText,
+              borderRadius: 5
+            }}
+          >
+            {/* Top Header */}
             <Box
               sx={{
                 backgroundColor: theme.palette.panda.main,
@@ -869,7 +1570,7 @@ const Dashboard = () => {
         </Grid>
       </Grid>
       {/* <DriverTable /> */}
-    </Container>
+    </Container >
   );
 };
 

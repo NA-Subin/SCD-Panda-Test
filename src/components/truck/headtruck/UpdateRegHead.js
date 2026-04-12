@@ -272,7 +272,7 @@ const UpdateRegHead = (props) => {
                 </DialogTitle>
                 <DialogContent>
                     <Box marginTop={2} marginBottom={-2} sx={{ display: "flex", alignItems: "center", justifyContent: "right" }}>
-                        <Typography variant="subtitle1" fontWeight="bold" color={theme.palette.warning.main} textAlign="right" marginRight={2} gutterBottom>{truck.RepairTruck.split(":")[1]}</Typography>
+                        <Typography variant="subtitle1" fontWeight="bold" color={truck.RepairTruck.split(":")[1] === "ตรวจสอบสภาพรถแล้ว" ? theme.palette.success.main : theme.palette.warning.main} textAlign="right" marginRight={2} gutterBottom>{truck.RepairTruck.split(":")[1]}</Typography>
                         <TruckRepair key={truck.RepairTruck.split(":")[1]} row={truck} type={"ตรวจสอบสภาพรถ"} />
                     </Box>
                     <Paper

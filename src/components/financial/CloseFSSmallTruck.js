@@ -83,6 +83,23 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
         }
     ]
 
+    const DRIVER_ONLY_BANKS = ["เงินเดือน", "ประกันสังคม", "ค่าโทรศัพท์"];
+
+    const getKey = (r, bankName) => {
+        const isDriverOnly = DRIVER_ONLY_BANKS.includes(bankName);
+
+        const driverKey = normalizeReg(r.Driver);
+        const regKey = normalizeReg(r.Registration);
+
+        // 🔥 กลุ่มพิเศษ → map ไปหา registration
+        if (isDriverOnly) {
+            return driverToRegMap[driverKey] || driverKey;
+        }
+
+        // 🔥 ปกติ
+        return regKey || driverKey;
+    };
+
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     useEffect(() => {
@@ -348,7 +365,8 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                         CostPrice: 0,
                         Transport: 0,
                         ProfitLoss: 0,
-
+                        Rate: item.Rate,
+                        RateOil: item.RateOil,
                         Drivers: new Map(),
                     };
                 }
@@ -647,20 +665,13 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             .map((curr) => {
                 const tripDetail = trips.find((trip) => (Number(trip.id) - 1) === Number(curr.Trip));
 
-                let registrationTail = "";
+                let shortName = "";
                 let truckCompany = "";
-                if (tripDetail?.TruckType === "รถใหญ่") {
-                    const reg = registrationH.find(
-                        (h) => h.id === Number(tripDetail?.Registration.split(":")[0])
-                    );
-                    registrationTail = reg?.RegTail || "";
-                    truckCompany = reg?.Company || "";
-                }
-                else if (tripDetail?.TruckType === "รถเล็ก") {
+                if (tripDetail?.TruckType === "รถเล็ก") {
                     const reg = registrationSm.find(
                         (h) => h.id === Number(tripDetail?.Registration.split(":")[0])
                     );
-                    registrationTail = reg?.RegHead || "";
+                    shortName = reg?.ShortName || "";
                     truckCompany = reg?.Company || "";
                 }
 
@@ -673,7 +684,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                     Rate = parseFloat(curr.Rate3) || 0;
 
                 // 🔥 คำนวณยอดจาก Product
-                const totalProductCost = calcProductTotal(curr.Product, Rate);
+                const totalProductCost = calcProductTotal(curr.Product, curr.Rate);
 
                 return {
                     ...curr,
@@ -681,11 +692,11 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                     DateDelivery: tripDetail?.DateDelivery,
                     TruckType: tripDetail?.TruckType,
                     Driver: tripDetail?.Driver,
-                    RateOil: Rate,
+                    RateOil: curr.Rate,
                     ProductTotal: totalProductCost, // ✅ ยอดรวม Volume * 1000 * Rate
                     ProductVolume: calcProductVolume(curr.Product, Rate), // ✅ ยอดรวม Volume * 1000
                     Registration: tripDetail?.Registration,
-                    RegistrationTail: registrationTail,
+                    ShortName: shortName,
                     TruckCompany: truckCompany
                 };
             })
@@ -724,72 +735,6 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
     }, [ticket, trips, registrationH, registrationT, date, months, years]);
     console.log("filteredOrders truck : ", filteredOrders.filter((tk) => tk.TruckType === "รถใหญ่" && tk.TruckCompany === "2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" && tk.Status !== "ยกเลิก" && tk.TicketName.split(":")[1] === "ศรีพลัง").reduce((sum, tk) => sum + (tk.ProductTotal || 0), 0));
 
-    // console.log("filteredOrders truck : ", filteredOrders.filter((tk) => tk.TruckType === "รถใหญ่" && tk.TruckCompany === "2:บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" && tk.TicketName.split(":")[1] === "ศรีพลัง"));
-
-    // ===============================
-    // 2️⃣ สร้าง DriverGroups
-    // ===============================
-    const driverGroups = useMemo(() => {
-        if (!groupedResult) return [];
-
-        const smallTruckGroups = registrationSm
-            .filter((reg) =>
-                companyName === "0:ทั้งหมด" ? true : reg.Company === companyName
-            )
-            .reduce((acc, curr) => {
-                const regKey = `${curr.id}:${curr.RegHead}`;
-
-                // 🔥 หา group ที่มี driver + registration ตรง
-                const matchedGroups = groupedResult.filter((gr) =>
-                    (gr.Drivers || []).some(
-                        (d) =>
-                            d.Registration === regKey
-                    )
-                );
-
-                if (matchedGroups.length === 0) return acc;
-
-                // 🔥 เอา driver จาก groupedResult
-                const driver = matchedGroups[0]?.Drivers?.[0]?.Driver || "";
-
-                const key = `${driver}-${regKey}`;
-
-                let group = acc.find((g) => g.key === key);
-
-                if (!group) {
-                    group = {
-                        key,
-                        Driver: driver,
-                        Registration: regKey,
-                        RegistrationTail: curr.ShortName,
-                        TicketName: matchedGroups, // 🔥 ใช้ groupedResult แทน
-                        TruckType: "รถเล็ก",
-                    };
-                    acc.push(group);
-                }
-
-                return acc;
-            }, []);
-
-        const truckTypeOrder = {
-            "รถรับจ้างขนส่ง": 1,
-            "รถใหญ่": 2,
-            "รถเล็ก": 3,
-        };
-
-        return smallTruckGroups.sort((a, b) => {
-            const typeDiff =
-                (truckTypeOrder[a.TruckType] || 99) -
-                (truckTypeOrder[b.TruckType] || 99);
-
-            if (typeDiff !== 0) return typeDiff;
-
-            const nameA = (a.Driver?.split(":")[1] || "").trim();
-            const nameB = (b.Driver?.split(":")[1] || "").trim();
-
-            return nameA.localeCompare(nameB, "th");
-        });
-    }, [registrationSm, groupedResult, companyName]);
     // ===============================
     // 3️⃣ สร้าง ReportDetail จาก expenseitem + reports
     // ===============================
@@ -844,6 +789,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             TotalAmount: 0,
             TotalVat: 0,
             Driver: [],
+            Registrations: [],
             isFixed: priorityNames.includes(item.Name),
         }));
 
@@ -881,6 +827,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                         Bank: bank,
                         Type: "ค่าใช้จ่าย",
                         Driver: [],
+                        Registrations: [],
                     };
                     reportInit.push(bankGroup);
                 }
@@ -904,6 +851,8 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                 regGroup.TotalAmount += Number(curr.Price || 0);
                 regGroup.TotalVat += Number(curr.Vat || 0);
             });
+
+        console.log("reports : ", reports.filter((r) => r.TruckType === "รถเล็ก"));
 
         filteredReports
             .filter(r => {
@@ -954,61 +903,97 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
         trips
             .filter((tr) => {
                 if (tr.Status === "ยกเลิก") return false;
-
                 if (tr.StatusTrip === "ยกเลิก") return false;
-
                 if (tr.TruckType !== "รถเล็ก") return false;
-                // ตรวจสอบเดือนและปีของ DateReceive
-                const tripDate = dayjs(tr.DateReceive, ['DD/MM/YYYY', 'YYYY-MM-DD']); // รองรับหลาย format
+
+                const tripDate = dayjs(tr.DateReceive, ['DD/MM/YYYY', 'YYYY-MM-DD']);
                 const selectedMonth = dayjs(months);
                 const selectedYear = dayjs(years);
 
-                // ถ้า date = false ให้กรองตามเดือน+ปี, ถ้า date = true ให้กรองตามปี
                 return !date
-                    ? tripDate.month() === selectedMonth.month() && tripDate.year() === selectedMonth.year()
+                    ? tripDate.month() === selectedMonth.month() &&
+                    tripDate.year() === selectedMonth.year()
                     : tripDate.year() === selectedYear.year();
             })
             .forEach((curr) => {
-                const bankName = "2:ค่าเที่ยวรถ"; // กำหนด BankName เป็น "ค่าเที่ยว"
+                const bankName = "2:ค่าเที่ยวรถ";
+
                 let bankGroup = reportInit.find(b => b.Bank === bankName);
+
                 if (!bankGroup) {
-                    bankGroup = { Bank: bankName, Type: "ค่าใช้จ่าย", Driver: [] };
+                    bankGroup = {
+                        Bank: bankName,
+                        Type: "ค่าใช้จ่าย",
+                        Driver: [], // 🔥 ใช้ Drivers
+                    };
                     reportInit.push(bankGroup);
                 }
 
-                let driverName = ""
+                // 🔥 หา Driver
+                let driverName = "";
                 if (curr.TruckType === "รถเล็ก") {
-                    const dv = driver.filter((d) => d.TruckType === "รถเล็ก").find((rg) => rg.id === Number(curr.Driver.split(":")[0]));
-                    driverName = `${dv?.id}:${dv?.Name}`;
+                    const dv = driver
+                        .filter((d) => d.TruckType === "รถเล็ก")
+                        .find((rg) => rg.id === Number(curr.Driver?.split(":")[0]));
+
+                    driverName = `${dv?.id || ""}:${dv?.Name || ""}`;
                 }
 
+                // 🔥 Registration
+                const registration = curr.Registration || "";
+
+                // 🔥 key รวม Driver + Registration
+                const key = `${driverName}_${registration}`;
+
                 let regGroup = bankGroup.Driver.find(
-                    (r) => r.Driver === driverName
+                    (r) => `${r.Driver}_${r.Registration}` === key
                 );
 
                 if (!regGroup) {
                     regGroup = {
                         Driver: driverName,
+                        Registration: registration,
                         TruckType: curr.TruckType,
                         TotalPrice: 0,
                         TotalAmount: 0,
                         TotalVat: 0,
                     };
+
                     bankGroup.Driver.push(regGroup);
                 }
 
+                // ✅ รวมค่า
                 regGroup.TotalPrice += Number(curr.CostTrip || 0);
                 regGroup.TotalAmount += Number(curr.Price || 0);
                 regGroup.TotalVat += Number(curr.Vat || 0);
             });
 
+        console.log("trips : ", trips.filter((tr) => tr.TruckType === "รถเล็ก"));
 
         // ✅ สรุปรวมหลังจาก loop เสร็จ
         reportInit.forEach((bankGroup) => {
-            bankGroup.TotalPrice = bankGroup.Driver.reduce((sum, r) => sum + (r.TotalPrice || 0), 0);
-            bankGroup.TotalAmount = bankGroup.Driver.reduce((sum, r) => sum + (r.TotalAmount || 0), 0);
-            bankGroup.TotalVat = bankGroup.Driver.reduce((sum, r) => sum + (r.TotalVat || 0), 0);
+            const driverList = bankGroup.Driver || [];
+            const regList = bankGroup.Registrations || [];
+
+            const all = [...driverList, ...regList]; // ✅ รวม 2 แหล่ง
+
+            bankGroup.TotalPrice = all.reduce(
+                (sum, r) => sum + Number(r.TotalPrice || 0),
+                0
+            );
+
+            bankGroup.TotalAmount = all.reduce(
+                (sum, r) => sum + Number(r.TotalAmount || 0),
+                0
+            );
+
+            bankGroup.TotalVat = all.reduce(
+                (sum, r) => sum + Number(r.TotalVat || 0),
+                0
+            );
         });
+
+        console.log("reportInit before sort : ", reportInit);
 
         // sort by priorityNames
         return reportInit
@@ -1027,8 +1012,154 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
 
     }, [expenseitem, reports, date, months, years, companyName, filteredReports, trips]);
 
-    console.log("trips : ", trips);
+    console.log("reportInit after sort : ", reportDetail);
 
+    const driverFirstRegMap = {};
+
+    const normalize = (v) => v?.trim().toLowerCase() || "";
+
+    // 🔥 วนทุก data หา registration แรกของแต่ละ driver
+    [...(groupedResult || []), ...(reportDetail || [])].forEach((item) => {
+        const list = [
+            ...(item.Driver || item.Drivers || []),
+            ...(item.Registrations || [])
+        ];
+
+        list.forEach((d) => {
+            const driverKey = normalize(d.Driver);
+            const regKey = normalize(d.Registration);
+
+            if (driverKey && regKey && !driverFirstRegMap[driverKey]) {
+                driverFirstRegMap[driverKey] = regKey;
+            }
+        });
+    });
+
+    const getGroupKey = (driver, registration) => {
+        const driverKey = normalize(driver);
+        const regKey = normalize(registration);
+
+        // ✅ มีทั้งคู่ → ใช้คู่
+        if (driverKey && regKey) {
+            return `${driverKey}__${regKey}`;
+        }
+
+        // 🔥 ไม่มี registration → ไปใช้ตัวแรกของ driver
+        if (driverKey && !regKey) {
+            const firstReg = driverFirstRegMap[driverKey];
+            if (firstReg) {
+                return `${driverKey}__${firstReg}`;
+            }
+            return driverKey;
+        }
+
+        // fallback
+        return regKey;
+    };
+
+    const driverGroups = useMemo(() => {
+        if (!groupedResult && !reportDetail) return [];
+
+        const result = [];
+
+        const pushIfNotExist = (driver = "", registration = "", extra = {}) => {
+            const key = getGroupKey(driver, registration);
+
+            if (!key) return;
+
+            let exist = result.find((r) => r._key === key);
+
+            if (exist) return;
+
+            const registrations = registration.split(":")[1]?.trim() || "";
+            const shortName =
+                registrationSm.find((reg) => reg.RegHead === registrations)?.ShortName || "";
+
+            result.push({
+                _key: key, // 🔥 เก็บ key ไว้เลย
+                Driver: driver,
+                Registration: registration,
+                ShortName: shortName,
+                ...extra,
+            });
+        };
+
+        groupedResult?.forEach((gr) => {
+            (gr.Drivers || []).forEach((d) => {
+                pushIfNotExist(d.Driver, d.Registration, {
+                    TruckType: "รถเล็ก",
+                });
+            });
+        });
+
+        // 🔥 2. reportDetail
+        reportDetail?.forEach((bank) => {
+            if (bank.Driver && bank.Driver.length > 0) {
+                // ✅ มี Driver → ใช้ Driver อย่างเดียว
+                (bank.Driver || []).forEach((d) => {
+                    pushIfNotExist(d.Driver, d.Registration, {
+                        TruckType: d.TruckType,
+                    });
+                });
+            } else {
+                // ✅ ไม่มี Driver → ใช้ Registration
+                (bank.Registrations || []).forEach((r) => {
+                    pushIfNotExist("", r.Registration, {
+                        TruckType: r.TruckType,
+                    });
+                });
+            }
+        });
+
+        // 🔥 sort
+        const truckTypeOrder = {
+            "รถรับจ้างขนส่ง": 1,
+            "รถใหญ่": 2,
+            "รถเล็ก": 3,
+        };
+
+        return result.sort((a, b) => {
+            const typeDiff =
+                (truckTypeOrder[a.TruckType] || 99) -
+                (truckTypeOrder[b.TruckType] || 99);
+
+            if (typeDiff !== 0) return typeDiff;
+
+            const getName = (item) => {
+                const name =
+                    item.Driver?.split(":")[1]?.trim();
+                return name;
+            };
+
+            const nameA = getName(a);
+            const nameB = getName(b);
+
+            // 🔥 ถ้า A ไม่มีค่า → ไปท้าย
+            if (!nameA && nameB) return 1;
+
+            // 🔥 ถ้า B ไม่มีค่า → ไปท้าย
+            if (nameA && !nameB) return -1;
+
+            // 🔥 ถ้าทั้งคู่ไม่มี → เท่ากัน
+            if (!nameA && !nameB) return 0;
+
+            return nameA.localeCompare(nameB, "th");
+        });
+    }, [registrationSm, groupedResult, reportDetail, companyName]);
+
+    const driverToRegMap = {};
+
+    reportDetail.forEach((item) => {
+        (item.Driver || []).forEach((d) => {
+            const driverKey = normalizeReg(d.Driver);
+            const regKey = normalizeReg(d.Registration);
+
+            // 🔥 เก็บทะเบียนแรกของ driver
+            if (driverKey && regKey && !driverToRegMap[driverKey]) {
+                driverToRegMap[driverKey] = regKey;
+            }
+        });
+    });
     // ===============================
     // 4️⃣ สร้าง TicketGroups
     // ===============================
@@ -1084,13 +1215,9 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             }
 
             // 🔹 หา DriverGroup
-            let registrationTail = "";
-            if (tripDetail?.TruckType === "รถใหญ่") {
-                registrationTail = registrationH.find(h => h.id === Number(tripDetail?.Registration.split(":")[0]))?.RegTail;
-            } else if (tripDetail?.TruckType === "รถรับจ้างขนส่ง") {
-                registrationTail = registrationT.find(h => h.id === Number(tripDetail?.Registration.split(":")[0]))?.Name;
-            } else if (tripDetail?.TruckType === "รถเล็ก") {
-                registrationTail = registrationSm.find(h => h.id === Number(tripDetail?.Registration.split(":")[0]))?.ShortName;
+            let shortName = "";
+            if (tripDetail?.TruckType === "รถเล็ก") {
+                shortName = registrationSm.find(h => h.id === Number(tripDetail?.Registration.split(":")[0]))?.ShortName;
             }
 
             let driverGroup = ticketGroup.Drivers.find(
@@ -1102,7 +1229,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                     CustomerType: curr.CustomerType,
                     Driver: tripDetail?.Driver,
                     Registration: tripDetail?.Registration,
-                    RegistrationTail: registrationTail,
+                    ShortName: shortName,
                     Volume: 0,
                     Amount: 0,
                 };
@@ -1192,28 +1319,44 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
         // =======================
         // Grand total for reportDetail
         // =======================
+        const seen = new Set();
+
         const grandTotalReport = reportDetail.reduce(
             (sum, item) => {
-                sum.TotalPrice += item.TotalPrice || 0;
-                sum.TotalAmount += item.TotalAmount || 0;
-                sum.TotalVat += item.TotalVat || 0;
+                const process = (r) => {
+                    const key = getGroupKey(r.Driver, r.Registration);
+
+                    if (!key || seen.has(key)) return;
+                    seen.add(key);
+
+                    sum.TotalPrice += Number(r.TotalPrice || 0);
+                    sum.TotalAmount += Number(r.TotalAmount || 0);
+                    sum.TotalVat += Number(r.TotalVat || 0);
+                };
+
+                [...(item.Driver || []), ...(item.Registrations || [])].forEach(process);
+
                 return sum;
             },
             { TotalPrice: 0, TotalAmount: 0, TotalVat: 0 }
         );
 
         const driverReportTotals = reportDetail.reduce((acc, item) => {
-            item.Driver.forEach(r => {
-                const regKey = normalizeReg(r.Driver);
+            const process = (r) => {
+                const key = getGroupKey(r.Driver, r.Registration);
 
-                if (!acc[regKey]) {
-                    acc[regKey] = { TotalPrice: 0, TotalAmount: 0, TotalVat: 0 };
+                if (!key) return;
+
+                if (!acc[key]) {
+                    acc[key] = { TotalPrice: 0, TotalAmount: 0, TotalVat: 0 };
                 }
 
-                acc[regKey].TotalPrice += r.TotalPrice || 0;
-                acc[regKey].TotalAmount += r.TotalAmount || 0;
-                acc[regKey].TotalVat += r.TotalVat || 0;
-            });
+                acc[key].TotalPrice += Number(r.TotalPrice || 0);
+                acc[key].TotalAmount += Number(r.TotalAmount || 0);
+                acc[key].TotalVat += Number(r.TotalVat || 0);
+            };
+
+            [...(item.Driver || []), ...(item.Registrations || [])].forEach(process);
 
             return acc;
         }, {});
@@ -1414,15 +1557,13 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             { header: "ลำดับ", key: "no", width: 7 }, // 50px
             { header: "ประเภท", key: "type", width: 14 }, // 100px
             { header: "ชื่อรายการ", key: "ticket", width: 40 }, // 280px
-            { header: "เฉลี่ยค่าขนส่ง/ลิตร", key: "rate", width: 20 }, // 140px
+            { header: "ค่าบรรทุก", key: "rate", width: 20 }, // 140px
             { header: "รวม", key: "total", width: 19 }, // 130px
             ...driverGroups.map(dg => ({
                 header:
                     dg.TruckType === "รถเล็ก" ?
-                        `${dg.RegistrationTail}/${dg.Registration.split(":")[1]}`
-                        : dg.TruckType === "รถรับจ้างขนส่ง" ?
-                            (dg.Driver ? dg.Driver.split(":")[1] : "")
-                            : `${dg.Registration.split(":")[1]}/${dg.RegistrationTail.split(":")[1]}`
+                        `${dg.Driver?.split(":")[1] || ""}${dg.ShortName ? dg.ShortName + "/" : ""}${dg.Registration.split(":")[1]}`
+                        : ""
                 ,
                 key: `driver_${dg.Registration.split(":")[0]}`,
                 width: 32, // 250px
@@ -1451,15 +1592,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             cell.alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
         });
 
-        // 4️⃣ TicketGroups per type
-        const ticketTypes = [
-            { label: "ตั๋วน้ำมัน", totals: driverTotalsA, grandTotal: grandTotalA },
-            { label: "ตั๋วรับจ้างขนส่ง", totals: driverTotalsT, grandTotal: grandTotalT },
-            { label: "ตั๋วปั้ม", totals: driverTotalsG, grandTotal: grandTotalG },
-            // { label: "ตั๋วรถเล็ก", totals: driverTotalsS, grandTotal: grandTotalS },
-        ];
-
-        ticketTypes.forEach(({ label, totals, grandTotal }) => {
+        summary.map(({ label, total, driverTotals }) => {
             // Header for type
             const typeRow = worksheet.addRow([label]);
             typeRow.font = { bold: true };
@@ -1469,25 +1602,32 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             });
 
             // Data rows
-            ticketGroups.filter(t => t.CustomerType === label).forEach((row, idx) => {
-                const dataRow = [
-                    idx + 1,
-                    "รายได้",
-                    row.TicketName?.split(":")[1] || row.TicketName,
-                    row.Rate,
-                    row.Drivers.reduce((sum, dv) => sum + Number(check ? dv.Amount : dv.Volume || 0), 0),
-                    ...driverGroups.map(dg => {
-                        const found = row.Drivers.find(dv => dv.Driver === dg.Driver && dv.Registration === dg.Registration);
-                        return found ? Number(check ? found.Amount : found.Volume) : 0;
-                    }),
-                ];
-                const excelRow = worksheet.addRow(dataRow);
-                excelRow.eachCell((cell, colIndex) => {
-                    cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-                    if (colIndex > 1) cell.numFmt = "#,##0.00";
-                    cell.alignment = { horizontal: colIndex === 3 ? "left" : "right", vertical: "middle" };
+            groupedResult
+                .map((row, index) => {
+                    const dataRow = [
+                        index + 1,
+                        "รายได้",
+                        row.TicketName?.split(":")[1] || row.TicketName,
+                        row.Rate,
+                        label === "ค่าขนส่ง" ? row.Transport : row.ProfitLoss,
+                        ...driverGroups.map((h, i) => {
+                            const found = row.Drivers.find(
+                                (dv) =>
+                                    dv.Driver === h.Driver &&
+                                    dv.Registration === h.Registration
+                            );
+
+                            const value = label === "ค่าขนส่ง" ? Number(found?.Transport) || 0 : Number(found?.ProfitLoss) || 0;
+                            return value ?? 0;
+                        }),
+                    ];
+                    const excelRow = worksheet.addRow(dataRow);
+                    excelRow.eachCell((cell, colIndex) => {
+                        cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+                        if (colIndex > 1) cell.numFmt = "#,##0.00";
+                        cell.alignment = { horizontal: colIndex === 3 ? "left" : "right", vertical: "middle" };
+                    });
                 });
-            });
 
             // Total per type
             const totalRow = [
@@ -1495,10 +1635,15 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                 "",
                 `รวมรายได้ของ ${label}`,
                 "",
-                grandTotal ? Number(check ? grandTotal.Amount : grandTotal.Volume) : 0,
-                ...driverGroups.map(dg => {
-                    const totalDriver = totals[dg.Driver.split(":")[1]] || { Amount: 0, Volume: 0 };
-                    return Number(check ? totalDriver.Amount : totalDriver.Volume);
+                total,
+                ...driverGroups.map((row) => {
+                    const driverName = row.Driver?.split(":")[1] || "";
+                    const regis = row.Registration?.split(":")[1] || "";
+                    const key = driverName + regis;
+
+                    const found = driverTotals[key];
+
+                    return found?.total ?? 0;
                 }),
             ];
             const footerRow = worksheet.addRow(totalRow);
@@ -1517,11 +1662,14 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             "",
             "รวมรายได้ทั้งหมด",
             "",
-            grandTotal ? Number(check ? grandTotal.Amount : grandTotal.Volume) : 0,
-            ...driverGroups.map(dg => {
-                const driverName = dg.Driver.split(":")[1];
-                const total = driverTotals[driverName] || { Amount: 0, Volume: 0 };
-                return Number(check ? total.Amount : total.Volume);
+            (grandTotal?.Transport + grandTotal?.ProfitLoss),
+            ...driverGroups.map((row) => {
+                const driverName = row.Driver?.split(":")[1] || "";
+                const regis = row.Registration?.split(":")[1] || "";
+                const key = `${driverName}_${regis}`;
+
+                const total = grandTotal.driverTotals[key];
+                return total?.total ?? 0;
             }),
         ];
         const gTotalRow = worksheet.addRow(grandTotalRow);
@@ -1541,12 +1689,38 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                 row.Bank ? row.Bank.split(":")[1] : row.Bank,
                 "-",
                 row.TotalPrice || 0,
-                ...driverGroups.map(dg => {
-                    const found = row.Registrations.find(
-                        r => Number(r.Registration.split(":")[0]) === Number(dg.Registration.split(":")[0])
+                ...driverGroups.map((driver, i) => {
+                    const key = driver._key;
+
+                    const firstIndex = driverGroups.findIndex((d) => d._key === key);
+
+                    if (i !== firstIndex) {
+                        return <TableCell key={i} />;
+                    }
+
+                    // 🔥 source
+                    const source = [
+                        ...(row.Driver || []),
+                        ...(row.Registrations || [])
+                    ];
+
+                    const matched = source.filter((d) => {
+                        const dKey = getGroupKey(d.Driver, d.Registration); // ✅ ใช้ function เดียวกัน
+
+                        return dKey === key;
+                    });
+
+                    const totalPrice = matched.reduce(
+                        (sum, d) => sum + Number(d.TotalPrice || 0),
+                        0
                     );
-                    return found ? (found.TotalPrice) : 0;
-                }),
+
+                    if (!matched.length || totalPrice === 0) {
+                        return 0;
+                    }
+                    return totalPrice ?? 0;
+                }
+                ),
             ];
             const excelRow = worksheet.addRow(dataRow);
             excelRow.eachCell((cell, colIndex) => {
@@ -1563,13 +1737,15 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             "รวมค่าใช้จ่าย",
             "",
             grandTotalReport?.TotalPrice || 0,
-            ...driverGroups.map(dg => {
-                // const regis = Number(dg.Registration.split(":")[0]);
-                // const total = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
-                const regis = normalizeReg(dg.Registration);
-                const total = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+            ...driverGroups.map((row, index) => {
+                const key = row._key; // ✅ ใช้ key ที่สร้างมาแล้ว
 
-                return total.TotalPrice;
+                const total = driverReportTotals[key] || {
+                    TotalAmount: 0,
+                    TotalPrice: 0,
+                    TotalVat: 0
+                };
+                return total.TotalPrice ?? 0;
             }),
         ];
         const gTotalReportRow = worksheet.addRow(grandTotalReportRow);
@@ -1587,17 +1763,23 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             "",
             "ยอดกำไรสุทธิ",
             "",
-            ((check ? grandTotal?.Amount : grandTotal?.Volume) - grandTotalReport?.TotalPrice || 0),
-            ...driverGroups.map(dg => {
-                const driverName = dg.Driver.split(":")[1];
-                // const regis = Number(dg.Registration.split(":")[0]);
-                // const total1 = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
-                const regis = normalizeReg(dg.Registration);
-                const total1 = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+            ((grandTotal?.Transport + grandTotal?.ProfitLoss) - (grandTotalReport?.TotalPrice)),
+            ...driverGroups.map((row) => {
+                const key = row._key; // ✅ ใช้อันเดียว
 
-                const total2 = driverTotals[driverName] || { Volume: 0, Amount: 0 };
-                return (check ? total2.Amount : total2.Volume) - total1.TotalPrice;
-            }),
+                const driverName = row.Driver?.split(":")[1] || "";
+                const regis = row.Registration?.split(":")[1] || "";
+                const keys = `${driverName}_${regis}`;
+
+                const total1 = grandTotal.driverTotals[keys];
+
+                const total2 = driverReportTotals[key] || {
+                    TotalAmount: 0,
+                    TotalPrice: 0,
+                    TotalVat: 0
+                };
+                return (total1?.Transport ?? 0) + (total1?.ProfitLoss ?? 0) - (total2.TotalPrice ?? 0);
+            })
         ];
         const gTotalnetIncomeRow = worksheet.addRow(netIncomeReportRow);
         gTotalnetIncomeRow.font = { bold: true };
@@ -1892,7 +2074,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                     ชื่อรายการ
                                 </TablecellPink>
                                 <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 140 }}>
-                                    เฉลี่ยค่าขนส่ง/ลิตร
+                                    ค่าบรรทุก
                                 </TablecellPink>
                                 <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 130, position: "sticky", left: 320, zIndex: 5, borderRight: "2px solid white" }}>
                                     รวม
@@ -1906,10 +2088,8 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                             <Typography variant="subtitle2" fontSize="16px" fontWeight="bold" sx={{ whiteSpace: "nowrap", lineHeight: 1 }} gutterBottom>
                                                 {
                                                     row.TruckType === "รถเล็ก" ?
-                                                        `${row.RegistrationTail}/${row.Registration.split(":")[1]}`
-                                                        : row.TruckType === "รถรับจ้างขนส่ง" ?
-                                                            ``
-                                                            : `${row.Registration.split(":")[1]}/${row.RegistrationTail.split(":")[1]}`
+                                                        `${row.ShortName ? row.ShortName + "/" : ""}${row.Registration.split(":")[1]}`
+                                                        : ""
                                                 }
                                             </Typography>
                                         </TablecellPink>
@@ -1984,7 +2164,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                                     </Typography>
                                                 </TableCell>
 
-                                                <TableCell sx={{ textAlign: "center" }}>{row.Rate}</TableCell>
+                                                <TableCell sx={{ textAlign: "center" }}>{row.RateOil}</TableCell>
 
                                                 {/* ช่องรวมของแต่ละ Ticket */}
                                                 <TableCell
@@ -2206,85 +2386,120 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                 })}
                             </TableRow>
                             {
-                                reportDetail.map((row, index) => (
-                                    <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff" }}>
-                                        <TableCell
-                                            sx={{
-                                                textAlign: "center",
-                                                position: "sticky",
-                                                left: 0,
-                                                zIndex: 4,
-                                                borderRight: "2px solid white",
-                                                backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff",
-                                            }}
-                                        >
-                                            {index + 1}
-                                        </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>{row.Type}</TableCell>
-                                        <TableCell
-                                            sx={{
-                                                textAlign: "left",
-                                                position: "sticky",
-                                                left: 50,
-                                                zIndex: 4,
-                                                borderRight: "2px solid white",
-                                                backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff",
-                                            }}
-                                        >
-                                            <Typography variant="subtitle2" sx={{ marginLeft: 2, lineHeight: 1.2, whiteSpace: "nowrap" }} gutterBottom>{row.Bank ? row.Bank.split(":")[1] : row.Bank}</Typography>
-                                        </TableCell>
-                                        <TableCell sx={{ textAlign: "center" }}>-</TableCell>
-                                        <TableCell
-                                            sx={{
-                                                textAlign: "right",
-                                                position: "sticky",
-                                                left: 320,
-                                                zIndex: 4,
-                                                borderRight: "2px solid white",
-                                                backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff",
-                                                paddingLeft: "15px !important",
-                                                paddingRight: "15px !important",
-                                                fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
-                                            }}
-                                        >
-                                            {new Intl.NumberFormat("en-US", {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            }).format(row.TotalPrice || 0)}
-                                        </TableCell>
-                                        {driverGroups.map((driver, i) => {
-                                            const driverName = normalizeReg(driver.Driver);
+                                reportDetail.map((row, index) => {
+                                    const bankName = row.Bank?.split(":")[1]?.trim() || "";
+                                    const isDriverOnly = DRIVER_ONLY_BANKS.includes(bankName);
+                                    return (
+                                        <TableRow key={index} sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff" }}>
+                                            <TableCell
+                                                sx={{
+                                                    textAlign: "center",
+                                                    position: "sticky",
+                                                    left: 0,
+                                                    zIndex: 4,
+                                                    borderRight: "2px solid white",
+                                                    backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff",
+                                                }}
+                                            >
+                                                {index + 1}
+                                            </TableCell>
+                                            <TableCell sx={{ textAlign: "center" }}>{row.Type}</TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    textAlign: "left",
+                                                    position: "sticky",
+                                                    left: 50,
+                                                    zIndex: 4,
+                                                    borderRight: "2px solid white",
+                                                    backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff",
+                                                }}
+                                            >
+                                                <Typography variant="subtitle2" sx={{ marginLeft: 2, lineHeight: 1.2, whiteSpace: "nowrap" }} gutterBottom>{row.Bank ? row.Bank.split(":")[1] : row.Bank}</Typography>
+                                            </TableCell>
+                                            <TableCell sx={{ textAlign: "center" }}>-</TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    textAlign: "right",
+                                                    position: "sticky",
+                                                    left: 320,
+                                                    zIndex: 4,
+                                                    borderRight: "2px solid white",
+                                                    backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#fcf3fbff",
+                                                    paddingLeft: "15px !important",
+                                                    paddingRight: "15px !important",
+                                                    fontVariantNumeric: "tabular-nums", // ✅ ให้ตัวเลขแต่ละหลักมีความกว้างเท่ากัน 
+                                                }}
+                                            >
+                                                {new Intl.NumberFormat("en-US", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                }).format(row.TotalPrice || 0)}
+                                            </TableCell>
+                                            {driverGroups.map((driver, i) => {
+                                                const key = driver._key;
 
-                                            const matchedDrivers = (row.Driver || []).filter((d) => {
-                                                const name = normalizeReg(d.Driver);
-                                                return name === driverName;
-                                            });
+                                                const firstIndex = driverGroups.findIndex((d) => d._key === key);
 
-                                            const totalPrice = matchedDrivers.reduce(
-                                                (sum, d) => sum + Number(d.TotalPrice || 0),
-                                                0
-                                            );
+                                                if (i !== firstIndex) {
+                                                    return <TableCell key={i} />;
+                                                }
 
-                                            return (
-                                                <TableCell
-                                                    key={i}
-                                                    sx={{
-                                                        textAlign: "right",
-                                                        paddingLeft: "15px !important",
-                                                        paddingRight: "15px !important",
-                                                        fontVariantNumeric: "tabular-nums",
-                                                        color: matchedDrivers.length === 0 ? "lightgray" : "inherit"
-                                                    }}
-                                                >
-                                                    {new Intl.NumberFormat("en-US", {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2,
-                                                    }).format(totalPrice)}
-                                                </TableCell>
-                                            );
-                                        })}
-                                    </TableRow>
-                                ))
+                                                // 🔥 source
+                                                const source = [
+                                                    ...(row.Driver || []),
+                                                    ...(row.Registrations || [])
+                                                ];
+
+                                                const matched = source.filter((d) => {
+                                                    const dKey = getGroupKey(d.Driver, d.Registration); // ✅ ใช้ function เดียวกัน
+
+                                                    return dKey === key;
+                                                });
+
+                                                const totalPrice = matched.reduce(
+                                                    (sum, d) => sum + Number(d.TotalPrice || 0),
+                                                    0
+                                                );
+
+                                                if (!matched.length || totalPrice === 0) {
+                                                    return (
+                                                        <TableCell
+                                                            key={i}
+                                                            sx={{
+                                                                textAlign: "right",
+                                                                paddingLeft: "15px !important",
+                                                                paddingRight: "15px !important",
+                                                                fontVariantNumeric: "tabular-nums",
+                                                                // color: matchedDrivers.length === 0 ? "lightgray" : "inherit"
+                                                            }}
+                                                        >
+                                                            -
+                                                        </TableCell>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <TableCell
+                                                        key={i}
+                                                        sx={{
+                                                            textAlign: "right",
+                                                            paddingLeft: "15px !important",
+                                                            paddingRight: "15px !important",
+                                                            fontVariantNumeric: "tabular-nums",
+                                                            // color: matchedDrivers.length === 0 ? "lightgray" : "inherit"
+                                                        }}
+                                                    >
+                                                        {new Intl.NumberFormat("en-US", {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        }).format(totalPrice)}
+                                                    </TableCell>
+                                                );
+                                            })
+                                            }
+                                        </TableRow>
+                                    )
+                                })
                             }
                             <TableRow>
                                 <TableCell
@@ -2338,12 +2553,17 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                     }).format((grandTotalReport?.TotalPrice) || 0)}
                                 </TableCell>
                                 {driverGroups.map((row, index) => {
-                                    const regis = normalizeReg(row.Registration);
-                                    const total = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+                                    const key = row._key; // ✅ ใช้ key ที่สร้างมาแล้ว
+
+                                    const total = driverReportTotals[key] || {
+                                        TotalAmount: 0,
+                                        TotalPrice: 0,
+                                        TotalVat: 0
+                                    };
 
                                     return (
                                         <TableCell
-                                            key={`${regis}-${index}`}    // <— ใช้ key ไม่ซ้ำ 100%
+                                            key={`${key}-${index}`}    // <— ใช้ key ไม่ซ้ำ 100%
                                             sx={{
                                                 textAlign: "right",
                                                 backgroundColor: "#efc9ecff",
@@ -2411,20 +2631,26 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                     {new Intl.NumberFormat("en-US", {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
-                                    }).format((check ? grandTotal?.Amount : grandTotal?.Volume) - (grandTotalReport?.TotalPrice))}
+                                    }).format((grandTotal?.Transport + grandTotal?.ProfitLoss) - (grandTotalReport?.TotalPrice))}
                                 </TableCell>
                                 {driverGroups.map((row) => {
-                                    const driverName = row.Driver.split(":")[1];
-                                    // const regis = Number(row.Registration.split(":")[0]);
-                                    // const total1 = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
-                                    const regis = normalizeReg(row.Registration);
-                                    const total1 = driverReportTotals[regis] || { TotalAmount: 0, TotalPrice: 0, TotalVat: 0 };
+                                    const key = row._key; // ✅ ใช้อันเดียว
 
-                                    const total2 = driverTotals[driverName] || { Volume: 0, Amount: 0 };
+                                    const driverName = row.Driver?.split(":")[1] || "";
+                                    const regis = row.Registration?.split(":")[1] || "";
+                                    const keys = `${driverName}_${regis}`;
+
+                                    const total1 = grandTotal.driverTotals[keys];
+
+                                    const total2 = driverReportTotals[key] || {
+                                        TotalAmount: 0,
+                                        TotalPrice: 0,
+                                        TotalVat: 0
+                                    };
 
                                     return (
                                         <TableCell
-                                            key={regis}
+                                            key={key}
                                             sx={{
                                                 textAlign: "right",
                                                 backgroundColor: "#fce3fdff",
@@ -2434,7 +2660,9 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                             }}
                                         >
                                             <Typography variant="subtitle2" fontSize="14px" fontWeight="bold">
-                                                {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format((check ? total2.Amount : total2.Volume) - (total1.TotalPrice))}
+                                                {/* {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(((total1?.Transport || 0) + (total1?.ProfitLoss || 0)) - (total2.TotalPrice))} */}
+                                                {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format((total1?.Transport || 0) + (total1?.ProfitLoss || 0) - (total2.TotalPrice || 0))}
+                                                {/* {total2.TotalPrice || 0} */}
                                             </Typography>
                                         </TableCell>
                                     );

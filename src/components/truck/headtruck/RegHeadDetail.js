@@ -292,7 +292,9 @@ const RegHeadDetail = (props) => {
             "-"
           )}
         </TableCell>
-        <TableCell sx={{ textAlign: "center" }}>{truck.RepairTruck.split(":")[1]}</TableCell>
+        <TableCell sx={{ textAlign: "center", fontWeight: "bold", color: truck.RepairTruck.split(":")[1] === "ตรวจสอบสภาพรถแล้ว" ? theme.palette.success.main : theme.palette.warning.main }}>
+          {truck.RepairTruck.split(":")[1]}
+        </TableCell>
         <TableCell sx={{ textAlign: "center" }}>{truck.Status}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>{truck.Company.split(":")[1]}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>{truck.Driver === "ไม่มี" ? truck.Driver : truck.Driver.split(":")[1]}</TableCell>
