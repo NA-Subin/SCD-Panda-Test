@@ -1384,10 +1384,10 @@ const CloseFS = ({ openNavbar }) => {
             ...driverGroups.map(dg => ({
                 header:
                     dg.TruckType === "รถเล็ก" ?
-                        `${dg.RegistrationTail}/${dg.Registration.split(":")[1]}`
+                        `${dg.Driver.split(":")[1]}/${dg.RegistrationTail}/${dg.Registration.split(":")[1]}`
                         : dg.TruckType === "รถรับจ้างขนส่ง" ?
                             (dg.Driver ? dg.Driver.split(":")[1] : "")
-                            : `${dg.Registration.split(":")[1]}/${dg.RegistrationTail.split(":")[1]}`
+                            : `${dg.Driver.split(":")[1]}/${dg.Registration.split(":")[1]}/${dg.RegistrationTail.split(":")[1]}`
                 ,
                 key: `driver_${dg.Registration.split(":")[0]}`,
                 width: 32, // 250px

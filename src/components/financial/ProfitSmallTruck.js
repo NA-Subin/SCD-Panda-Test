@@ -209,9 +209,11 @@ const ProfitSmallTruck = ({ openNavbar }) => {
                 const isBeforeEnd =
                     !selectedDateEnd || deliveryDate.isSameOrBefore(selectedDateEnd, "day");
 
-                const companystatus = !checkStatusCompany ? row.StatusCompany === "อยู่บริษัทในเครือ" : row.StatusCompany === "ไม่อยู่บริษัทในเครือ"
+                const companystatus = !checkStatusCompany ? (row.StatusCompany === "อยู่บริษัทในเครือ" || row.TicketName.split(":")[1] === "ต่อภาษี") : row.StatusCompany === "ไม่อยู่บริษัทในเครือ";
+                
+                const checkTicket = !checkStatusCompany ? (row.TicketName.split(":")[1] === "ต่อภาษี") : (row.TicketName.split(":")[1] !== "ต่อภาษี");
 
-                return isAfterStart && isBeforeEnd && companystatus;
+                return isAfterStart && isBeforeEnd && companystatus && checkTicket;
             }).sort((a, b) => {
                 const key = sortConfig.key || 'Date';
                 const direction = sortConfig.key ? sortConfig.direction : 'asc';

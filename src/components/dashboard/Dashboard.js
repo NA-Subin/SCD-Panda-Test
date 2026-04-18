@@ -170,8 +170,13 @@ const Dashboard = () => {
     "รถเล็ก",
     "รถรับจ้างขนส่ง"
   ]);
-  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState(
+    (dayjs().format("MM/YYYY")).toString()
+  );
   const [selectedFlow, setSelectedFlow] = useState(["in", "out"]);
+
+
+  console.log("selectedMonth : ", selectedMonth);
 
   const handleDateChangeDate = (newValue) => {
     const monthName = newValue.format("MMMM"); // แปลงเป็นชื่อเดือนที่เลือก
@@ -504,10 +509,13 @@ const Dashboard = () => {
 
   Object.entries(driverMonthVolumes).forEach(([month, monthData]) => {
     Object.values(monthData).forEach((d) => {
+      const driveName = getDriverName(d.driver);
+      const regName = getRegistration(d.registration);
+
       flatDriverData.push({
         month,
-        driver: d.driver,
-        registration: d.registration,
+        driver: driveName,
+        registration: regName,
         truckType: d.truckType,
         volume: d.volume,
       });
@@ -526,7 +534,9 @@ const Dashboard = () => {
     const map = {};
 
     data.forEach(d => {
-      const key = `${d.driver} ${d.registration}`;
+      const driveName = getDriverName(d.driver);
+      const regName = getRegistration(d.registration);
+      const key = `${driveName} ${regName}`;
       map[key] = (map[key] || 0) + d.volume;
     });
 
@@ -537,7 +547,8 @@ const Dashboard = () => {
     const map = {};
 
     data.forEach(d => {
-      const key = d.registration;
+      const regName = getRegistration(d.registration);
+      const key = regName;
       map[key] = (map[key] || 0) + d.volume;
     });
 
@@ -575,6 +586,8 @@ const Dashboard = () => {
     return Array.from(months).sort(); // ["01/2026", "02/2026"]
   }, [flatDriverData]);
 
+  console.log("monthOptions : ", monthOptions);
+
   const filtered = useMemo(() => {
     return allData.filter((d) => {
       const matchTruck = selectedTruck.includes(d.truckType);
@@ -593,7 +606,9 @@ const Dashboard = () => {
     const map = {};
 
     data.forEach(d => {
-      const key = `${d.driver} ${d.registration}`;
+      const driveName = getDriverName(d.driver);
+      const regName = getRegistration(d.registration);
+      const key = `${driveName} ${regName}`;
       map[key] = (map[key] || 0) + 1; // 🔥 นับแทน volume
     });
 
@@ -607,7 +622,8 @@ const Dashboard = () => {
     const map = {};
 
     data.forEach(d => {
-      const key = d.registration;
+      const regName = getRegistration(d.registration);
+      const key = regName;
       map[key] = (map[key] || 0) + 1;
     });
 
@@ -1021,6 +1037,126 @@ const Dashboard = () => {
           </Paper>
 
         </Grid>
+        <Grid item xs={12} sm={12} lg={12}>
+          <Paper
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 3,
+              backgroundColor: theme.palette.primary.contrastText,
+              padding: 1,
+              flexWrap: "wrap",
+            }}
+          >
+            {/* เดือน */}
+            <TextField
+              select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              size="small"
+              sx={{ minWidth: 180, backgroundColor: "white" }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    เดือน :
+                  </InputAdornment>
+                ),
+              }}
+            >
+              <MenuItem value="">ทั้งหมด</MenuItem>
+              {monthOptions.map((m) => (
+                <MenuItem key={m} value={m}>
+                  {m}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            {/* 🔵 กลุ่ม 1: Flow */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography fontWeight="bold">ประเภทงาน :</Typography>
+
+              <FormGroup row>
+                {/* ทั้งหมด */}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedFlow.length === 2}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedFlow(["in", "out"]);
+                        } else {
+                          setSelectedFlow([]);
+                        }
+                      }}
+                    />
+                  }
+                  label="ทั้งหมด"
+                />
+
+                {/* รับเข้า */}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedFlow.includes("in")}
+                      onChange={(e) => {
+                        setSelectedFlow((prev) =>
+                          e.target.checked
+                            ? ["in"]
+                            : prev.filter((f) => f !== "in")
+                        );
+                      }}
+                    />
+                  }
+                  label="รับเข้า"
+                />
+
+                {/* ส่งออก */}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedFlow.includes("out")}
+                      onChange={(e) => {
+                        setSelectedFlow((prev) =>
+                          e.target.checked
+                            ? ["out"]
+                            : prev.filter((f) => f !== "out")
+                        );
+                      }}
+                    />
+                  }
+                  label="ส่งออก"
+                />
+              </FormGroup>
+            </Box>
+
+            {/* 🔶 กลุ่ม 2: Truck */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography fontWeight="bold">ประเภทรถ :</Typography>
+
+              <FormGroup row>
+                {["รถใหญ่", "รถเล็ก", "รถรับจ้างขนส่ง"].map((type) => (
+                  <FormControlLabel
+                    key={type}
+                    control={
+                      <Checkbox
+                        disabled={selectedFlow.length === 0} // 🔥 ยังไม่เลือก flow → ห้ามเลือก
+                        checked={selectedTruck.includes(type)}
+                        onChange={(e) => {
+                          setSelectedTruck((prev) =>
+                            e.target.checked
+                              ? [...prev, type]
+                              : prev.filter((t) => t !== type)
+                          );
+                        }}
+                      />
+                    }
+                    label={type}
+                  />
+                ))}
+              </FormGroup>
+            </Box>
+          </Paper>
+        </Grid>
         <Grid item xs={12} sm={12} lg={8}>
           <Paper
             sx={{
@@ -1039,90 +1175,11 @@ const Dashboard = () => {
                 height: "5vh",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center"
+                justifyContent: "center",
+                fontWeight: "bold"
               }}
             >
-              <Paper component="form" sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <FormControl size="small" sx={{ minWidth: 150, border: "1px solid white", borderRadius: 1, backgroundColor: "white" }}>
-                  <InputLabel>เดือน</InputLabel>
-                  <Select
-                    value={selectedMonth}
-                    label="เดือน"
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        height: "30px",
-                        paddingRight: "8px", // ลดพื้นที่ไอคอนให้แคบลง
-                      },
-                      "& .MuiInputBase-input": {
-                        fontSize: "14px", // ปรับขนาดตัวอักษรภายใน Input
-                      },
-                      "& .MuiInputAdornment-root": {
-                        marginLeft: "0px", // ลดช่องว่างด้านซ้ายของไอคอน
-                        paddingLeft: "0px", // เอาพื้นที่ด้านซ้ายของไอคอนออก
-                      },
-                    }}
-                  >
-                    <MenuItem value="">ทั้งหมด</MenuItem>
-                    {monthOptions.map((m) => (
-                      <MenuItem key={m} value={m}>
-                        {m}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={selectedFlow.includes("in")}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedFlow([...selectedFlow, "in"]);
-                        } else {
-                          setSelectedFlow(selectedFlow.filter((f) => f !== "in"));
-                        }
-                      }}
-                    />
-                  }
-                  label="รับเข้า"
-                />
-
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={selectedFlow.includes("out")}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedFlow([...selectedFlow, "out"]);
-                        } else {
-                          setSelectedFlow(selectedFlow.filter((f) => f !== "out"));
-                        }
-                      }}
-                    />
-                  }
-                  label="ส่งออก"
-                />
-                <FormGroup row>
-                  {["รถใหญ่", "รถเล็ก", "รถรับจ้างขนส่ง"].map((type) => (
-                    <FormControlLabel
-                      key={type}
-                      control={
-                        <Checkbox
-                          checked={selectedTruck.includes(type)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedTruck(prev => [...prev, type]);
-                            } else {
-                              setSelectedTruck(prev => prev.filter(t => t !== type));
-                            }
-                          }}
-                        />
-                      }
-                      label={type}
-                    />
-                  ))}
-                </FormGroup>
-              </Paper>
+              {`จำนวนลิตร (${selectedTruck.join(", ")})`}
             </Box>
 
             {/* Middle Content */}
@@ -1147,7 +1204,7 @@ const Dashboard = () => {
                 series={[
                   {
                     dataKey: 'volume',
-                    label: `${selectedTruck.join(", ")} (พนักงานขับรถ)`,
+                    label: `จำนวนลิตร (พนักงานขับรถ)`,
                     color: theme.palette.success.main
                   }
                 ]}
@@ -1159,7 +1216,7 @@ const Dashboard = () => {
                   [
                     {
                       dataKey: 'volume',
-                      label: `${selectedTruck.join(", ")} (ทะเบียนรถ)`,
+                      label: `จำนวนลิตร (ทะเบียนรถ)`,
                       color: theme.palette.warning.main
                     }
                   ]
@@ -1213,7 +1270,7 @@ const Dashboard = () => {
                 series={[
                   {
                     dataKey: 'volume',
-                    label: `${selectedTruck.join(", ")} (ทะเบียน)`
+                    label: `จำนวนลิตร (ทะเบียน)`
                   }
                 ]}
               /> */}
@@ -1224,7 +1281,7 @@ const Dashboard = () => {
                 series={[
                   {
                     dataKey: 'volume',
-                    label: `${selectedTruck.join(", ")} (รวมปริมาณ)`,
+                    label: `จำนวนลิตร (รวมปริมาณ)`,
                     color: theme.palette.primary.main
                   }
                 ]}
@@ -1250,9 +1307,11 @@ const Dashboard = () => {
                 height: "5vh",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center"
+                justifyContent: "center",
+                fontWeight: "bold"
               }}
             >
+              {`จำนวนเที่ยววิ่ง (${selectedTruck.join(", ")})`}
             </Box>
 
             {/* Middle Content */}

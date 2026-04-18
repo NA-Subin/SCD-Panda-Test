@@ -933,7 +933,9 @@ const PrintReport = () => {
                             invoiceData?.Company === "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" ? "บริษัท นาครา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
                               : "ห้างหุ้นส่วน พิชยา ทรานสปอร์ต จำกัด (สำนักงานใหญ่)"
                           } */}
-                          {invoiceData?.Company}
+                          {
+                            invoiceData?.Transport.split(":")[0] === "2" ? "บจ.นาครา ทรานสปอร์ต (สำนักงานใหญ่)" : invoiceData?.Company
+                          }
                         </Typography>
                         <Typography variant="subtitle2" gutterBottom>
                           {/* {

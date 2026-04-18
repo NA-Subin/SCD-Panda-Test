@@ -340,10 +340,13 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
 
             const isTruck = item?.TruckType === "รถเล็ก";
 
+            const statusCompanyCheck = item?.StatusCompany === "ไม่อยู่บริษัทในเครือ";
+            const ticket = item.TicketName.split(":")[1] !== "ต่อภาษี";
+
             return (
                 sameMonth &&
                 (isAllCompany || sameCompany) &&
-                isTruck
+                isTruck && statusCompanyCheck && ticket
             );
         });
 
@@ -367,7 +370,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                         ProfitLoss: 0,
                         Rate: item.Rate,
                         RateOil: item.RateOil,
-                        Drivers: new Map(),
+                        Registration: new Map(),
                     };
                 }
 
@@ -378,10 +381,10 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                 acc[key].ProfitLoss += item.ProfitLoss;
 
                 // 🔥 DRIVER (แก้ของเดิมที่พัง)
-                const driverKey = `${item.Driver || ""}_${item.Registration || ""}`;
+                const driverKey = `${item.Registration || ""}`;
 
-                if (!acc[key].Drivers.has(driverKey)) {
-                    acc[key].Drivers.set(driverKey, {
+                if (!acc[key].Registration.has(driverKey)) {
+                    acc[key].Registration.set(driverKey, {
                         Driver: item.Driver || "",
                         Registration: item.Registration || "",
                         Volume: 0,
@@ -390,7 +393,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                     });
                 }
 
-                const d = acc[key].Drivers.get(driverKey);
+                const d = acc[key].Registration.get(driverKey);
 
                 d.Volume += item.Volume;
                 d.Transport += item.Transport;
@@ -400,7 +403,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             }, {})
         ).map((item) => ({
             ...item,
-            Drivers: Array.from(item.Drivers.values()),
+            Registration: Array.from(item.Registration.values()),
         }));
     }, [result, months]);
 
@@ -415,14 +418,14 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             totalTransport += row.Transport || 0;
             totalProfitLoss += row.ProfitLoss || 0;
 
-            (row.Drivers || []).forEach((d) => {
-                const driverName = d.Driver?.split(":")[1] || "";
+            (row.Registration || []).forEach((d) => {
+                // const driverName = d.Driver?.split(":")[1] || "";
                 const regis = d.Registration?.split(":")[1] || "";
-                const key = driverName + regis;
+                const key = regis;
 
                 if (!driverTransport[key]) {
                     driverTransport[key] = {
-                        Driver: d.Driver,
+                        // Driver: d.Driver,
                         Registration: d.Registration,
                         total: 0,
                     };
@@ -430,7 +433,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
 
                 if (!driverProfitLoss[key]) {
                     driverProfitLoss[key] = {
-                        Driver: d.Driver,
+                        // Driver: d.Driver,
                         Registration: d.Registration,
                         total: 0,
                     };
@@ -468,14 +471,14 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             totalProfitLoss += row.ProfitLoss || 0;
             totalVolume += row.Volume || 0;
 
-            (row.Drivers || []).forEach((d) => {
-                const driverName = d.Driver?.split(":")[1] || "";
+            (row.Registration || []).forEach((d) => {
+                // const driverName = d.Driver?.split(":")[1] || "";
                 const regis = d.Registration?.split(":")[1] || "";
-                const key = `${driverName}_${regis}`;
+                const key = regis;
 
                 if (!driverTotals[key]) {
                     driverTotals[key] = {
-                        Driver: d.Driver,
+                        // Driver: d.Driver,
                         Registration: d.Registration,
                         Transport: 0,
                         ProfitLoss: 0,
@@ -854,50 +857,50 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
 
         console.log("reports : ", reports.filter((r) => r.TruckType === "รถเล็ก"));
 
-        filteredReports
-            .filter(r => {
-                const name = r.Name?.split(":")[1]?.trim();
-                return ["เงินเดือน", "ประกันสังคม", "ค่าโทรศัพท์"].includes(name);
-            })
-            .forEach((curr) => {
-                const bankName = curr.Name?.split(":")[1]?.trim() || curr.Name;
+        // filteredReports
+        //     .filter(r => {
+        //         const name = r.Name?.split(":")[1]?.trim();
+        //         return ["เงินเดือน", "ประกันสังคม", "ค่าโทรศัพท์"].includes(name);
+        //     })
+        //     .forEach((curr) => {
+        //         const bankName = curr.Name?.split(":")[1]?.trim() || curr.Name;
 
-                let bankGroup = reportInit.find(b => b.Bank.includes(bankName));
+        //         let bankGroup = reportInit.find(b => b.Bank.includes(bankName));
 
-                if (!bankGroup) {
-                    bankGroup = {
-                        Bank: bankName,
-                        Type: "ค่าใช้จ่าย",
-                        Drivers: [], // ✅ เปลี่ยนจาก Registrations → Drivers
-                    };
-                    reportInit.push(bankGroup);
-                }
+        //         if (!bankGroup) {
+        //             bankGroup = {
+        //                 Bank: bankName,
+        //                 Type: "ค่าใช้จ่าย",
+        //                 Drivers: [], // ✅ เปลี่ยนจาก Registrations → Drivers
+        //             };
+        //             reportInit.push(bankGroup);
+        //         }
 
-                // 🔥 ใช้ Driver แทน
-                const driver = curr.Driver || "ไม่ระบุ";
+        //         // 🔥 ใช้ Driver แทน
+        //         const driver = curr.Driver || "ไม่ระบุ";
 
-                let driverGroup = bankGroup.Driver.find(
-                    (d) => normalizeReg(d.Driver) === normalizeReg(driver)
-                );
+        //         let driverGroup = bankGroup.Driver.find(
+        //             (d) => normalizeReg(d.Driver) === normalizeReg(driver)
+        //         );
 
-                if (!driverGroup) {
-                    driverGroup = {
-                        Driver: driver,
-                        TruckType: "รวม",
-                        TotalPrice: 0,
-                        TotalAmount: 0,
-                        TotalVat: 0,
-                    };
-                    bankGroup.Driver.push(driverGroup);
-                }
+        //         if (!driverGroup) {
+        //             driverGroup = {
+        //                 Driver: driver,
+        //                 TruckType: "รวม",
+        //                 TotalPrice: 0,
+        //                 TotalAmount: 0,
+        //                 TotalVat: 0,
+        //             };
+        //             bankGroup.Driver.push(driverGroup);
+        //         }
 
-                // ✅ รวมค่า
-                driverGroup.TotalPrice += Number(curr.Money || curr.Total || 0);
-                driverGroup.TotalAmount += Number(curr.Price || 0);
-                driverGroup.TotalVat += Number(curr.Vat || 0);
-            });
+        //         // ✅ รวมค่า
+        //         driverGroup.TotalPrice += Number(curr.Money || curr.Total || 0);
+        //         driverGroup.TotalAmount += Number(curr.Price || 0);
+        //         driverGroup.TotalVat += Number(curr.Vat || 0);
+        //     });
 
-        console.log("filteredReports : ", filteredReports.filter((r) => r.VehicleType === "รถเล็ก"));
+        // console.log("filteredReports : ", filteredReports.filter((r) => r.VehicleType === "รถเล็ก"));
 
         // 3️⃣ merge trips
         trips
@@ -1035,23 +1038,23 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
         });
     });
 
-    const getGroupKey = (driver, registration) => {
-        const driverKey = normalize(driver);
+    const getGroupKey = (registration) => {
+        // const driverKey = normalize(driver);
         const regKey = normalize(registration);
 
         // ✅ มีทั้งคู่ → ใช้คู่
-        if (driverKey && regKey) {
-            return `${driverKey}__${regKey}`;
-        }
+        // if (driverKey && regKey) {
+        //     return `${driverKey}__${regKey}`;
+        // }
 
         // 🔥 ไม่มี registration → ไปใช้ตัวแรกของ driver
-        if (driverKey && !regKey) {
-            const firstReg = driverFirstRegMap[driverKey];
-            if (firstReg) {
-                return `${driverKey}__${firstReg}`;
-            }
-            return driverKey;
-        }
+        // if (driverKey && !regKey) {
+        //     const firstReg = driverFirstRegMap[driverKey];
+        //     if (firstReg) {
+        //         return `${driverKey}__${firstReg}`;
+        //     }
+        //     return driverKey;
+        // }
 
         // fallback
         return regKey;
@@ -1062,8 +1065,8 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
 
         const result = [];
 
-        const pushIfNotExist = (driver = "", registration = "", extra = {}) => {
-            const key = getGroupKey(driver, registration);
+        const pushIfNotExist = (registration = "", extra = {}) => {
+            const key = getGroupKey(registration);
 
             if (!key) return;
 
@@ -1077,7 +1080,6 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
 
             result.push({
                 _key: key, // 🔥 เก็บ key ไว้เลย
-                Driver: driver,
                 Registration: registration,
                 ShortName: shortName,
                 ...extra,
@@ -1085,8 +1087,8 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
         };
 
         groupedResult?.forEach((gr) => {
-            (gr.Drivers || []).forEach((d) => {
-                pushIfNotExist(d.Driver, d.Registration, {
+            (gr.Registration || []).forEach((d) => {
+                pushIfNotExist(d.Registration, {
                     TruckType: "รถเล็ก",
                 });
             });
@@ -1097,14 +1099,14 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             if (bank.Driver && bank.Driver.length > 0) {
                 // ✅ มี Driver → ใช้ Driver อย่างเดียว
                 (bank.Driver || []).forEach((d) => {
-                    pushIfNotExist(d.Driver, d.Registration, {
+                    pushIfNotExist(d.Registration, {
                         TruckType: d.TruckType,
                     });
                 });
             } else {
                 // ✅ ไม่มี Driver → ใช้ Registration
                 (bank.Registrations || []).forEach((r) => {
-                    pushIfNotExist("", r.Registration, {
+                    pushIfNotExist(r.Registration, {
                         TruckType: r.TruckType,
                     });
                 });
@@ -1160,171 +1162,14 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             }
         });
     });
-    // ===============================
-    // 4️⃣ สร้าง TicketGroups
-    // ===============================
-    const ticketGroups = useMemo(() => {
-        if (!filteredOrders || !trips || !registrationH || !registrationT) return [];
 
-        return filteredOrders.filter(tk => {
-            const rowDate = dayjs(tk.DateReceive, "DD/MM/YYYY");
-            const selectedMonth = dayjs(months);
-            const selectedYear = dayjs(years);
-
-            const dateMatch = !date
-                ? rowDate.format("MM") === selectedMonth.format("MM") &&
-                rowDate.format("YYYY") === selectedMonth.format("YYYY")
-                : rowDate.format("YYYY") === selectedYear.format("YYYY");
-
-            const companyCheck = companyName === "0:ทั้งหมด" ? true : companyName === tk.TruckCompany;
-
-            return dateMatch && companyCheck;
-        }).reduce((acc, curr) => {
-            const tripDetail = trips.find(trip => (Number(trip.id) - 1) === Number(curr.Trip));
-            // const depotName = tripDetail?.Depot?.split(":")[1] || "-";
-
-            const depot = normalizeDepotName(tripDetail?.Depot);
-
-            let Rate = 0;
-            if (depot === "ลำปาง") Rate = parseFloat(curr.Rate1) || 0;
-            else if (depot === "พิจิตร") Rate = parseFloat(curr.Rate2) || 0;
-            else if (["สระบุรี", "บางปะอิน", "IR"].includes(depot))
-                Rate = parseFloat(curr.Rate3) || 0;
-
-            // let rate = 0;
-            // if (depotName === "ลำปาง") rate = curr.Rate1;
-            // else if (depotName === "พิจิตร") rate = curr.Rate2;
-            // else if (["สระบุรี", "บางปะอิน", "IR"].includes(depotName)) rate = curr.Rate3;
-
-            // 🔹 ใช้ TicketName + CustomerType + TruckType เป็น key สำหรับรวมกลุ่ม
-            const ticketGroupKey = `${curr.TicketName}-${curr.CustomerType}}`;
-
-            let ticketGroup = acc.find(t => t.key === ticketGroupKey);
-
-            if (!ticketGroup) {
-                ticketGroup = {
-                    key: ticketGroupKey, // จับกลุ่ม TicketName
-                    TicketName: curr.TicketName,
-                    Rate: Rate,
-                    CustomerType: curr.CustomerType,
-                    TruckType: tripDetail?.TruckType,
-                    Depot: tripDetail?.Depot || "-",
-                    Drivers: [],
-                };
-                acc.push(ticketGroup);
-            }
-
-            // 🔹 หา DriverGroup
-            let shortName = "";
-            if (tripDetail?.TruckType === "รถเล็ก") {
-                shortName = registrationSm.find(h => h.id === Number(tripDetail?.Registration.split(":")[0]))?.ShortName;
-            }
-
-            let driverGroup = ticketGroup.Drivers.find(
-                d => d.Driver === tripDetail?.Driver && d.Registration === tripDetail?.Registration
-            );
-
-            if (!driverGroup) {
-                driverGroup = {
-                    CustomerType: curr.CustomerType,
-                    Driver: tripDetail?.Driver,
-                    Registration: tripDetail?.Registration,
-                    ShortName: shortName,
-                    Volume: 0,
-                    Amount: 0,
-                };
-                ticketGroup.Drivers.push(driverGroup);
-            }
-
-            const driverVolume = Object.values(curr.Product || {}).reduce(
-                (sum, p) => sum + (tripDetail?.TruckType === "รถเล็ก" ? Number(p?.Volume || 0) : Number(p?.Volume || 0) * 1000),
-                0
-            );
-
-            const driverAmount = driverVolume * Rate;
-
-            driverGroup.Volume += driverVolume;
-            driverGroup.Amount += driverAmount;
-
-            return acc;
-        }, []);
-    }, [filteredOrders, trips, registrationH, registrationT, registrationSm, date, months, years, companyName]);
-
-    console.log("ticketGroups : ", ticketGroups.filter((r) => r.TruckType === "รถเล็ก"));
-
-    // ===============================
-    // 5️⃣ คำนวณ Totals
-    // ===============================
-    // const grandTotal = useMemo(() => {
-    //     return ticketGroups.filter((r) => r.TruckType === "รถเล็ก").reduce(
-    //         (sum, ticket) => {
-    //             ticket.TotalVolume = ticket.Drivers.reduce((v, d) => v + d.Volume, 0);
-    //             ticket.TotalAmount = ticket.Drivers.reduce((a, d) => a + d.Amount, 0);
-    //             sum.Volume += ticket.TotalVolume;
-    //             sum.Amount += ticket.TotalAmount;
-    //             return sum;
-    //         },
-    //         { Volume: 0, Amount: 0 }
-    //     );
-    // }, [ticketGroups]);
-
-    const driverTotals = useMemo(() => {
-        return groupedResult.reduce((acc, ticket) => {
-            ticket.Drivers.forEach(d => {
-                const driverName = d.Driver.split(":")[1];
-                const regis = d.Registration.split(":")[1];
-                if (!acc[driverName + regis]) acc[driverName + regis] = { Transport: 0, ProfitLoss: 0 };
-                acc[driverName + regis].Transport += d.Transport || 0;
-                acc[driverName + regis].ProfitLoss += d.ProfitLoss;
-            });
-            return acc;
-        }, {});
-    }, [groupedResult]);
-
-    const { grandTotalA, driverTotalsA, grandTotalT, driverTotalsT, grandTotalG, driverTotalsG, grandTotalReport, driverReportTotals } = useMemo(() => {
-        // =======================
-        // TicketGroups per type
-        // =======================
-        const calcGrandDriver = (filterType) => {
-            const tickets = ticketGroups.filter(t => t.CustomerType === filterType && t.TruckType === "รถเล็ก");
-            const grand = tickets.reduce(
-                (sum, t) => {
-                    t.TotalVolume = t.Drivers.reduce((v, d) => v + d.Volume, 0);
-                    t.TotalAmount = t.Drivers.reduce((a, d) => a + d.Amount, 0);
-                    sum.Volume += t.TotalVolume;
-                    sum.Amount += t.TotalAmount;
-                    return sum;
-                },
-                { Volume: 0, Amount: 0 }
-            );
-
-            const driverTotals = tickets.reduce((acc, t) => {
-                t.Drivers.forEach(d => {
-                    const driverName = d.Driver.split(":")[1];
-                    if (!acc[driverName]) acc[driverName] = { Volume: 0, Amount: 0 };
-                    acc[driverName].Volume += d.Volume;
-                    acc[driverName].Amount += d.Amount;
-                });
-                return acc;
-            }, {});
-
-            return { grand, driverTotals };
-        };
-
-        const { grand: grandTotalA, driverTotals: driverTotalsA } = calcGrandDriver("ตั๋วน้ำมัน");
-        const { grand: grandTotalT, driverTotals: driverTotalsT } = calcGrandDriver("ตั๋วรับจ้างขนส่ง");
-        const { grand: grandTotalG, driverTotals: driverTotalsG } = calcGrandDriver("ตั๋วปั้ม");
-        // const { grand: grandTotalS, driverTotals: driverTotalsS } = calcGrandDriver("ตั๋วรถเล็ก");
-
-        // =======================
-        // Grand total for reportDetail
-        // =======================
+    const { grandTotalReport, driverReportTotals } = useMemo(() => {
         const seen = new Set();
 
         const grandTotalReport = reportDetail.reduce(
             (sum, item) => {
                 const process = (r) => {
-                    const key = getGroupKey(r.Driver, r.Registration);
+                    const key = getGroupKey(r.Registration);
 
                     if (!key || seen.has(key)) return;
                     seen.add(key);
@@ -1343,7 +1188,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
 
         const driverReportTotals = reportDetail.reduce((acc, item) => {
             const process = (r) => {
-                const key = getGroupKey(r.Driver, r.Registration);
+                const key = getGroupKey(r.Registration);
 
                 if (!key) return;
 
@@ -1361,52 +1206,8 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             return acc;
         }, {});
 
-        return { grandTotalA, driverTotalsA, grandTotalT, driverTotalsT, grandTotalG, driverTotalsG, grandTotalReport, driverReportTotals };
-    }, [ticketGroups, reportDetail]);
-
-    console.log("grandTotalReport : ", grandTotalReport);
-    console.log("driverReportTotals : ", driverReportTotals);
-    console.log("ReportDetail : ", reportDetail);
-    console.log("grandTotalA : ", grandTotalA);
-
-    console.log("grandTotal : ", grandTotal);
-    console.log("filteredOrders : ", filteredOrders.filter((tk) => {
-        const rowDate = dayjs(tk.DateDelivery, "DD/MM/YYYY");
-        const selectedMonth = dayjs(months);
-        const selectedYear = dayjs(years);
-
-        // ✅ ถ้า date = true → กรองตามเดือนและปี
-        // ✅ ถ้า date = false → กรองตามปี
-        const dateMatch = !date
-            ? rowDate.format("MM") === selectedMonth.format("MM") &&
-            rowDate.format("YYYY") === selectedMonth.format("YYYY")
-            : rowDate.format("YYYY") === selectedYear.format("YYYY");
-
-        const companyCheck =
-            companyName === "0:ทั้งหมด"
-                ? true
-                : companyName === tk.TruckCompany;
-
-        return dateMatch && companyCheck;
-    }));
-    console.log("ticketGroups : ", ticketGroups);
-    console.log("driverGroups : ", driverGroups);
-    console.log("report Detail : ", reportDetail);
-    // const tripdetail = trips.find((row) => orders.find((r) => r.Trip === row.id-1));
-
-    // console.log("tripdetail : ", tripdetail.Depot);
-
-    // const detail = filtered.map((row) => {
-    //     const regId = Number(row.Registration.split(":")[0]); // สมมติว่า Registration = "123:1กข1234"
-    //     const regInfo = registration.find((r) => r.id === regId && (formatmonth(row.Date) === dayjs(months).format("MMMM")));
-
-    //     return {
-    //         Date: row.Date,
-    //         Driver: row.Driver,
-    //         Registration: row.Registration,
-    //         Company: regInfo ? regInfo.Company : null, // ถ้าไม่เจอให้เป็น null
-    //     };
-    // });
+        return { grandTotalReport, driverReportTotals };
+    }, [reportDetail]);
 
     const [driverData, setDriverData] = useState([])
     const [driverDataNotCancel, setDriverDataNotCancel] = useState([])
@@ -1422,131 +1223,6 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
 
     console.log("data : ", data);
     console.log("Data Not Cancel : ", dataNotCancel);
-
-    const handleCompany = (data) => {
-        setCompanyName(data);
-        const filtereds = orders
-            .filter((row) => row.Trip !== "ยกเลิก")
-            .reduce((acc, curr) => {
-                const exists = acc.some(
-                    (item) =>
-                        item.Driver === curr.Driver && item.Registration === curr.Registration
-                );
-
-                if (!exists) {
-                    acc.push({
-                        Date: curr.Date,
-                        Driver: curr.Driver,
-                        Registration: curr.Registration,
-                    });
-                }
-
-                return acc;
-            }, []);
-
-        const filteredsDetail = orders.map((row) => {
-            if (row.Trip !== "ยกเลิก" && row.CustomerType === "ตั๋วรับจ้างขนส่ง") {
-                const regId = Number(row.Registration.split(":")[0]);
-                const companyId = Number(data.split(":")[0]);
-
-                const found = registration.find(
-                    (r) =>
-                        r.id === regId &&
-                        Number(r.Company.split(":")[0]) === companyId &&
-                        formatmonth(row.Date) === dayjs(months).format("MMMM")
-                );
-
-                const matchedTrip = trips.find((trip) => (trip.id - 1) === row.Trip);
-                console.log("matchedTrip : ", matchedTrip);
-                const depot = matchedTrip ? matchedTrip.Depot : null;
-
-                const Total = (
-                    depot.split(":")[1] === "ลำปาง" ?
-                        Object.values(row.Product || {}).reduce((sum, product) => {
-                            const volume = product?.Volume || 0;
-                            return sum + ((volume * 1000) * row.Rate1);
-                        }, 0)
-                        : depot.split(":")[1] === "พิจิตร" ?
-                            Object.values(row.Product || {}).reduce((sum, product) => {
-                                const volume = product?.Volume || 0;
-                                return sum + ((volume * 1000) * row.Rate2);
-                            }, 0)
-                            : ["สระบุรี", "บางปะอิน", "IR"].includes(depot.split(":")[1]) ?
-                                Object.values(row.Product || {}).reduce((sum, product) => {
-                                    const volume = product?.Volume || 0;
-                                    return sum + ((volume * 1000) * row.Rate3);
-                                }, 0)
-                                : ""
-                )
-
-                console.log("Total : ", Total); // 👉 300
-
-                return found ? {
-                    Driver: row.Driver,
-                    Registration: row.Registration,
-                    Date: row.Date,
-                    TicketName: row.TicketName,
-                    Amount: Total,
-                    Rate: depot.split(":")[1] === "ลำปาง" ? row.Rate1
-                        : depot.split(":")[1] === "พิจิตร" ? row.Rate2
-                            : ["สระบุรี", "บางปะอิน", "IR"].includes(depot.split(":")[1]) ? row.Rate3
-                                : "",
-                    Depot: depot
-                } : null;
-            }
-            return null;
-        }).filter(Boolean); // ลบค่าที่เป็น null ออก
-
-
-        const details = filtereds
-            .map((row) => {
-                // แยก id ออกจาก Registration และ Company เพื่อนำไปเทียบ
-                const regId = Number(row.Registration.split(":")[0]);
-                const companyId = Number(data.split(":")[0]);
-
-                // หาข้อมูลทะเบียนที่ตรงกับ regId และ companyId
-                const regInfo = registration.find(
-                    (r) => r.id === regId && Number(r.Company.split(":")[0]) === companyId && formatmonth(row.Date) === dayjs(months).format("MMMM")
-                );
-
-                // ถ้าพบข้อมูลตรงกัน ให้ return รายการรายละเอียด
-                if (regInfo) {
-                    return {
-                        Date: row.Date,
-                        Driver: row.Driver,
-                        Registration: row.Registration,
-                        Company: regInfo.Company,
-                    };
-                }
-
-                // ถ้าไม่เจอ ให้ return null (หรือกรองทิ้งภายหลัง)
-                return null;
-            })
-            .filter(Boolean); // กรองค่า null ออก (เหลือแต่รายการที่เจอ regInfo)
-
-        const grouped = {};
-
-        filteredsDetail.forEach((item) => {
-            const key = item.TicketName;
-
-            if (!grouped[key]) {
-                grouped[key] = {
-                    ...item,
-                    amounts: {} // key เป็น `${Driver}-${Registration}`
-                };
-            }
-
-            const driverKey = `${item.Driver}:${item.Registration}`; // สร้าง key สำหรับ driver
-            grouped[key].amounts[driverKey] = item.Amount;
-        });
-
-        console.log("grouped : ", Object.values(grouped));
-
-        setDriverData(details)
-        setDriverDataNotCancel(Object.values(grouped))
-        setData(details)
-        setDataNotCancel(Object.values(grouped))
-    }
 
     const exportTableToExcel = async () => {
         const workbook = new ExcelJS.Workbook();
@@ -1611,9 +1287,9 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                         row.Rate,
                         label === "ค่าขนส่ง" ? row.Transport : row.ProfitLoss,
                         ...driverGroups.map((h, i) => {
-                            const found = row.Drivers.find(
+                            const found = row.Registration.find(
                                 (dv) =>
-                                    dv.Driver === h.Driver &&
+                                    // dv.Driver === h.Driver &&
                                     dv.Registration === h.Registration
                             );
 
@@ -1637,9 +1313,9 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                 "",
                 total,
                 ...driverGroups.map((row) => {
-                    const driverName = row.Driver?.split(":")[1] || "";
+                    // const driverName = row.Driver?.split(":")[1] || "";
                     const regis = row.Registration?.split(":")[1] || "";
-                    const key = driverName + regis;
+                    const key = regis;
 
                     const found = driverTotals[key];
 
@@ -1664,12 +1340,12 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             "",
             (grandTotal?.Transport + grandTotal?.ProfitLoss),
             ...driverGroups.map((row) => {
-                const driverName = row.Driver?.split(":")[1] || "";
+                // const driverName = row.Driver?.split(":")[1] || "";
                 const regis = row.Registration?.split(":")[1] || "";
-                const key = `${driverName}_${regis}`;
+                const key = regis;
 
                 const total = grandTotal.driverTotals[key];
-                return total?.total ?? 0;
+                return (total?.Transport || 0) + (total?.ProfitLoss || 0);
             }),
         ];
         const gTotalRow = worksheet.addRow(grandTotalRow);
@@ -1700,12 +1376,12 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
 
                     // 🔥 source
                     const source = [
-                        ...(row.Driver || []),
+                        // ...(row.Driver || []),
                         ...(row.Registrations || [])
                     ];
 
                     const matched = source.filter((d) => {
-                        const dKey = getGroupKey(d.Driver, d.Registration); // ✅ ใช้ function เดียวกัน
+                        const dKey = getGroupKey(d.Registration); // ✅ ใช้ function เดียวกัน
 
                         return dKey === key;
                     });
@@ -1767,9 +1443,9 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             ...driverGroups.map((row) => {
                 const key = row._key; // ✅ ใช้อันเดียว
 
-                const driverName = row.Driver?.split(":")[1] || "";
+                // const driverName = row.Driver?.split(":")[1] || "";
                 const regis = row.Registration?.split(":")[1] || "";
-                const keys = `${driverName}_${regis}`;
+                const keys = regis;
 
                 const total1 = grandTotal.driverTotals[keys];
 
@@ -1913,7 +1589,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                 </Paper>
                         }
                     </Grid>
-                    <Grid item md={5.5} xs={12}>
+                    {/* <Grid item md={5.5} xs={12}>
                         <Paper
                             component="form"
                             sx={{ height: "35px", width: "100%", marginTop: -2 }}
@@ -1964,6 +1640,16 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                 )}
                             />
                         </Paper>
+                    </Grid> */}
+                    <Grid item md={5.5} xs={12}>
+                        <Typography
+                            variant="body1"
+                            sx={{ fontWeight: "bold", marginTop: -1, color: "gray" }}
+                        >
+                            {!date
+                                ? `( วันที่ ${firstDay.format("D เดือนMMMM พ.ศ.BBBB")} ถึง ${lastDay.format("D เดือนMMMM พ.ศ.BBBB")} )`
+                                : `( ปี ${years.format("BBBB")} )`}
+                        </Typography>
                     </Grid>
                     <Grid item md={2} xs={12} textAlign="right">
                         <Button
@@ -1976,20 +1662,10 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                             Export Excel
                         </Button>
                     </Grid>
-                    <Grid item md={4.5} xs={12}>
-                        <Typography
-                            variant="body1"
-                            sx={{ fontWeight: "bold", marginTop: -1, color: "gray" }}
-                        >
-                            {!date
-                                ? `( วันที่ ${firstDay.format("D เดือนMMMM พ.ศ.BBBB")} ถึง ${lastDay.format("D เดือนMMMM พ.ศ.BBBB")} )`
-                                : `( ปี ${years.format("BBBB")} )`}
-                        </Typography>
-                    </Grid>
-                    <Grid item md={7.5} xs={12}>
-                        <FormGroup row sx={{ marginTop: -2 }}>
-                            {/* <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 1, marginTop: 1, marginRight: 2 }} gutterBottom>เลือกประเภท</Typography> */}
-                            {/* <FormControlLabel
+                    {/* <Grid item md={7.5} xs={12}>
+                        <FormGroup row sx={{ marginTop: -2 }}> */}
+                    {/* <Typography variant="subtitle1" fontWeight="bold" sx={{ marginLeft: 1, marginTop: 1, marginRight: 2 }} gutterBottom>เลือกประเภท</Typography> */}
+                    {/* <FormControlLabel
                                 control={
                                     <Checkbox
                                         checked={check === 1 ? true : false}
@@ -2002,7 +1678,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                     </Typography>
                                 }
                             /> */}
-                            {/* <FormControlLabel
+                    {/* <FormControlLabel
                                 control={
                                     <Checkbox
                                         checked={check === true ? true : false}
@@ -2030,7 +1706,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                     </Typography>
                                 }
                             /> */}
-                            {/* {
+                    {/* {
                             Object.entries(typeF).map(([key, label]) => (
                                 <FormControlLabel
                                     key={key}
@@ -2049,8 +1725,8 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                             ))
                         }
                         <InsertType typeFinancial={typeF} /> */}
-                        </FormGroup>
-                    </Grid>
+                    {/* </FormGroup>
+                    </Grid> */}
                 </Grid>
             </Box>
             <Box display="flex" justifyContent="center" alignItems="center" width="100%" sx={{ marginTop: 1, }}>
@@ -2082,9 +1758,9 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                 {
                                     driverGroups.map((row) => (
                                         <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 250 }}>
-                                            <Typography variant="subtitle2" fontSize="16px" fontWeight="bold" sx={{ whiteSpace: "nowrap", lineHeight: 1, marginTop: 1 }} gutterBottom>
+                                            {/* <Typography variant="subtitle2" fontSize="16px" fontWeight="bold" sx={{ whiteSpace: "nowrap", lineHeight: 1, marginTop: 1 }} gutterBottom>
                                                 {row.Driver.split(":")[1]}
-                                            </Typography>
+                                            </Typography> */}
                                             <Typography variant="subtitle2" fontSize="16px" fontWeight="bold" sx={{ whiteSpace: "nowrap", lineHeight: 1 }} gutterBottom>
                                                 {
                                                     row.TruckType === "รถเล็ก" ?
@@ -2190,9 +1866,9 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
 
                                                 {/* แสดงค่า per Driver */}
                                                 {driverGroups.map((h, i) => {
-                                                    const found = row.Drivers.find(
+                                                    const found = row.Registration.find(
                                                         (dv) =>
-                                                            dv.Driver === h.Driver &&
+                                                            // dv.Driver === h.Driver &&
                                                             dv.Registration === h.Registration
                                                     );
 
@@ -2273,9 +1949,10 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                             }).format(total || 0)}
                                         </TableCell>
                                         {driverGroups.map((row) => {
-                                            const driverName = row.Driver?.split(":")[1] || "";
+                                            // const driverName = row.Driver?.split(":")[1] || "";
                                             const regis = row.Registration?.split(":")[1] || "";
-                                            const key = driverName + regis;
+                                            // const key = driverName + regis;
+                                            const key = regis;
 
                                             const found = driverTotals[key];
 
@@ -2357,9 +2034,10 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                 </TableCell>
 
                                 {driverGroups.map((row) => {
-                                    const driverName = row.Driver?.split(":")[1] || "";
+                                    // const driverName = row.Driver?.split(":")[1] || "";
                                     const regis = row.Registration?.split(":")[1] || "";
-                                    const key = `${driverName}_${regis}`;
+                                    // const key = `${driverName}_${regis}`;
+                                    const key = regis;
 
                                     const total = grandTotal.driverTotals[key];
 
@@ -2446,12 +2124,12 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
 
                                                 // 🔥 source
                                                 const source = [
-                                                    ...(row.Driver || []),
+                                                    // ...(row.Driver || []),
                                                     ...(row.Registrations || [])
                                                 ];
 
                                                 const matched = source.filter((d) => {
-                                                    const dKey = getGroupKey(d.Driver, d.Registration); // ✅ ใช้ function เดียวกัน
+                                                    const dKey = getGroupKey(d.Registration); // ✅ ใช้ function เดียวกัน
 
                                                     return dKey === key;
                                                 });
@@ -2636,9 +2314,9 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                 {driverGroups.map((row) => {
                                     const key = row._key; // ✅ ใช้อันเดียว
 
-                                    const driverName = row.Driver?.split(":")[1] || "";
+                                    // const driverName = row.Driver?.split(":")[1] || "";
                                     const regis = row.Registration?.split(":")[1] || "";
-                                    const keys = `${driverName}_${regis}`;
+                                    const keys = `${regis}`;
 
                                     const total1 = grandTotal.driverTotals[keys];
 
