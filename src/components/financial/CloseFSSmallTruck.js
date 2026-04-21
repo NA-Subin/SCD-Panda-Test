@@ -216,6 +216,8 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
     const companies = Object.values(company || {});
     const driver = Object.values(drivers || {});
     const ticketsS = Object.values(customersmalltruck || {});
+
+    console.log("expenseitem: ",expenseitem);
     // const ticket = Object.values(tickets || {}).filter(item => {
     //     const itemDate = dayjs(item.Date, "DD/MM/YYYY");
     //     return itemDate.isSameOrAfter(dayjs("01/01/2026", "DD/MM/YYYY"), 'day');
@@ -927,34 +929,34 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                     bankGroup = {
                         Bank: bankName,
                         Type: "ค่าใช้จ่าย",
-                        Driver: [], // 🔥 ใช้ Drivers
+                        Registrations: [], // 🔥 ใช้ Drivers
                     };
                     reportInit.push(bankGroup);
                 }
 
                 // 🔥 หา Driver
-                let driverName = "";
-                if (curr.TruckType === "รถเล็ก") {
-                    const dv = driver
-                        .filter((d) => d.TruckType === "รถเล็ก")
-                        .find((rg) => rg.id === Number(curr.Driver?.split(":")[0]));
+                // let driverName = "";
+                // if (curr.TruckType === "รถเล็ก") {
+                //     const dv = driver
+                //         .filter((d) => d.TruckType === "รถเล็ก")
+                //         .find((rg) => rg.id === Number(curr.Driver?.split(":")[0]));
 
-                    driverName = `${dv?.id || ""}:${dv?.Name || ""}`;
-                }
+                //     driverName = `${dv?.id || ""}:${dv?.Name || ""}`;
+                // }
 
                 // 🔥 Registration
                 const registration = curr.Registration || "";
 
                 // 🔥 key รวม Driver + Registration
-                const key = `${driverName}_${registration}`;
+                const key = `${registration}`;
 
-                let regGroup = bankGroup.Driver.find(
-                    (r) => `${r.Driver}_${r.Registration}` === key
+                let regGroup = bankGroup.Registrations.find(
+                    (r) => `${r.Registration}` === key
                 );
 
                 if (!regGroup) {
                     regGroup = {
-                        Driver: driverName,
+                        // Driver: driverName,
                         Registration: registration,
                         TruckType: curr.TruckType,
                         TotalPrice: 0,
@@ -962,7 +964,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                         TotalVat: 0,
                     };
 
-                    bankGroup.Driver.push(regGroup);
+                    bankGroup.Registrations.push(regGroup);
                 }
 
                 // ✅ รวมค่า
@@ -1000,7 +1002,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
 
         // sort by priorityNames
         return reportInit
-            .filter(item => item.isFixed || item.TotalPrice + item.TotalAmount + item.TotalVat > 0)
+            .filter(item => item.isFixed || item.TotalPrice + item.TotalAmount + item.TotalVat !== 0)
             .sort((a, b) => {
                 const nameA = a.Bank.includes(":") ? a.Bank.split(":")[1].trim() : a.Bank.trim();
                 const nameB = b.Bank.includes(":") ? b.Bank.split(":")[1].trim() : b.Bank.trim();
@@ -1164,27 +1166,32 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
     });
 
     const { grandTotalReport, driverReportTotals } = useMemo(() => {
-        const seen = new Set();
-
         const grandTotalReport = reportDetail.reduce(
-            (sum, item) => {
-                const process = (r) => {
-                    const key = getGroupKey(r.Registration);
+    (sum, item) => {
+        const seen = new Set(); // 👈 ย้ายมา per item
 
-                    if (!key || seen.has(key)) return;
-                    seen.add(key);
+        const process = (r, type) => {
+            const key = getGroupKey(r?.Registration || r?.registration);
 
-                    sum.TotalPrice += Number(r.TotalPrice || 0);
-                    sum.TotalAmount += Number(r.TotalAmount || 0);
-                    sum.TotalVat += Number(r.TotalVat || 0);
-                };
+            if (!key || seen.has(key)) return;
+            seen.add(key);
 
-                [...(item.Driver || []), ...(item.Registrations || [])].forEach(process);
+            const price = Number(String(r.TotalPrice || 0).replace(/,/g, ""));
+            const amount = Number(String(r.TotalAmount || 0).replace(/,/g, ""));
+            const vat = Number(String(r.TotalVat || 0).replace(/,/g, ""));
 
-                return sum;
-            },
-            { TotalPrice: 0, TotalAmount: 0, TotalVat: 0 }
-        );
+            sum.TotalPrice += price;
+            sum.TotalAmount += amount;
+            sum.TotalVat += vat;
+        };
+
+        (item.Driver || []).forEach((r) => process(r, "driver"));
+        (item.Registrations || []).forEach((r) => process(r, "reg"));
+
+        return sum;
+    },
+    { TotalPrice: 0, TotalAmount: 0, TotalVat: 0 }
+);
 
         const driverReportTotals = reportDetail.reduce((acc, item) => {
             const process = (r) => {
@@ -1233,7 +1240,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             { header: "ลำดับ", key: "no", width: 7 }, // 50px
             { header: "ประเภท", key: "type", width: 14 }, // 100px
             { header: "ชื่อรายการ", key: "ticket", width: 40 }, // 280px
-            { header: "ค่าบรรทุก", key: "rate", width: 20 }, // 140px
+            // { header: "ค่าบรรทุก", key: "rate", width: 20 }, // 140px
             { header: "รวม", key: "total", width: 19 }, // 130px
             ...driverGroups.map(dg => ({
                 header:
@@ -1284,7 +1291,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                         index + 1,
                         "รายได้",
                         row.TicketName?.split(":")[1] || row.TicketName,
-                        row.Rate,
+                        // row.Rate,
                         label === "ค่าขนส่ง" ? row.Transport : row.ProfitLoss,
                         ...driverGroups.map((h, i) => {
                             const found = row.Registration.find(
@@ -1310,7 +1317,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                 "",
                 "",
                 `รวมรายได้ของ ${label}`,
-                "",
+                // "",
                 total,
                 ...driverGroups.map((row) => {
                     // const driverName = row.Driver?.split(":")[1] || "";
@@ -1337,7 +1344,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             "",
             "",
             "รวมรายได้ทั้งหมด",
-            "",
+            // "",
             (grandTotal?.Transport + grandTotal?.ProfitLoss),
             ...driverGroups.map((row) => {
                 // const driverName = row.Driver?.split(":")[1] || "";
@@ -1363,7 +1370,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                 idx + 1,
                 row.Type,
                 row.Bank ? row.Bank.split(":")[1] : row.Bank,
-                "-",
+                // "-",
                 row.TotalPrice || 0,
                 ...driverGroups.map((driver, i) => {
                     const key = driver._key;
@@ -1411,7 +1418,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             "",
             "",
             "รวมค่าใช้จ่าย",
-            "",
+            // "",
             grandTotalReport?.TotalPrice || 0,
             ...driverGroups.map((row, index) => {
                 const key = row._key; // ✅ ใช้ key ที่สร้างมาแล้ว
@@ -1438,7 +1445,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
             "",
             "",
             "ยอดกำไรสุทธิ",
-            "",
+            // "",
             ((grandTotal?.Transport + grandTotal?.ProfitLoss) - (grandTotalReport?.TotalPrice)),
             ...driverGroups.map((row) => {
                 const key = row._key; // ✅ ใช้อันเดียว
@@ -1749,9 +1756,9 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                 <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 280, position: "sticky", left: 50, zIndex: 5, borderRight: "2px solid white" }}>
                                     ชื่อรายการ
                                 </TablecellPink>
-                                <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 140 }}>
+                                {/* <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 140 }}>
                                     ค่าบรรทุก
-                                </TablecellPink>
+                                </TablecellPink> */}
                                 <TablecellPink sx={{ textAlign: "center", fontSize: 16, width: 130, position: "sticky", left: 320, zIndex: 5, borderRight: "2px solid white" }}>
                                     รวม
                                 </TablecellPink>
@@ -1840,7 +1847,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                                     </Typography>
                                                 </TableCell>
 
-                                                <TableCell sx={{ textAlign: "center" }}>{row.RateOil}</TableCell>
+                                                {/* <TableCell sx={{ textAlign: "center" }}>{row.Rate}</TableCell> */}
 
                                                 {/* ช่องรวมของแต่ละ Ticket */}
                                                 <TableCell
@@ -1928,7 +1935,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                                 รวมรายได้ของ{label}
                                             </Typography>
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", backgroundColor: "#efc9ecff" }}></TableCell>
+                                        {/* <TableCell sx={{ textAlign: "center", backgroundColor: "#efc9ecff" }}></TableCell> */}
                                         <TableCell
                                             sx={{
                                                 textAlign: "right",
@@ -2012,7 +2019,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                         รวมรายได้ทั้งหมด
                                     </Typography>
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fce3fdff" }}></TableCell>
+                                {/* <TableCell sx={{ textAlign: "center", backgroundColor: "#fce3fdff" }}></TableCell> */}
                                 <TableCell
                                     sx={{
                                         textAlign: "right",
@@ -2094,7 +2101,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                             >
                                                 <Typography variant="subtitle2" sx={{ marginLeft: 2, lineHeight: 1.2, whiteSpace: "nowrap" }} gutterBottom>{row.Bank ? row.Bank.split(":")[1] : row.Bank}</Typography>
                                             </TableCell>
-                                            <TableCell sx={{ textAlign: "center" }}>-</TableCell>
+                                            {/* <TableCell sx={{ textAlign: "center" }}>-</TableCell> */}
                                             <TableCell
                                                 sx={{
                                                     textAlign: "right",
@@ -2210,7 +2217,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                         รวมค่าใช้จ่าย
                                     </Typography>
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", backgroundColor: "#efc9ecff", }}></TableCell>
+                                {/* <TableCell sx={{ textAlign: "center", backgroundColor: "#efc9ecff", }}></TableCell> */}
                                 <TableCell
                                     sx={{
                                         textAlign: "right",
@@ -2291,7 +2298,7 @@ const CloseFSSmallTruck = ({ openNavbar }) => {
                                         ยอดกำไรสุทธิ
                                     </Typography>
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", backgroundColor: "#fce3fdff", }}></TableCell>
+                                {/* <TableCell sx={{ textAlign: "center", backgroundColor: "#fce3fdff", }}></TableCell> */}
                                 <TableCell
                                     sx={{
                                         textAlign: "right",
