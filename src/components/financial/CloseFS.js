@@ -947,7 +947,7 @@ const CloseFS = ({ openNavbar }) => {
 
         // sort by priorityNames
         return reportInit
-            .filter(item => item.isFixed || item.TotalPrice + item.TotalAmount + item.TotalVat > 0)
+            .filter(item => item.isFixed || item.TotalPrice + item.TotalAmount + item.TotalVat !== 0)
             .sort((a, b) => {
                 const nameA = a.Bank.includes(":") ? a.Bank.split(":")[1].trim() : a.Bank.trim();
                 const nameB = b.Bank.includes(":") ? b.Bank.split(":")[1].trim() : b.Bank.trim();
